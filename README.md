@@ -172,25 +172,9 @@ Hotkeys are remappable via the **Hotkeys** panel inside the extension.
 ---
 
 
-## Roadmap
-
-Honestly, nothing much. Have a feature idea? Open an [issue](../../issues) or a discussion. Or at https://tabbit.website/feedback.
-
----
-
 ## Contributing
 
-Pull requests are welcome. For significant changes, please open an issue first so we can discuss the approach.
-
-```bash
-# Fork, then:
-git clone https://github.com/[your-username]/tabbit.git
-cd tabbit
-pnpm install
-pnpm dev
-```
-
-Please keep PRs focused. One feature or fix per PR.
+Have a feature idea? Open an [issue](../../issues) or a discussion. Or let me know at https://tabbit.website/feedback. You are more than welcome to submit PRs if you feel inclined to.
 
 ## License
 
