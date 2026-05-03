@@ -6,7 +6,7 @@
 
 **Close your tabs!!**
 
-[![Chrome Web Store](https://img.shields.io/badge/Chrome%20Web%20Store-v0.2-4285F4?logo=googlechrome&logoColor=white&style=flat-square)](https://chromewebstore.google.com/detail/tabbit-tab-closer-organiz/calbmnbhppoplenhgpfejepklainehko)
+[![Chrome Web Store](https://img.shields.io/badge/Chrome%20Web%20Store-v0.1.1-4285F4?logo=googlechrome&logoColor=white&style=flat-square)](https://chromewebstore.google.com/detail/tabbit-tab-closer-organiz/calbmnbhppoplenhgpfejepklainehko)
 [![Built with React](https://img.shields.io/badge/React-18-61dafb?logo=react&logoColor=white&style=flat-square)](https://react.dev)
 [![Built with Vite](https://img.shields.io/badge/Vite-5-646cff?logo=vite&logoColor=white&style=flat-square)](https://vitejs.dev)
 
