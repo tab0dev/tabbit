@@ -1,0 +1,30 @@
+{
+  "name": "Tabbit: Tab Closer & Organizer",
+  "private": true,
+  "version": "0.1.2",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "build:zip": "vite build && node scripts/zip-dist.js",
+    "preview": "vite preview",
+    "gen-audio": "node scripts/gen-audio.cjs"
+  },
+  "dependencies": {
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/utilities": "^3.2.2",
+    "@leeoniya/ufuzzy": "^1.0.19",
+    "@phosphor-icons/react": "^2.1.10",
+    "framer-motion": "^12.38.0",
+    "react": "^18.2.0",
+    "react-confetti": "^6.4.0",
+    "react-dom": "^18.2.0",
+    "tone": "^15.1.22"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.43",
+    "@types/react-dom": "^18.2.17",
+    "@vitejs/plugin-react": "^4.2.1",
+    "vite": "^5.0.8"
+  }
+}

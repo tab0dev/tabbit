@@ -1,0 +1,188 @@
+.tabSorterCard {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  color: var(--text-secondary);
+  background: var(--bg-surface);
+  border-radius: var(--radius) var(--radius) 0 0;
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  min-height: 53px;
+  transition: border-color var(--transition);
+}
+
+.title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.content::-webkit-scrollbar {
+  width: 6px;
+  background: transparent;
+}
+
+.content::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 3px;
+}
+
+.sectionBody {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  transition: border-color var(--transition), background-color var(--transition), color var(--transition);
+  flex-shrink: 0;
+}
+
+.settingRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  gap: 36px;
+  transition: border-color var(--transition);
+  border-bottom: 1px solid var(--border);
+}
+
+.settingRow:last-child {
+  border-bottom: none;
+}
+
+.settingInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.settingTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.settingIcon {
+  color: var(--text-primary);
+}
+
+.settingDesc {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.settingControl {
+  flex-shrink: 0;
+}
+
+.textInput {
+  padding: 0.5rem;
+  border-radius: 4px;
+  background-color: var(--bg-primary);
+  color: var(--text-base);
+  border: 1px solid var(--border);
+  font-family: inherit;
+  font-size: 0.85rem;
+  width: 250px;
+}
+
+.textInput:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.toggle {
+  appearance: none;
+  width: 36px;
+  height: 20px;
+  background: color-mix(in srgb, var(--bg-surface) 50%, transparent);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  position: relative;
+  cursor: pointer;
+  outline: none;
+  transition: all 150ms ease;
+  flex-shrink: 0;
+}
+
+.toggle::after {
+  content: '';
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  width: 16px;
+  height: 16px;
+  background: var(--text-secondary);
+  border-radius: 50%;
+  transition: transform 150ms ease, background 150ms ease;
+}
+
+.toggle:hover {
+  border-color: color-mix(in srgb, var(--text-primary) 35%, transparent);
+}
+
+.toggle:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 20%, transparent);
+}
+
+.toggle:checked {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.toggle:checked::after {
+  transform: translateX(16px);
+  background: var(--bg-surface);
+}
+
+/* Footer */
+.footerNote {
+  margin-top: auto;
+  font-size: 11px;
+  color: var(--text-secondary);
+  text-align: left;
+  opacity: 0.7;
+  padding: 8px 0 8px 20px;
+  font-style: italic;
+}
+
+.footer {
+  display: flex; align-items: center; justify-content: flex-end;
+  padding: 12px 16px; border-top: 0px solid var(--border); gap: 8px; flex-shrink: 0;
+  background: var(--bg-surface);
+}
+.footerRight { display: flex; align-items: center; gap: 8px; }
+
+.btnConfirm {
+  font-size: 12px; font-weight: 600; color: #fff; background: var(--accent);
+  border: 1px solid transparent; border-radius: 6px; padding: 6px 16px; cursor: pointer; transition: all 100ms ease;
+}
+.btnConfirm:hover:not(:disabled) { filter: brightness(1.1); transform: translateY(-1px); }
+.btnConfirm:disabled { opacity: 0.35; cursor: not-allowed; }
+.btnConfirmWorking { opacity: 0.7; cursor: wait; }

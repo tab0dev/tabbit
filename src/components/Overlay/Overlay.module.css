@@ -1,0 +1,552 @@
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.pickerOverlay {
+  position: fixed;
+  inset: 0;
+  background: var(--backdrop);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  animation: fadeIn 120ms ease;
+}
+
+.pickerModal {
+  width: 90%;
+  max-width: 480px;
+  max-height: 70vh;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: scaleIn 150ms ease;
+}
+
+.pickerHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px 12px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.pickerTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  gap: 6px;
+}
+
+.pickerHints {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.separator {
+  color: var(--text-muted);
+  font-size: 10px;
+  opacity: 0.5;
+}
+
+.pickerHint {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.pickerSearchRow {
+  display: flex;
+  align-items: center;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--border);
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.searchIcon {
+  color: var(--text-muted);
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.pickerSearchInput {
+  background: transparent;
+  border: none;
+  flex: 1;
+  color: var(--text-primary);
+  outline: none;
+  font-family: var(--font-mono);
+  font-size: 14px;
+}
+
+.pickerSearchInput::placeholder {
+  color: var(--text-muted);
+}
+
+/* Scrollable list — key fix: must allow overflow */
+.pickerList {
+  list-style: none;
+  overflow-y: auto;
+  flex: 1;
+  padding: 8px 0 0 0;
+  min-height: 0;
+  /* critical for flex + overflow-y to work */
+}
+
+.pickerList::-webkit-scrollbar {
+  width: 6px;
+  background: transparent;
+}
+
+.pickerList::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 3px;
+}
+
+.pickerItem {
+  padding: 10px 20px;
+  cursor: pointer;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: background var(--transition);
+  color: var(--text-secondary);
+}
+
+.pickerItem:hover {
+  background: var(--bg-elevated);
+}
+
+.pickerItemSelected {
+  background: var(--accent-dim);
+  color: var(--accent);
+}
+
+.pickerItemIcon {
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.pickerItemLabel {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pickerItemPath {
+  color: var(--text-muted);
+  font-size: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+  flex-shrink: 0;
+}
+
+.pickerItemColor {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.pickerEmpty {
+  padding: 24px 20px;
+  color: var(--text-muted);
+  font-size: 13px;
+  text-align: center;
+}
+
+/* Section headers within the picker list (Recently Used, Recommended, All) */
+.pickerSectionHeader {
+  padding: 10px 20px 4px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  cursor: default;
+  user-select: none;
+  list-style: none;
+  border-top: 1px solid var(--border);
+  margin-top: 4px;
+}
+
+.pickerSectionHeader:first-child {
+  border-top: none;
+  margin-top: 0;
+}
+
+/* Wrapper that PickerPanel renders into — allows active glow to scope to the panel */
+.pickerPanelOuter {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.pickerPanelInner {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  border-radius: var(--radius);
+  border: none;
+  box-shadow: inset 0 0 0 1.5px transparent;
+  transition: box-shadow 150ms ease;
+  overflow: hidden;
+  padding-bottom: 12px;
+}
+
+.pickerPanelActive {
+  box-shadow: 
+    inset 0 0 0 1.5px var(--accent),
+    0 0 0 2px color-mix(in srgb, var(--accent) 20%, transparent),
+    inset 0 0 24px color-mix(in srgb, var(--accent) 6%, transparent);
+}
+
+/* ── Action-hint bulge ── */
+/* A half-pill that protrudes from the active border edge of the picker panel. */
+.actionBulge {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 22px 6px;
+  background: color-mix(in srgb, var(--accent) 82%, #000);
+  border-radius: 0 0 999px 999px;
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 10;
+
+  /* Slide in when active */
+  opacity: 0;
+  translate: 0 -4px;
+  transition: opacity 180ms ease, translate 180ms ease;
+}
+
+.actionBulgeTop {
+  top: -1px;
+  border-radius: 0 0 999px 999px;
+  translate: 0 -6px;
+}
+
+.actionBulgeBottom {
+  bottom: -1px;
+  border-radius: 999px 999px 0 0;
+  translate: 0 6px;
+}
+
+.pickerPanelActive ~ .actionBulge,
+.actionBulgeVisible {
+  opacity: 1;
+  translate: 0 0 !important;
+}
+
+.actionBulgeHint {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  font-weight: 600;
+  color: color-mix(in srgb, #fff 90%, var(--accent));
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  font-family: var(--font-mono);
+}
+
+.actionBulgeKey {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 16px;
+  padding: 0 4px;
+  background: color-mix(in srgb, #fff 18%, transparent);
+  border: 1px solid color-mix(in srgb, #fff 30%, transparent);
+  border-radius: 4px;
+  font-size: 9px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0;
+  line-height: 1;
+}
+
+.actionBulgeDivider {
+  width: 1px;
+  height: 10px;
+  background: color-mix(in srgb, #fff 25%, transparent);
+  border-radius: 1px;
+  flex-shrink: 0;
+}
+
+.actionBulgeSpacer {
+  flex: 1;
+  min-width: 12px;
+}
+
+/* Save / Go button that appears in the panel header when a panel is active */
+.pickerSaveBtn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  cursor: pointer;
+  transition: color 120ms ease, border-color 120ms ease, background 120ms ease;
+  font-family: inherit;
+  letter-spacing: 0.02em;
+}
+
+.pickerSaveBtn:hover {
+  color: var(--text-primary);
+  border-color: color-mix(in srgb, var(--text-primary) 35%, transparent);
+  background: var(--bg-elevated);
+}
+
+/* ── Header action cluster (Save + icon buttons) ── */
+.pickerHeaderActions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Small icon-only button in picker header */
+.pickerIconBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  color: var(--text-secondary);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: color 120ms ease, background 120ms ease, border-color 120ms ease;
+  font-family: inherit;
+}
+
+.pickerIconBtn:not(:disabled):hover {
+  color: var(--text-primary);
+  background: var(--bg-elevated);
+  border-color: var(--border);
+}
+
+.pickerIconBtn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ── Inline "New Folder" popover — REMOVED (moved inline to tree rows) ── */
+
+/* ── Bookmark folder tree ── */
+.treeNode {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-right: 16px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  transition: background var(--transition), color var(--transition);
+  user-select: none;
+}
+
+.treeNode:hover {
+  background: var(--bg-elevated);
+}
+
+.treeNodeSelected {
+  background: var(--accent-dim);
+  color: var(--accent);
+}
+
+.treeNodeSelected .treeChevron {
+  color: var(--accent);
+}
+
+.treeChevron {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--text-muted);
+  border-radius: 3px;
+  transition: color 120ms ease, background 120ms ease;
+}
+
+.treeChevron:hover {
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+}
+
+.treeChevronSpacer {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+}
+
+.treeNodeIcon {
+  font-size: 13px;
+  flex-shrink: 0;
+  line-height: 1;
+  opacity: 0.85;
+}
+
+.treeNodeLabel {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Per-row + button — hidden until row is hovered or selected */
+.treeNodeAddBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  padding: 0;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  color: var(--text-muted);
+  opacity: 0;
+  transition: opacity 120ms ease, background 120ms ease, color 120ms ease;
+}
+
+.treeNode:hover .treeNodeAddBtn,
+.treeNodeSelected .treeNodeAddBtn {
+  opacity: 1;
+}
+
+.treeNodeAddBtn:hover {
+  background: var(--bg-elevated);
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+}
+
+/* Inline new-folder input row — appears below the target node in DOM flow */
+.inlineAddRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  padding-right: 12px;
+  background: color-mix(in srgb, var(--accent) 6%, transparent);
+  border-left: 2px solid var(--accent);
+  animation: scaleIn 100ms ease;
+}
+
+.inlineAddInput {
+  flex: 1;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 4px 8px;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  outline: none;
+  transition: border-color 120ms ease;
+  min-width: 0;
+}
+
+.inlineAddInput:focus {
+  border-color: var(--accent);
+}
+
+.inlineAddCreateBtn {
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: color 120ms ease, border-color 120ms ease, background 120ms ease;
+  line-height: 1.4;
+}
+
+.inlineAddCreateBtn:hover {
+  color: var(--text-primary);
+  border-color: color-mix(in srgb, var(--text-primary) 35%, transparent);
+  background: var(--bg-elevated);
+}
+
+.inlineAddCancelBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 11px;
+  flex-shrink: 0;
+  transition: color 120ms ease;
+}
+
+.inlineAddCancelBtn:hover {
+  color: var(--text-primary);
+}

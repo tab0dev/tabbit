@@ -1,0 +1,255 @@
+/*
+ * MusicGame.module.css — V2
+ *
+ * Styles for RetroMonitorMusicGame — layered on top of Monitor.module.css.
+ * Uses the theme CSS custom properties (--monitor-fg, --monitor-bg, etc.)
+ * already defined on the .themeXxx classes so it's theme-aware for free.
+ *
+ * All game elements are absolutely positioned inside .monitorScreen which
+ * already supplies:  position: relative; overflow: hidden; container-type: size
+ *
+ * V2 changes:
+ *   - Bar group clouds removed (one obstacle per bar, no grouping needed)
+ *   - .obstacle restyled as a cactus silhouette (narrow stem + two side arms)
+ *   - .beatRing[data-beat='4'] adds extra glow (jump cue on the snare)
+ *   - .stageIcon replaces .scoreText (geometric SVG layer indicator)
+ */
+
+/* ─── Game screen overlay ───────────────────────────────────────────────── */
+
+/* Extra behaviour on top of Monitor.module.css .monitorScreen */
+.gameScreen {
+  cursor: pointer;
+  user-select: none;
+  /* Override the row-flex so absolutely-positioned game children work cleanly */
+  display:  block !important;
+  position: relative;       /* already set, but explicit for safety */
+}
+
+.gameScreen:focus-visible {
+  outline: 2px solid var(--monitor-beat, currentColor);
+  outline-offset: -2px;
+}
+
+/* ─── Ground line ───────────────────────────────────────────────────────── */
+
+.ground {
+  position: absolute;
+  left:     0;
+  right:    0;
+  bottom:   var(--game-ground-h, 4px);
+  height:   1px;
+  background: var(--monitor-fg);
+  opacity:  0.4;
+}
+
+/* ─── Bunny runner ──────────────────────────────────────────────────────── */
+
+.bunnyRunner {
+  position:    absolute;
+  left:        10px;       /* BUNNY_LEFT — must match useMusicGame.js constant */
+  bottom:      var(--game-ground-h, 4px);
+  will-change: transform;  /* GPU-composited Y translation */
+  z-index:     2;
+}
+
+/* ─── Cactus obstacles ──────────────────────────────────────────────────── */
+
+/*
+ * V2 cactus shape:
+ *   Main element  = narrow vertical stem (5px wide × var(--obs-h) tall)
+ *   ::before      = left arm  (horizontal bar projecting left, with upward tip via box-shadow)
+ *   ::after       = right arm (horizontal bar projecting right, with upward tip via box-shadow)
+ *
+ * At 8–14px heights these render as a recognisable cactus silhouette.
+ * Total footprint ~17px wide (5px stem + 6px each side).
+ */
+.obstacle {
+  position:        absolute;
+  left:            0;
+  bottom:          var(--game-ground-h, 4px);
+  background:      var(--monitor-fg);
+  will-change:     transform;
+  image-rendering: pixelated;
+  transition:      opacity 240ms ease, box-shadow 240ms ease;
+
+  /* CRT glow around the cactus stem */
+  box-shadow:
+    0 0 3px 1px color-mix(in srgb, var(--monitor-fg) 55%, transparent),
+    0 0 6px 0px color-mix(in srgb, var(--monitor-fg) 25%, transparent);
+}
+
+/* Left arm */
+.obstacle::before {
+  content:    '';
+  position:   absolute;
+  /* Arm sits ~35% from the bottom of the stem */
+  bottom:     35%;
+  left:       calc(-1 * var(--arm-w, 6px));
+  width:      var(--arm-w, 6px);
+  height:     2px;
+  background: var(--monitor-fg);
+  /* Upward tip on the arm end via box-shadow */
+  box-shadow: calc(-1px) -3px 0 var(--monitor-fg);
+  transition: opacity 240ms ease;
+}
+
+/* Right arm */
+.obstacle::after {
+  content:    '';
+  position:   absolute;
+  bottom:     45%;
+  right:      calc(-1 * var(--arm-w, 6px));
+  width:      var(--arm-w, 6px);
+  height:     2px;
+  background: var(--monitor-fg);
+  box-shadow: 1px -3px 0 var(--monitor-fg);
+  transition: opacity 240ms ease;
+}
+
+/* ─── Cleared (on-beat action — bar success) ─────────────────────────────── */
+
+.obstacle[data-cleared='true'] {
+  opacity:    0.12;
+  box-shadow: none;
+}
+.obstacle[data-cleared='true']::before,
+.obstacle[data-cleared='true']::after {
+  opacity: 0;
+}
+
+/* ─── Passed (scrolled behind the bunny) ─────────────────────────────────── */
+
+.obstacle[data-passed='true'] {
+  opacity:    0.05;
+  box-shadow: none;
+}
+.obstacle[data-passed='true']::before,
+.obstacle[data-passed='true']::after {
+  opacity: 0;
+}
+
+/* ─── Layer stage indicator ─────────────────────────────────────────────── */
+
+/*
+ * Small geometric SVG shape in the top-right corner.
+ * Starts as a line (stage 0 = just kick), grows to a circle (stage 6 = full band).
+ * stroke and fill inherit from the parent's color (--monitor-fg).
+ */
+.stageIcon {
+  position:       absolute;
+  top:            4px;
+  right:          5px;
+  width:          10px;
+  height:         10px;
+  pointer-events: none;
+  z-index:        3;
+  /* Inherit theme foreground color for stroke and fill */
+  color:          var(--monitor-fg);
+  stroke:         currentColor;
+  fill:           currentColor;
+  opacity:        0.65;
+  overflow:       visible;
+  transition:     opacity 300ms ease;
+}
+
+/* Pulse briefly when a new layer unlocks */
+.stageIcon[data-bump='true'] {
+  opacity: 1;
+}
+
+/* ─── Beat pulse ring ───────────────────────────────────────────────────── */
+
+/*
+ * Left-edge vertical glow that pulses on every beat.
+ * On beat 4 (data-beat='4') it glows brighter — this is the jump cue,
+ * aligned with the snare hit that signals "act now".
+ */
+.beatRing {
+  position:     absolute;
+  left:         0;
+  top:          0;
+  bottom:       0;
+  width:        44px;
+  pointer-events: none;
+  z-index:      1;
+  background: linear-gradient(
+    to right,
+    color-mix(in srgb, var(--monitor-beat, var(--monitor-fg)) 12%, transparent),
+    transparent
+  );
+  opacity:    0;
+  transition: opacity 80ms ease-out;
+}
+
+.beatRing[data-active='true'] {
+  opacity: 1;
+  transition-duration: 0ms;
+}
+
+/* Beat 4 = stronger glow (jump cue on snare) */
+.beatRing[data-active='true'][data-beat='4'] {
+  background: linear-gradient(
+    to right,
+    color-mix(in srgb, var(--monitor-beat, var(--monitor-fg)) 30%, transparent),
+    color-mix(in srgb, var(--monitor-beat, var(--monitor-fg)) 8%, transparent) 60%,
+    transparent
+  );
+}
+
+/* ─── Collision flash overlay ───────────────────────────────────────────── */
+
+.collideFlash {
+  position:       absolute;
+  inset:          0;
+  pointer-events: none;
+  z-index:        5;
+  background:     transparent;
+  animation:      none;
+}
+
+.collideFlash[data-active='true'] {
+  animation: collisionBurst 0.3s ease-out forwards;
+}
+
+@keyframes collisionBurst {
+  0%   { background: color-mix(in srgb, var(--monitor-dot-red, #c04848) 28%, transparent); }
+  100% { background: transparent; }
+}
+
+/* ─── Idle overlay (music is off) ───────────────────────────────────────── */
+
+.idleOverlay {
+  position:       absolute;
+  inset:          0;
+  display:        flex;
+  align-items:    center;
+  justify-content: center;
+  pointer-events: none;
+  z-index:        4;
+  /* Inherits VT323 font, color from .monitorScreen */
+  opacity:        0.45;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-size:      clamp(10px, 18cqh, 13px);
+}
+
+/* ─── Jump prompt (shown until first on-beat action) ────────────────────── */
+
+.jumpPrompt {
+  position:       absolute;
+  bottom:         calc(var(--game-ground-h, 4px) + 8px);
+  left:           50%;
+  transform:      translateX(-50%);
+  pointer-events: none;
+  z-index:        3;
+  opacity:        0.45;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  font-size:      clamp(9px, 16cqh, 12px);
+  animation:      gamePromptBlink 1.1s step-end infinite;
+}
+
+@keyframes gamePromptBlink {
+  50% { opacity: 0; }
+}

@@ -1,0 +1,298 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=VT323&display=swap');
+
+/* ─── Dark Mode (default) ─────────────────────────────────────────────────── */
+:root {
+  /* Backgrounds */
+  --bg:           #0f1117;
+  --bg-surface:   #1a1d27;
+  --bg-elevated:  #242836;
+
+  /* Borders */
+  --border:       #2e3345;
+  --card-border:  #2e3345;
+
+  /* Text */
+  --text-primary:   #e8eaf0;
+  --text-secondary: #8b8fa3;
+  --text-muted:     #5c6078;
+
+  /* Accent */
+  --accent:         #6c8cff;
+  --accent-vibrant: #1f2b52;
+  --accent-dim:     rgba(108, 140, 255, 0.15);
+
+  /* Status colors */
+  --green:      #4ade80;
+  --green-dim:  rgba(74, 222, 128, 0.15);
+  --red:        #f87171;
+  --red-dim:    rgba(248, 113, 113, 0.15);
+  --orange:     #fb923c;
+  --orange-dim: rgba(251, 146, 60, 0.15);
+  --purple:     #a78bfa;
+  --purple-dim: rgba(167, 139, 250, 0.15);
+
+  /* Component-specific semantic tokens */
+  --scrollbar-thumb: #2e3345;
+  --timer-fill:      #272F4D;
+  --backdrop:        rgba(0, 0, 0, 0.6);
+  --overlay-bg:      rgba(26, 29, 39, 0.92);
+  --card-shadow:     0 10px 30px rgba(0, 0, 0, 0.2);
+  --card-hover-title:  #ffffff;
+  --card-hover-domain: #ffffff;
+  --card-hover-url:    #ffffff;
+  --favicon-bg:        transparent;
+
+  /* Pills */
+  --pill-font-weight: 700;
+  --pill-text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --pill-bg-mix: 13%;
+  --pill-border-mix: 26%;
+  --pill-group-text-mix: 100%;
+  --pill-text-color: #fff;
+  --pill-pinned-bg: rgba(255, 255, 255, 0.15);
+  --pill-pinned-border: rgba(255, 255, 255, 0.25);
+  --pill-green-bg: rgba(57, 174, 100, 0.2);
+  --pill-green-border: rgba(57, 174, 100, 0.4);
+  --pill-red-bg: rgba(248, 113, 113, 0.2);
+  --pill-red-border: rgba(248, 113, 113, 0.4);
+  --pill-yellow-bg: rgba(234, 179, 8, 0.2);
+  --pill-yellow-border: rgba(234, 179, 8, 0.4);
+
+  /* Other */
+  --magic-dot:   #bd740e;
+  --radius:      12px;
+  --radius-sm:   8px;
+  --font:        'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --font-mono:   'JetBrains Mono', 'Fira Code', 'SF Mono', monospace;
+  --transition:  180ms ease;
+}
+
+/* ─── Light Mode ──────────────────────────────────────────────────────────── */
+[data-theme="light"] {
+  /* Backgrounds */
+  --bg:           #f0f2f7;
+  --bg-surface:   #ffffff;
+  --bg-elevated:  #e8ebf2;
+
+  /* Borders */
+  --border:       #d1d5e0;
+  --card-border:  #d1d5e0;
+  /* --card-border:  #b2b7c7; */
+
+  /* Text */
+  --text-primary:   #111827;
+  --text-secondary: #4b5563;
+  --text-muted:     #9ca3af;
+
+  /* Accent — same hue, both modes */
+  --accent-vibrant: #dde5ff;
+  --accent-dim:     rgba(108, 140, 255, 0.12);
+
+  /* Status dims — lighter on white backgrounds */
+  --green-dim:  rgba(74, 222, 128, 0.14);
+  --red-dim:    rgba(248, 113, 113, 0.14);
+  --orange-dim: rgba(251, 146, 60, 0.14);
+  --purple-dim: rgba(167, 139, 250, 0.14);
+
+  /* Component-specific semantic tokens */
+  --scrollbar-thumb: #c1c5d0;
+  --timer-fill:      #dde5ff;
+  --backdrop:        rgba(0, 0, 0, 0.3);
+  --overlay-bg:      rgba(255, 255, 255, 0.92);
+  --card-shadow:     none;
+  --card-hover-title:  var(--text-primary);
+  --card-hover-domain: var(--text-secondary);
+  --card-hover-url:    var(--text-muted);
+  --favicon-bg:        var(--bg-elevated);
+
+  /* Pills */
+  --pill-font-weight: 500;
+  --pill-text-shadow: none;
+  --pill-bg-mix: 45%;
+  --pill-border-mix: 80%;
+  --pill-group-text-mix: 50%;
+  --pill-text-color: var(--text-primary);
+  --pill-pinned-bg: color-mix(in srgb, var(--text-primary) 15%, transparent);
+  --pill-pinned-border: color-mix(in srgb, var(--text-primary) 30%, transparent);
+  --pill-green-bg: rgba(57, 174, 100, 0.45);
+  --pill-green-border: rgba(57, 174, 100, 0.8);
+  --pill-red-bg: rgba(248, 113, 113, 0.45);
+  --pill-red-border: rgba(248, 113, 113, 0.8);
+  --pill-yellow-bg: rgba(234, 179, 8, 0.5);
+  --pill-yellow-border: rgba(234, 179, 8, 0.9);
+
+  /* Retro Monitor Light Overrides */
+  --darkula-bg: #f4f6f9;
+  --darkula-fg: #6b7280;
+  --darkula-grid: rgba(0, 0, 0, 0.08);
+  --darkula-border: rgba(0, 0, 0, 0.15);
+  --darkula-quip: #6c8cff;
+}
+
+/* ─── OS-preference fallback (no localStorage yet) ───────────────────────── */
+/* Applied only when JS hasn't set data-theme yet */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme]) {
+    --bg:           #f0f2f7;
+    --bg-surface:   #ffffff;
+    --bg-elevated:  #e8ebf2;
+    --border:       #d1d5e0;
+    --card-border:  #d1d5e0;
+    /* --card-border:  #b2b7c7; */
+    --text-primary:   #111827;
+    --text-secondary: #4b5563;
+    --text-muted:     #9ca3af;
+    --accent-vibrant: #dde5ff;
+    --accent-dim:     rgba(108, 140, 255, 0.12);
+    --green-dim:  rgba(74, 222, 128, 0.14);
+    --red-dim:    rgba(248, 113, 113, 0.14);
+    --orange-dim: rgba(251, 146, 60, 0.14);
+    --purple-dim: rgba(167, 139, 250, 0.14);
+    --scrollbar-thumb: #c1c5d0;
+    --timer-fill:      #dde5ff;
+    --backdrop:        rgba(0, 0, 0, 0.3);
+    --overlay-bg:      rgba(255, 255, 255, 0.92);
+    --card-shadow:     none;
+    --card-hover-title:  var(--text-primary);
+    --card-hover-domain: var(--text-secondary);
+    --card-hover-url:    var(--text-muted);
+    --favicon-bg:        var(--bg-elevated);
+    --pill-font-weight: 500;
+    --pill-text-shadow: none;
+    --pill-bg-mix: 45%;
+    --pill-border-mix: 80%;
+    --pill-group-text-mix: 50%;
+    --pill-text-color: var(--text-primary);
+    --pill-pinned-bg: color-mix(in srgb, var(--text-primary) 15%, transparent);
+    --pill-pinned-border: color-mix(in srgb, var(--text-primary) 30%, transparent);
+    --pill-green-bg: rgba(57, 174, 100, 0.45);
+    --pill-green-border: rgba(57, 174, 100, 0.8);
+    --pill-red-bg: rgba(248, 113, 113, 0.45);
+    --pill-red-border: rgba(248, 113, 113, 0.8);
+    --pill-yellow-bg: rgba(234, 179, 8, 0.5);
+    --pill-yellow-border: rgba(234, 179, 8, 0.9);
+    --darkula-bg: #f4f6f9;
+    --darkula-fg: #6b7280;
+    --darkula-grid: rgba(0, 0, 0, 0.08);
+    --darkula-border: rgba(0, 0, 0, 0.15);
+    --darkula-quip: #6c8cff;
+  }
+}
+
+
+/* --- Reset & Base --- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 250ms ease, color 250ms ease;
+}
+
+.app-root {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.8s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes bounce {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  40% {
+    transform: translateY(-20px);
+  }
+
+  60% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes toastOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* Helper Views */
+.view {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 640px;
+  padding: 32px 24px;
+  animation: fadeIn 250ms ease;
+}
+
+.view[hidden] {
+  display: none;
+}
