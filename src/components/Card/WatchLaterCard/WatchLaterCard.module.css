@@ -1,0 +1,294 @@
+/* Mirrors AutoCloseCard.module.css exactly, with Watch Later accent tweaks */
+
+.watchLaterCard {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  color: var(--text-secondary);
+  background: var(--bg-surface);
+  border-radius: var(--radius) var(--radius) 0 0;
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  min-height: 53px;
+  transition: border-color var(--transition);
+}
+
+.title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.resetBtn {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-muted);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 4px 10px;
+  cursor: pointer;
+  transition: all 100ms ease;
+}
+.resetBtn:hover {
+  color: var(--text-primary);
+  background: var(--bg-elevated);
+}
+
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.content::-webkit-scrollbar { width: 6px; background: transparent; }
+.content::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px; }
+
+/* Grid */
+.previewContainer {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: border-color var(--transition);
+  min-height: 200px;
+}
+
+.previewHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  background: color-mix(in srgb, var(--bg-surface) 50%, transparent);
+}
+
+.previewTitle {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.toggleAllBtn {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-muted);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  padding: 4px 10px;
+  cursor: pointer;
+  transition: all 100ms ease;
+}
+.toggleAllBtn:hover {
+  color: var(--text-primary);
+  background: var(--bg-elevated);
+  border-color: var(--border);
+}
+
+.previewGridScroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px;
+}
+.previewGridScroll::-webkit-scrollbar { width: 6px; background: transparent; }
+.previewGridScroll::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px; }
+
+.previewGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px;
+}
+
+.previewCard {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  cursor: pointer;
+  position: relative;
+  transition: border-color 100ms ease, background 100ms ease;
+  user-select: none;
+}
+.previewCard:hover {
+  border-color: color-mix(in srgb, var(--text-secondary) 50%, transparent);
+  background: var(--bg-elevated);
+}
+.previewCardExcluded { opacity: 0.45; }
+.previewCardLocked   { cursor: default; }
+
+/* Status badge (overlays top-right corner during run) */
+.statusBadge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 20px;
+  height: 20px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: bold;
+  border: 2px solid var(--bg-surface);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.25);
+  z-index: 10;
+}
+.statusPending { background: var(--text-muted); color: var(--bg-surface); }
+.statusSaved   { background: var(--green, #34c759); color: #fff; }
+.statusSkipped { background: var(--text-muted); color: var(--bg-surface); }
+.statusFailed  { background: var(--red, #ff3b30); color: #fff; }
+
+/* Duplicate badge */
+.duplicateBadge {
+  position: absolute;
+  top: -6px;
+  left: -6px;
+  background-color: var(--accent-red, #ff3b30);
+  color: white;
+  font-size: 11px;
+  font-weight: bold;
+  height: 20px;
+  min-width: 20px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.25);
+  z-index: 10;
+  border: 2px solid var(--bg-surface);
+}
+
+.previewCardTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.previewFavicon {
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+.previewFaviconFallback {
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+}
+
+.checkbox {
+  width: 16px; height: 16px;
+  border-radius: 4px;
+  border: 1.5px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; color: transparent;
+  transition: all 100ms ease;
+  flex-shrink: 0;
+}
+.checkboxChecked {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.previewInfo { display: flex; flex-direction: column; gap: 2px; }
+.previewTitleText {
+  font-size: 12px; font-weight: 500; color: var(--text-primary);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.3;
+}
+.previewUrlText {
+  font-size: 10px; color: var(--text-muted); font-family: var(--font-mono);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.3;
+}
+
+.emptyState {
+  padding: 32px 16px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+/* Footer */
+.footer {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px; border-top: 1px solid var(--border); gap: 8px; flex-shrink: 0;
+  background: var(--bg-surface);
+}
+.footerLeft  { display: flex; align-items: center; gap: 6px; }
+.footerMeta  { font-size: 11px; color: var(--text-muted); font-family: var(--font-mono); }
+.footerRight { display: flex; align-items: center; gap: 8px; }
+
+.btnCancel {
+  font-size: 12px; font-weight: 500; color: var(--text-muted); background: transparent;
+  border: 1px solid var(--border); border-radius: 6px; padding: 6px 14px; cursor: pointer;
+  transition: all 100ms ease;
+}
+.btnCancel:hover { color: var(--text-primary); background: var(--bg-elevated); }
+
+.btnConfirm {
+  font-size: 12px; font-weight: 600; color: #fff; background: var(--accent);
+  border: 1px solid transparent; border-radius: 6px; padding: 6px 16px; cursor: pointer;
+  transition: all 100ms ease;
+}
+.btnConfirm:hover:not(:disabled) { filter: brightness(1.1); transform: translateY(-1px); }
+.btnConfirm:disabled { opacity: 0.35; cursor: not-allowed; }
+
+/* Stop button variant — red-tinted */
+.btnStop {
+  background: color-mix(in srgb, var(--red, #ff3b30) 85%, transparent);
+}
+.btnStop:hover { filter: brightness(1.1); transform: translateY(-1px); }
+
+/* ── Debug log panel ─────────────────────────────────────────────────────── */
+.debugLog {
+  margin-top: 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--bg-surface) 40%, #000);
+  padding: 10px 12px;
+  max-height: 140px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.debugLog::-webkit-scrollbar { width: 4px; background: transparent; }
+.debugLog::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 2px; }
+
+.debugLine {
+  font-family: var(--font-mono, monospace);
+  font-size: 10px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  white-space: pre;
+  word-break: break-all;
+}
+.debugLine:last-child {
+  color: var(--text-primary);
+}
+

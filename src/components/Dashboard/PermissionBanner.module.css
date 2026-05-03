@@ -1,0 +1,54 @@
+.permissionCard {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 32px;
+  text-align: center;
+  max-width: 400px;
+}
+
+.permissionCard h2 {
+  font-size: 20px;
+  margin-bottom: 12px;
+}
+
+.permissionCard p {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+
+.permissionCard button {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: opacity var(--transition);
+  margin-bottom: 12px;
+}
+
+.btnPrimary {
+  background: var(--accent);
+  color: #fff;
+}
+
+.btnPrimary:hover {
+  opacity: 0.9;
+}
+
+.btnSecondary {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+
+.btnSecondary:hover {
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+}

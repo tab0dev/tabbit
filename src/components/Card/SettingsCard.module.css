@@ -1,0 +1,225 @@
+.settingsCard {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  color: var(--text-secondary);
+  background: var(--bg-surface);
+  border-radius: var(--radius) var(--radius) 0 0;
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  min-height: 53px;
+  transition: border-color var(--transition);
+}
+
+.title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.content::-webkit-scrollbar {
+  width: 6px;
+  background: transparent;
+}
+
+.content::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 3px;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin: 2px 0 12px 0;
+}
+
+.sectionTitle {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+  margin-left: 6px;
+}
+
+.sectionBody {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  transition: border-color var(--transition), background-color var(--transition), color var(--transition);
+}
+
+/* .sectionBody:hover {
+  background: var(--bg-elevated);
+} */
+
+.settingRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  gap: 24px;
+  transition: border-color var(--transition);
+}
+
+.settingRow:last-child {
+  border-bottom: none;
+}
+
+.settingInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.settingTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.settingIcon {
+  color: var(--text-primary);
+}
+
+.settingDesc {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.settingControl {
+  flex-shrink: 0;
+}
+
+
+.toggle {
+  appearance: none;
+  width: 36px;
+  height: 20px;
+  background: color-mix(in srgb, var(--bg-surface) 50%, transparent);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  position: relative;
+  cursor: pointer;
+  outline: none;
+  transition: all 150ms ease;
+  flex-shrink: 0;
+}
+
+.toggle::after {
+  content: '';
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  width: 16px;
+  height: 16px;
+  background: var(--text-secondary);
+  border-radius: 50%;
+  transition: transform 150ms ease, background 150ms ease;
+}
+
+.toggle:hover {
+  border-color: color-mix(in srgb, var(--text-primary) 35%, transparent);
+}
+
+.toggle:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 20%, transparent);
+}
+
+.toggle:checked {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.toggle:checked::after {
+  transform: translateX(16px);
+  background: var(--bg-surface);
+}
+
+.aiSettingControl {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.badge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background-color: rgba(46, 204, 113, 0.15);
+  color: #2ecc71;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.badgeInactive {
+  background-color: var(--border);
+  color: var(--text-muted);
+}
+
+.button {
+  padding: 6px 12px;
+  border-radius: 6px;
+  background-color: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+
+.button:hover {
+  background-color: var(--border);
+}
+
+.textInput {
+  width: 220px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg-elevated, var(--bg-surface));
+  color: var(--text-primary);
+  font-size: 12px;
+  font-family: monospace;
+  outline: none;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.textInput:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 20%, transparent);
+}
+
+.textInput::placeholder {
+  color: var(--text-muted);
+}

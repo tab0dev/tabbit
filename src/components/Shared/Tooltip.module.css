@@ -1,0 +1,77 @@
+/* Tooltip — rendered via Portal onto document.body to avoid clipping */
+.tooltip {
+    position: fixed;
+    top: 0;
+    left: 0;
+    white-space: normal;
+    max-width: 220px;
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.4;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), 0 2px 5px rgba(0, 0, 0, 0.2);
+    pointer-events: none;
+    z-index: 10000;
+    opacity: 0;
+    word-wrap: break-word;
+    will-change: transform, opacity;
+    transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.visible {
+    opacity: 1;
+}
+
+/* Transform origins for directional scale animations */
+.tooltip[data-placement="top"] { transform-origin: var(--arrow-x) 100%; }
+.tooltip[data-placement="bottom"] { transform-origin: var(--arrow-x) 0%; }
+.tooltip[data-placement="left"] { transform-origin: 100% var(--arrow-y); }
+.tooltip[data-placement="right"] { transform-origin: 0% var(--arrow-y); }
+
+/* Beautiful Arrow Pseudo-element implementation */
+.arrow {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    pointer-events: none;
+    z-index: -1; /* Sinks right behind the tooltip interior rendering properly due to local stacking context */
+}
+
+/* Position arrow based on placement */
+.tooltip[data-placement="top"] .arrow {
+    bottom: -6px;
+    left: var(--arrow-x);
+    transform: translateX(-50%) rotate(45deg);
+    border-top: none;
+    border-left: none;
+}
+
+.tooltip[data-placement="bottom"] .arrow {
+    top: -6px;
+    left: var(--arrow-x);
+    transform: translateX(-50%) rotate(45deg);
+    border-bottom: none;
+    border-right: none;
+}
+
+.tooltip[data-placement="left"] .arrow {
+    right: -6px;
+    top: var(--arrow-y);
+    transform: translateY(-50%) rotate(45deg);
+    border-bottom: none;
+    border-left: none;
+}
+
+.tooltip[data-placement="right"] .arrow {
+    left: -6px;
+    top: var(--arrow-y);
+    transform: translateY(-50%) rotate(45deg);
+    border-top: none;
+    border-right: none;
+}

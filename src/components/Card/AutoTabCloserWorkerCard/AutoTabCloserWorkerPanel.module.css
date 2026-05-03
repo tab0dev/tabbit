@@ -1,0 +1,611 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+   AutoTabCloserWorkerPanel.module.css
+   Layout mirrors AutoCloseCard exactly — same header/content/footer shell,
+   same .sectionBody card-in-card for config rows, same .previewContainer
+   card-in-card for the graveyard list.
+───────────────────────────────────────────────────────────────────────────── */
+
+/* ─── Tabs-to-close preview grid (between settings and graveyard) ─────────── */
+.tabsPreviewContainer {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    transition: border-color var(--transition);
+    flex-shrink: 0;
+}
+
+.tabsPreviewScroll {
+    padding: 14px;
+}
+
+.previewGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px;
+}
+
+.previewCard {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    position: relative;
+    transition:
+        border-color 100ms ease,
+        background 100ms ease;
+}
+
+.previewCardTop {
+    display: flex;
+    align-items: flex-start;
+}
+
+.gridFavicon {
+    width: 16px;
+    height: 16px;
+    border-radius: 3px;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+.gridFaviconFallback {
+    width: 16px;
+    height: 16px;
+    border-radius: 3px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+}
+
+.previewCardInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.previewCardTitle {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.3;
+}
+
+.previewCardUrl {
+    font-size: 10px;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.3;
+}
+
+.previewCardAge {
+    font-size: 10px;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    opacity: 0.7;
+}
+
+.thumbnailContainer {
+    height: 90px;
+    width: 100%;
+    border-radius: 4px;
+    background: color-mix(in srgb, var(--bg-surface) 60%, transparent);
+    overflow: hidden;
+    margin-top: 4px;
+    border: 1px solid color-mix(in srgb, var(--border) 50%, transparent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.thumbnailLoading {
+    font-size: 10px;
+    color: var(--text-muted);
+    text-align: center;
+}
+
+.thumbnailImg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top;
+    display: block;
+}
+
+.duplicateBadge {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    background-color: var(--accent-red, #ff3b30);
+    color: white;
+    font-size: 11px;
+    font-weight: bold;
+    height: 20px;
+    min-width: 20px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+    z-index: 10;
+    border: 2px solid var(--bg-surface);
+}
+
+/* Root — same as .autoCloseCard */
+.autoCloserWorkerCard {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    color: var(--text-secondary);
+    background: var(--bg-surface);
+    border-radius: var(--radius) var(--radius) 0 0;
+    overflow: hidden;
+}
+
+/* ─── Header ─────────────────────────────────────────────────────────────── */
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    min-height: 53px;
+    transition: border-color var(--transition);
+}
+
+.title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* ─── Enable toggle (sits in header where threshold Select sits in AutoCloseCard) */
+.enableToggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.toggleInput {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggleTrack {
+    position: relative;
+    width: 34px;
+    height: 19px;
+    border-radius: 10px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    transition:
+        background 180ms ease,
+        border-color 180ms ease;
+    flex-shrink: 0;
+}
+
+.toggleTrackOn {
+    background: var(--accent);
+    border-color: var(--accent);
+}
+
+.toggleThumb {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+    transition: transform 180ms ease;
+}
+
+.toggleTrackOn .toggleThumb {
+    transform: translateX(15px);
+}
+
+.toggleLabel {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    min-width: 34px;
+    transition: color var(--transition);
+}
+
+.toggleTrackOn ~ .toggleLabel {
+    color: var(--accent);
+}
+
+/* ─── Content — same as AutoCloseCard .content ──────────────────────────── */
+.content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.content::-webkit-scrollbar {
+    width: 6px;
+    background: transparent;
+}
+
+.content::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-thumb);
+    border-radius: 3px;
+}
+
+/* ─── Config card-in-card — same as AutoCloseCard .sectionBody ────────── */
+.sectionBody {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    transition:
+        border-color var(--transition),
+        background-color var(--transition),
+        color var(--transition);
+    flex-shrink: 0;
+}
+
+.sectionBodyDisabled {
+    opacity: 0.45;
+    pointer-events: none;
+}
+
+/* ─── Setting rows — same as AutoCloseCard .settingRow ──────────────────── */
+.settingRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    gap: 24px;
+    transition: border-color var(--transition);
+}
+
+.settingDivider {
+    height: 1px;
+    background: var(--border);
+    margin: 0;
+    transition: background var(--transition);
+}
+
+.settingInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+}
+
+.settingTitle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.settingIcon {
+    color: var(--text-primary);
+}
+
+.settingDesc {
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.4;
+}
+
+.settingControl {
+    flex-shrink: 0;
+}
+
+/* ─── Live preview pill (inside sectionBody at bottom) ───────────────────── */
+
+/* ─── Graveyard card-in-card — same as AutoCloseCard .previewContainer ─── */
+.previewContainer {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    transition: border-color var(--transition);
+    min-height: 200px;
+}
+
+/* Header row — same as AutoCloseCard .previewHeader */
+.previewHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    background: color-mix(in srgb, var(--bg-surface) 50%, transparent);
+}
+
+.previewTitle {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+}
+
+/* Clear all button — same shape as AutoCloseCard toggleAllBtn */
+.clearBtn {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-muted);
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    padding: 4px 10px;
+    cursor: pointer;
+    transition: all 100ms ease;
+}
+
+.clearBtn:hover {
+    color: var(--red);
+    background: var(--red-dim);
+    border-color: color-mix(in srgb, var(--red) 30%, transparent);
+}
+
+/* Scrollable list area — same as AutoCloseCard .previewGridScroll */
+.previewGridScroll {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.previewGridScroll::-webkit-scrollbar {
+    width: 6px;
+    background: transparent;
+}
+.previewGridScroll::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-thumb);
+    border-radius: 3px;
+}
+
+/* ─── Graveyard rows ───────────────────────────────────────────────────── */
+.graveRow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-bottom: 1px solid color-mix(in srgb, var(--border) 50%, transparent);
+    transition: background 80ms ease;
+}
+
+.graveRow:last-child {
+    border-bottom: none;
+}
+
+.graveRow:hover {
+    background: var(--bg-elevated);
+}
+
+.graveFavicon {
+    border-radius: 3px;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+.graveFaviconFallback {
+    border-radius: 3px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    flex-shrink: 0;
+}
+
+.graveInfo {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    overflow: hidden;
+}
+
+.graveTitle {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.3;
+}
+
+.graveUrl {
+    font-size: 10px;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.3;
+}
+
+.graveMeta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.graveTime {
+    font-size: 10px;
+    font-family: var(--font-mono);
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+.restoreBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 5px;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 100ms ease;
+    flex-shrink: 0;
+}
+
+.restoreBtn:hover {
+    color: var(--accent);
+    background: var(--accent-dim);
+    border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+}
+
+/* ─── Empty state — same as AutoCloseCard .emptyState ───────────────────── */
+.emptyState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 40px 24px;
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.emptyIcon {
+    color: var(--text-muted);
+    opacity: 0.4;
+    margin-bottom: 4px;
+}
+
+.emptySubtext {
+    font-size: 11px;
+    color: var(--text-muted);
+    opacity: 0.7;
+    max-width: 220px;
+    line-height: 1.5;
+}
+
+/* ─── Loading shimmer ────────────────────────────────────────── */
+@keyframes shimmerSlide {
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+.shimmer {
+    background: linear-gradient(
+        90deg,
+        var(--bg-elevated) 25%,
+        color-mix(in srgb, var(--border) 60%, transparent) 50%,
+        var(--bg-elevated) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmerSlide 1.4s ease infinite;
+    border-color: transparent !important;
+}
+
+.shimmerBar {
+    border-radius: 4px;
+    background: linear-gradient(
+        90deg,
+        var(--bg-elevated) 25%,
+        color-mix(in srgb, var(--border) 60%, transparent) 50%,
+        var(--bg-elevated) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmerSlide 1.4s ease infinite;
+}
+
+.shimmerBarTitle {
+    height: 11px;
+    width: 70%;
+}
+
+.shimmerBarUrl {
+    height: 9px;
+    width: 50%;
+    animation-delay: 0.1s;
+}
+
+/* ─── Footer — same as AutoCloseCard footer ─────────────────────────────── */
+.footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-top: 1px solid var(--border);
+    gap: 8px;
+    flex-shrink: 0;
+    background: var(--bg-surface);
+}
+
+.footerLeft {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.footerMeta {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+}
+.footerRight {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btnDone {
+    font-size: 12px;
+    font-weight: 600;
+    color: #fff;
+    background: var(--accent);
+    border: 1px solid transparent;
+    border-radius: 6px;
+    padding: 6px 16px;
+    cursor: pointer;
+    transition: all 100ms ease;
+}
+
+.btnDone:hover:not(:disabled) {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+}
+
+.btnDone:disabled {
+    background: var(--bg-elevated);
+    color: var(--text-muted);
+    border-color: var(--border);
+    cursor: not-allowed;
+    opacity: 0.7;
+}

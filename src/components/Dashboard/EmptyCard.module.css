@@ -1,0 +1,143 @@
+.emptyCard {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--bg-surface);
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  text-align: center;
+  padding: 40px;
+}
+
+.emoji {
+  font-size: 64px;
+}
+
+.title {
+  color: var(--text-primary);
+  margin-bottom: 4px;
+  font-size: 24px;
+}
+
+.subtitle {
+  max-width: 240px;
+  line-height: 1.5;
+  margin-bottom: 24px;
+}
+
+.chartContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+  background-color: var(--bg-elevated);
+  padding: 24px 32px;
+  border-radius: 24px;
+  border: 1px solid var(--border);
+  margin: 16px 0;
+  width: 100%;
+  max-width: 440px;
+}
+
+.pieWrapper {
+  position: relative;
+  width: 160px;
+  height: 160px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  filter: drop-shadow(0px 8px 16px rgba(0,0,0,0.05));
+}
+
+.pieSvg {
+  overflow: visible;
+}
+
+.pieSlice {
+  transition: stroke 0.3s ease;
+}
+
+.pieCenter {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: transparent;
+}
+
+.totalNumber {
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1.1;
+}
+
+.totalLabel {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.legend {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.legendLabelContainer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.legendDot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.legendLabel {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.legendValue {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.undoHint {
+  margin-top: 32px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+.kbd {
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  background-color: var(--bg-elevated);
+  font-family: monospace;
+}
+
+

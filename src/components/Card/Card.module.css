@@ -1,0 +1,738 @@
+.card {
+  width: 100%;
+  height: 100%;
+  background: var(--bg-surface);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  overflow: hidden;
+  min-width: 0;
+  min-height: 0;
+  box-shadow: var(--card-shadow);
+  user-select: none;
+  touch-action: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  will-change: transform;
+}
+
+.cardDetails {
+  padding: clamp(16px, 2.5vw, 32px);
+  padding-bottom: 24px;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: background-color var(--transition), color var(--transition);
+  outline: none;
+  border-radius: var(--radius) var(--radius) 0 0;
+  position: relative;
+}
+
+.cardDetails:hover,
+.cardDetails:focus-visible {
+  background-color: transparent;
+}
+
+.cardDetails:hover .domain,
+.cardDetails:focus-visible .domain {
+  color: var(--card-hover-domain);
+}
+
+.cardDetails:hover .title,
+.cardDetails:focus-visible .title {
+  color: var(--card-hover-title);
+}
+
+.cardDetails:hover .url,
+.cardDetails:focus-visible .url {
+  color: var(--card-hover-url);
+}
+
+.cardExit {
+  opacity: 0;
+  transform: translateX(40px);
+  transition: all 150ms ease;
+}
+
+.cardEnter {
+  opacity: 0;
+  transform: translateX(-20px);
+}
+
+.faviconRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.favicon {
+  border-radius: 4px;
+  flex-shrink: 0;
+  background-color: var(--favicon-bg);
+}
+
+.domain {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.title {
+  font-size: clamp(16px, 1.5vw, 24px);
+  font-weight: 600;
+  line-height: 1.4;
+  margin-bottom: 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.url {
+  font-size: clamp(11px, 0.9vw, 14px);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  line-height: 1.5;
+  margin-bottom: clamp(10px, 1.2vw, 16px);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.preview {
+  width: 100%;
+  flex: 1;
+  border-radius: 0;
+  overflow: hidden;
+  background: var(--bg-elevated);
+  border-top: 1px solid var(--border);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  /* CRT: breathing edge glow + jitter */
+  animation: crtBorderGlow 4s ease-in-out infinite;
+}
+
+/* CRT: tight horizontal scanlines + faint RGB phosphor columns */
+.preview::before {
+  content: " ";
+  display: block;
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(rgba(0, 0, 0, 0) 50%,
+      rgba(0, 0, 0, 0.05) 50%),
+    linear-gradient(90deg,
+      rgba(255, 0, 0, 0.03),
+      rgba(0, 255, 0, 0.01),
+      rgba(0, 0, 255, 0.03));
+  background-size: 100% 3px, 3px 100%;
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* CRT: vignette — darkens edges like a CRT tube / security camera */
+.preview::after {
+  content: " ";
+  display: block;
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 90% 85% at 50% 50%,
+      transparent 50%,
+      rgba(0, 0, 0, 0.32) 100%);
+  pointer-events: none;
+  z-index: 3;
+}
+
+[data-theme="light"] .preview::after {
+  background: radial-gradient(ellipse 90% 85% at 50% 50%,
+      transparent 50%,
+      rgba(0, 0, 0, 0.20) 100%);
+}
+
+.previewLoading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.previewImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+  display: block;
+}
+
+.overlay {
+  position: absolute;
+  bottom: 48px;
+  width: 120px;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 84px;
+  font-weight: 900;
+  border: 10px solid;
+  pointer-events: none;
+  z-index: 200;
+  opacity: 0;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+  background: rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(4px);
+}
+
+.keepOverlay {
+  left: 48px;
+  color: #4ade80;
+  border-color: #4ade80;
+}
+
+.closeOverlay {
+  right: 48px;
+  color: #f87171;
+  border-color: #f87171;
+}
+
+.pillContainer {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  align-items: center;
+  z-index: 10;
+}
+
+.tabGroupPill {
+  padding: 4px 10px;
+  border-radius: 100px;
+  font-size: 11px;
+  font-weight: var(--pill-font-weight);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  backdrop-filter: blur(8px);
+  border: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  cursor: help;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.tabGroupPill:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.pillText {
+  color: inherit;
+  text-shadow: var(--pill-text-shadow);
+}
+
+.timerBarContainer {
+  height: clamp(32px, 4vh, 48px);
+  background-color: var(--bg-surface);
+  border-top: 1px solid var(--border);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 8px 0 12px;
+  /* padding: 0 clamp(16px, 2.5vw, 32px); */
+  flex-shrink: 0;
+  border-radius: 0 0 var(--radius) var(--radius);
+  overflow: hidden;
+}
+
+.timerBarFill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: var(--timer-fill);
+  transition: width 0.3s ease-out;
+}
+
+.timerContent {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.timerGroup {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-secondary);
+  min-width: 0;
+  overflow: hidden;
+  flex-shrink: 1;
+}
+
+/* Keep the icon from shrinking so only the text truncates */
+.timerGroup > svg {
+  flex-shrink: 0;
+}
+
+.timerText {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.progressText {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.timerLeft {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+  overflow: hidden;
+  flex-wrap: nowrap;
+  flex: 1;
+}
+
+.settingsButton {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.settingsButton:hover {
+  color: var(--text-secondary);
+  background: var(--bg-elevated);
+}
+
+.backButton {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 6px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  z-index: 10;
+  font-family: var(--font-mono);
+}
+
+.backButton:hover {
+  color: var(--text-secondary);
+  background: var(--bg-elevated);
+}
+
+.settingsText {
+  font-size: 12px;
+  margin-left: 4px;
+}
+
+/* ── Music toggle button (footer) ─────────────────────────────────────── */
+/* Intentionally matches .timerGroup — same color, font, size, no custom treatment */
+.musicToggleBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: none;
+  padding: 0;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-family: inherit;
+  transition: color 0.15s ease;
+  /* Allow the button to shrink and clip within .timerLeft */
+  min-width: 0;
+  overflow: hidden;
+  flex-shrink: 1;
+}
+
+.musicToggleBtn:hover {
+  color: var(--text-primary);
+}
+
+/*
+  Grid overlap trick: both label spans sit in the same grid cell (1/1).
+  The slot is always as wide as the wider of the two texts — the button
+  never resizes on hover, so the cursor never escapes and there is no
+  flicker loop. Visibility (not display) is used so both spans always
+  contribute to layout.
+*/
+.musicLabelSlot {
+  display: inline-grid;
+  justify-items: start;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  color: inherit;
+  /* Constrain so child spans can truncate */
+  min-width: 0;
+  overflow: hidden;
+  max-width: 100%;
+}
+
+.musicLabelDefault,
+.musicLabelHover {
+  grid-column: 1;
+  grid-row: 1;
+  transition: opacity 0.15s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.musicLabelDefault,
+.musicLabelHover {
+  grid-column: 1;
+  grid-row: 1;
+  transition: opacity 0.15s ease;
+}
+
+.musicLabelDefault  { opacity: 1; }
+.musicLabelHover    { opacity: 0; }
+
+.musicToggleBtn:hover .musicLabelDefault { opacity: 0; }
+.musicToggleBtn:hover .musicLabelHover   { opacity: 1; }
+
+
+/* Popover Menu Portal Styles */
+.menuPortalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9998;
+}
+
+.menuPopoverPortal {
+  position: fixed;
+  z-index: 9999;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 180px;
+
+  /* Default (Mobile / Small Screen): Above the button */
+  bottom: calc(var(--btn-bottom) + var(--btn-height) + 8px);
+  right: var(--btn-right);
+  transform-origin: bottom right;
+  animation: dropdownFadeIn 200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-theme="light"] .menuPopoverPortal {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+}
+
+@media (min-width: 800px) {
+  .menuPopoverPortal {
+    /* Larger Screens: Break to the right */
+    bottom: var(--btn-bottom);
+    left: calc(var(--btn-left) + var(--btn-width) + 12px);
+    right: auto;
+    transform-origin: bottom left;
+  }
+}
+
+.settingsButtonActive {
+  background: var(--bg-elevated) !important;
+  color: var(--text-primary) !important;
+}
+
+.menuItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-family: inherit;
+  color: var(--text-secondary);
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 150ms ease, color 150ms ease;
+  width: 100%;
+  text-align: left;
+}
+
+.menuItem:hover {
+  background: var(--hover-bg, var(--bg-elevated));
+  color: var(--hover-color, var(--text-primary));
+}
+
+.menuItemWand {
+  --hover-color: #75a7f8ff;
+  --hover-bg: color-mix(in srgb, #5b98f9ff 15%, transparent);
+}
+[data-theme="light"] .menuItemWand {
+  --hover-color: #1a73e8;
+  --hover-bg: color-mix(in srgb, #1a73e8 15%, transparent);
+}
+
+.menuItemBomb,
+.menuItemYoutube {
+  --hover-color: #f28b82;
+  --hover-bg: color-mix(in srgb, #f28b82 15%, transparent);
+}
+
+[data-theme="light"] .menuItemBomb,
+[data-theme="light"] .menuItemYoutube {
+  --hover-color: #d93025;
+  --hover-bg: color-mix(in srgb, #d93025 15%, transparent);
+}
+
+.menuItemLightning {
+  --hover-color: #fdd663;
+  --hover-bg: color-mix(in srgb, #fdd663 15%, transparent);
+}
+[data-theme="light"] .menuItemLightning {
+  --hover-color: #e37400;
+  --hover-bg: color-mix(in srgb, #e37400 15%, transparent);
+}
+
+.menuItemSort {
+  --hover-color: #81c995;
+  --hover-bg: color-mix(in srgb, #81c995 15%, transparent);
+}
+[data-theme="light"] .menuItemSort {
+  --hover-color: #1e8e3e;
+  --hover-bg: color-mix(in srgb, #1e8e3e 15%, transparent);
+}
+
+.menuActiveIcon {
+  color: #fdd663;
+}
+[data-theme="light"] .menuActiveIcon {
+  color: #e37400;
+}
+
+.menuItem span {
+  flex-grow: 1;
+}
+
+.menuDivider {
+  height: 1px;
+  background: var(--border);
+  margin: 2px 4px;
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CRT EFFECT ANIMATIONS
+   ─ scanlines    → .preview::before
+   ─ vignette     → .preview::after
+   ─ border glow  → animation on .preview
+   ─ scan jitter  → animation on .preview
+   ─ chromab      → animation on .previewImg
+   ─ sweep        → .crtSweep div inside PreviewPanel
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── Border glow: slow white inner glow (dark) / dark shadow (light) ── */
+@keyframes crtBorderGlow {
+
+  0%,
+  100% {
+    box-shadow:
+      inset 0 0 1px 0.5px rgba(255, 255, 255, 0.06),
+      inset 0 0 8px 2px rgba(255, 255, 255, 0.03);
+  }
+
+  50% {
+    box-shadow:
+      inset 0 0 1px 0.5px rgba(255, 255, 255, 0.12),
+      inset 0 0 14px 4px rgba(255, 255, 255, 0.08);
+  }
+}
+
+[data-theme="light"] .preview {
+  animation: crtBorderGlowLight 4s ease-in-out infinite, crtScanJitter 9s linear infinite;
+}
+
+@keyframes crtBorderGlowLight {
+
+  0%,
+  100% {
+    box-shadow:
+      inset 0 0 1px 0.5px rgba(0, 0, 0, 0.07),
+      inset 0 0 8px 2px rgba(0, 0, 0, 0.04);
+  }
+
+  50% {
+    box-shadow:
+      inset 0 0 1px 0.5px rgba(0, 0, 0, 0.13),
+      inset 0 0 14px 4px rgba(0, 0, 0, 0.08);
+  }
+}
+
+/* ── Phosphor RGB mask: repeating R/G/B subpixel columns at mix-blend-mode: screen ──
+   This is how real CRT phosphor masks work — tight vertical stripes of
+   red, green, and blue that produce a warm RGB glow when blended with the image.
+   mix-blend-mode: screen means it only adds light, never darkens. */
+.crtPhosphor {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(90deg,
+      rgba(255, 0, 0, 0.08) 0px,
+      rgba(255, 0, 0, 0.08) 1px,
+      rgba(0, 255, 0, 0.08) 1px,
+      rgba(0, 255, 0, 0.08) 2px,
+      rgba(0, 0, 255, 0.08) 2px,
+      rgba(0, 0, 255, 0.08) 3px);
+  mix-blend-mode: screen;
+  pointer-events: none;
+  z-index: 5;
+}
+
+[data-theme="light"] .crtPhosphor {
+  background: repeating-linear-gradient(90deg,
+      rgba(255, 0, 0, 0.05) 0px,
+      rgba(255, 0, 0, 0.05) 1px,
+      rgba(0, 255, 0, 0.05) 1px,
+      rgba(0, 255, 0, 0.05) 2px,
+      rgba(0, 0, 255, 0.05) 2px,
+      rgba(0, 0, 255, 0.05) 3px);
+}
+
+/* ── Sweep: luminous band sliding top→bottom every 8s ── */
+/* Math: element height = 14% of container.
+   translateY(-100%) → fully above (top = -14% of container).
+   translateY(650%)  → top = 0 + 14% * 6.5 = 91% → bottom = 91%+14%=105% → fully below. */
+@keyframes crtSweep {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+
+  4% {
+    opacity: 0.5;
+  }
+
+  94% {
+    opacity: 0.5;
+  }
+
+  100% {
+    transform: translateY(650%);
+    opacity: 0;
+  }
+}
+
+.crtSweep {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  /* Reduced height → easier to traverse the container */
+  height: 14%;
+  pointer-events: none;
+  z-index: 4;
+  /* Soft white sheen — neutral for both light and dark */
+  background: linear-gradient(180deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.01) 10%,
+      rgba(255, 255, 255, 0.028) 35%,
+      rgba(255, 255, 255, 0.038) 50%,
+      rgba(255, 255, 255, 0.028) 65%,
+      rgba(255, 255, 255, 0.01) 90%,
+      transparent 100%);
+  animation: crtSweep 8s cubic-bezier(0.33, 0, 0.66, 1) infinite;
+  filter: blur(1.5px);
+}
+
+[data-theme="light"] .crtSweep {
+  background: linear-gradient(180deg,
+      transparent 0%,
+      rgba(0, 0, 0, 0.012) 10%,
+      rgba(0, 0, 0, 0.032) 35%,
+      rgba(0, 0, 0, 0.045) 50%,
+      rgba(0, 0, 0, 0.032) 65%,
+      rgba(0, 0, 0, 0.012) 90%,
+      transparent 100%);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CRT EFFECT — DISABLED STATE
+   When the user toggles off the retro effect, CRTEffectProvider
+   sets [data-crt-off] on <html>. Every layer is hidden instantly
+   via CSS attribute selectors — no re-render required.
+   ══════════════════════════════════════════════════════════════ */
+
+/* Hide the JS-rendered overlay divs */
+[data-crt-off] .crtPhosphor,
+[data-crt-off] .crtSweep {
+  display: none;
+}
+
+/* Remove scanlines from .preview::before */
+[data-crt-off] .preview::before {
+  background: none;
+}
+
+/* Remove vignette from .preview::after */
+[data-crt-off] .preview::after {
+  background: none;
+}
+
+/* Stop the border glow animation and clear its box-shadow */
+[data-crt-off] .preview {
+  animation: none;
+  box-shadow: none;
+}

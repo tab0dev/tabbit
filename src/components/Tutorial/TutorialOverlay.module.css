@@ -1,0 +1,248 @@
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* background-color: var(--bg); */
+  z-index: 100;
+  color: var(--text);
+  /* Use a backdrop blur for a nice glassmorphism effect */
+  backdrop-filter: blur(2px);
+}
+
+.dialog {
+  display: flex;
+  flex-direction: column;
+  padding: 32px;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  max-width: 860px;
+  width: 100%;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  position: relative;
+}
+
+.header {
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  
+  background-color: #465fba;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--accent) 80%, #000 20%);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  
+  background-image:
+    linear-gradient(rgba(0, 0, 0, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.1) 1px, transparent 1px);
+  background-size: 3px 3px;
+}
+
+.header h1,
+.header h2 {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 600;
+  color: white;
+  letter-spacing: -0.5px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.headerTitle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header p {
+  color: rgba(255, 255, 255, 0.85);
+  margin: 0;
+  line-height: 1.4;
+  text-align: right;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.actionsList {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  height: max-content;
+}
+
+.boardsContainer {
+  display: grid;
+  grid-template-columns: 1fr 30px 1fr;
+  margin-bottom: 6px;
+}
+
+.primaryColumn {
+  display: flex;
+  flex-direction: column;
+}
+
+.secondaryColumn {
+  display: flex;
+  flex-direction: column;
+  justify-content: start;
+}
+
+.arrowsColumn {
+  display: flex;
+  flex-direction: column;
+}
+
+.arrowSlot {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+}
+
+.connectorLine {
+  width: calc(100% + 32px);
+  height: 1px;
+  margin-top: 16px;
+  background-color: var(--border);
+}
+
+.sectionHeader {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  font-size: 15px;
+  font-weight: 550;
+  color: var(--text-primary);
+  background-color: var(--bg-elevated);
+  display: flex;
+}
+
+.actionRow {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  gap: 24px;
+  transition: all 0.3s ease-in;
+}
+
+.actionRow:last-child {
+  border-bottom: none;
+}
+
+.actionRow:hover {
+  background: var(--bg-elevated);
+}
+
+.actionVisual {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  height: 40px;
+  padding: 0 8px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  border-bottom-width: 3px;
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.actionInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.actionTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.actionDesc {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.startButton {
+  position: absolute;
+  bottom: -16px;
+  right: -16px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 14px 6px 10px;
+  background-color: var(--bg);
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  background-image:
+    linear-gradient(rgba(0, 0, 0, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.1) 1px, transparent 1px);
+  background-size: 3px 3px;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background-color 1s ease, border-color 1s ease, transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), filter 0.2s ease;
+  font-family: inherit;
+  outline: none;
+}
+
+.startButton.ready {
+  background-color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 80%, #000 20%);
+  color: #fff;
+}
+
+.startButton:hover {
+  transform: scale(1.05) translateY(-2px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  filter: brightness(1.1);
+}
+
+.startButton:active {
+  transform: scale(0.95);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.startButtonText {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  margin-left: 2px;
+}
+
+.swipeAnimationContainer {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.swipeHand {
+  width: 40px;
+  height: 40px;
+}
