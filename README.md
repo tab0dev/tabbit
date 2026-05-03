@@ -16,7 +16,7 @@ Tabbit is a Chrome extension that helps you triage your open tabs, one tab at a 
 Install on the Google Chrome Web Store: 
 https://chromewebstore.google.com/detail/tabbit-tab-closer-organiz/calbmnbhppoplenhgpfejepklainehko
 
-
+<br />
 
 </div>
 
