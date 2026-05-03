@@ -1,29 +1,17 @@
 <div align="center">
 
-<img src="./public/icons/icon128.png" width="42" style="vertical-align: middle; margin-right: 2px;" />
-<span style="vertical-align: middle; font-weight: 700; font-size: 40px; letter-spacing: -0.9px;">Tabbit</span>
+<img src="https://raw.githubusercontent.com/tab0dev/tabbit/main/public/icons/icon128.png" width="42" />
+<img src="https://raw.githubusercontent.com/tab0dev/tabbit/main/public/brand-title.svg" height="42" />
 
-
-<svg width="175" height="40" viewBox="0 0 175 40" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-top:6px;margin-bottom:12px;">
-  <rect x="2" y="2" width="165" height="36" rx="10" fill="#f8b50abd" stroke="#A5822B" stroke-width="2"/>
-  <defs>
-    <pattern id="pattern0" x="0" y="0" width="4" height="4" patternUnits="userSpaceOnUse">
-      <path d="M4 0H0V4" stroke="black" stroke-opacity="0.08" stroke-width="0.5"/>
-    </pattern>
-  </defs>
-  <rect x="2" y="2" width="165" height="36" rx="10" fill="url(#pattern0)"/>
-  <text x="50%" y="25" text-anchor="middle" fill="white" font-family="ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="16" font-weight="500" letter-spacing="-0.9px">close your tabs!!</text>
-</svg>
-
-[![Chrome Web Store](https://img.shields.io/badge/Chrome%20Web%20Store-v0.2-f8b50a?logo=googlechrome&logoColor=white&style=flat-square)](https://chromewebstore.google.com/detail/tabbit-tab-closer-organiz/calbmnbhppoplenhgpfejepklainehko)
-
+<span>close your tabs!!</span>
+<br />
 <br />
 
 Tabbit is a Chrome extension that helps you triage your open tabs, one tab at a time. Use keyboard shortcuts or swipe on tab previews to decide if you want to keep, close, bookmark, or group the tab. Built with React, Chrome APIs, and carrots.
 
-<br />
+[![Chrome Web Store](https://img.shields.io/badge/Chrome%20Web%20Store-v0.2-f8b50a?logo=googlechrome&logoColor=white&style=flat-square)](https://chromewebstore.google.com/detail/tabbit-tab-closer-organiz/calbmnbhppoplenhgpfejepklainehko)
 
-Install it on the Chrome Web store: 
+Install it on the Google Chrome Web store: 
 https://chromewebstore.google.com/detail/tabbit-tab-closer-organiz/calbmnbhppoplenhgpfejepklainehko
 
 
@@ -76,7 +64,7 @@ Tabbit is a simple toolkit to help you make decisions fast and get your browser 
 
 ### 🧹 Background Cleaning
 - **Auto Tab Closer**: Quietly prunes tabs of a certain age you set. Easy to recover pruned tabs.
-- **One-Click Sorting**: Tidy up your window by sorting tabs alphabetically or by URL with a single right-click on the Tabbit icon
+- **One-Click Sorting**: Right click the Tabbit icon to sort your windows alphabetically or by URL
 - **Tab Smusher**: Reduce duplicates down to a single copy (prioritizing recent interactions) in one click
 
 ### 🎮 QoL
