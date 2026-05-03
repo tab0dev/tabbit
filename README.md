@@ -1,26 +1,38 @@
 <div align="center">
 
+<img src="./public/icons/icon128.png" width="42" style="vertical-align: middle; margin-right: 2px;" />
+<span style="vertical-align: middle; font-weight: 700; font-size: 40px; letter-spacing: -0.9px;">Tabbit</span>
+
+
+<svg width="175" height="40" viewBox="0 0 175 40" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-top:6px;margin-bottom:12px;">
+  <rect x="2" y="2" width="165" height="36" rx="10" fill="#f8b50abd" stroke="#A5822B" stroke-width="2"/>
+  <defs>
+    <pattern id="pattern0" x="0" y="0" width="4" height="4" patternUnits="userSpaceOnUse">
+      <path d="M4 0H0V4" stroke="black" stroke-opacity="0.08" stroke-width="0.5"/>
+    </pattern>
+  </defs>
+  <rect x="2" y="2" width="165" height="36" rx="10" fill="url(#pattern0)"/>
+  <text x="50%" y="25" text-anchor="middle" fill="white" font-family="ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="16" font-weight="500" letter-spacing="-0.9px">close your tabs!!</text>
+</svg>
+
+[![Chrome Web Store](https://img.shields.io/badge/Chrome%20Web%20Store-v0.2-f8b50a?logo=googlechrome&logoColor=white&style=flat-square)](https://chromewebstore.google.com/detail/tabbit-tab-closer-organiz/calbmnbhppoplenhgpfejepklainehko)
+
 <br />
 
-# 🐇 Tabbit
+Tabbit is a Chrome extension that helps you triage your open tabs, one tab at a time. Use keyboard shortcuts or swipe on tab previews to decide if you want to keep, close, bookmark, or group the tab. Built with React, Chrome APIs, and carrots.
 
-**Close your tabs!!**
+<br />
 
-[![Chrome Web Store](https://img.shields.io/badge/Chrome%20Web%20Store-v0.1.1-4285F4?logo=googlechrome&logoColor=white&style=flat-square)](https://chromewebstore.google.com/detail/tabbit-tab-closer-organiz/calbmnbhppoplenhgpfejepklainehko)
-[![Built with React](https://img.shields.io/badge/React-18-61dafb?logo=react&logoColor=white&style=flat-square)](https://react.dev)
-[![Built with Vite](https://img.shields.io/badge/Vite-5-646cff?logo=vite&logoColor=white&style=flat-square)](https://vitejs.dev)
+Install it on the Chrome Web store: 
+https://chromewebstore.google.com/detail/tabbit-tab-closer-organiz/calbmnbhppoplenhgpfejepklainehko
 
-
-Tabbit is a Chrome extension that helps you triage your open tabs, one tab at a time. Use keyboard shortcuts or swipe on tab previews to decide if you want to keep, close, bookmark, or group the tab. Built with React, Vite, Chrome MV3, Chrome APIs, and carrots.
 
 
 </div>
 
 ## What is Tabbit?
 
-You know that feeling. You open Chrome and there are 87 tabs staring back at you. Some important. Most not. All of them quietly draining your focus.
-
-Tabbit turns that chaos into a session. It surfaces every tab as a card and gives you four decisions:
+A messy browser sucks. Tabbit turns your open tabs into a deck of cards so you can make fast decisions about what you need, and what needs to go. It also includes useful Tab organization features: tab sorting, auto-creating tab groups, bulk closing, automated cleanup based on tab age, smushing duplicate tabs, etc.
 
 | Action | Hotkey | What it does |
 |--------|--------|-------------|
@@ -34,7 +46,7 @@ When the queue hits zero — confetti. Every action is fully undoable.
 
 ## 📚 Technical Documentation
 
-If you are a developer looking to contribute or understand how Tabbit works under the hood, we have a comprehensive set of technical guides:
+If you are a developer looking to contribute or understand how Tabbit works under the hood, there are some technical guides to help explain the existing system:
 
 - **[Architecture & Core Loop](./readmes/ARCHITECTURE.md)**
 - **[Data Model & State Management](./readmes/DATA_MODEL.md)**
@@ -49,32 +61,33 @@ If you are a developer looking to contribute or understand how Tabbit works unde
 
 ## ✨ Features & Product Outline
 
-Tabbit is a comprehensive suite of utilities designed to keep your decisions fast and focused.
+Tabbit is a simple toolkit to help you make decisions fast and get your browser back in order.
 
 ### 🃏 The Triage Flow
-- **Tinder-style swipe cards**: Swipe left or right with your mouse, drag them on a touch screen, or use lightning-fast keyboard shortcuts (`K`, `X`, `B`, `G`) to fly through your queue.
-- **Rich previews**: See the tab's title, URL, favicon, and a visual screenshot preview of the page itself before making a decision.
-- **Contextual metadata**: "Last visited X weeks ago" pills make stale tabs obvious, while duplicate-tab detection lets you batch-close redundant pages instantly.
-- **Full Undo Stack**: Every action is completely reversible (`Cmd+Z` / `Ctrl+Z`), seamlessly recreating closed tabs via Chrome APIs and patching the UI queue in sync.
+- **Swipe-to-sort**: Fly through tabs with your mouse, touch screen, or hotkeys
+- **Rich previews**: See a visual snapshot of the page before you decide its fate
+- **Smart context**: Flags stale tabs and duplicates so you can clear noise instantly
+- **Instant Undo**: Hit `Cmd+Z` to bring back any tab exactly as it was
 
 ### 🧠 Smart Organization
-- **Auto Tab Group Wizard**: Uses on-device AI (Gemini Nano) to cluster your open tabs by underlying intent, letting you create named Chrome Tab Groups with a single click.
-- **Fuzzy-search Pickers**: Save tabs to specific Bookmark folders or existing Tab Groups using a fast, keyboard-first fuzzy search interface (powered by [uFuzzy](https://github.com/leeoniya/uFuzzy)).
-- **Watch Later Automation**: Instantly clear out your backlog of YouTube tabs. Tabbit injects an automation script to natively click the "Save to Watch Later" button on each tab and closes them for you.
+- **AI Tab Grouping**: Clusters tabs into named groups using local on-device AI
+- **Quick Pickers**: Fuzzy-search folders and groups in milliseconds when bookmarking or adding to tab groups
+- **YouTube Batching**: Batch save YouTube videos into the native Youtube "Watch Later" folder
 
-### 🧹 Background Utilities
-- **Auto Tab Closer**: A completely silent background daemon that prunes tabs you haven't looked at in a while (e.g., older than 7 days). Review everything it closed in the built-in "Graveyard".
-- **Tab Sorter Engine**: Right-click the extension icon to instantly sort all of your open tabs alphabetically by Title or URL. Tabbit intelligently maintains your existing pinned tabs and tab groups.
+### 🧹 Background Cleaning
+- **Auto Tab Closer**: Quietly prunes tabs of a certain age you set. Easy to recover pruned tabs.
+- **One-Click Sorting**: Tidy up your window by sorting tabs alphabetically or by URL with a single right-click on the Tabbit icon
+- **Tab Smusher**: Reduce duplicates down to a single copy (prioritizing recent interactions) in one click
 
-### 🎮 Quality of Life
-- **Retro Monitor**: A built-in pixel-art status monitor that tracks your actions.
-- **Generative Music Game**: Turn on the music and play an integrated rhythm game while you triage, unlocking more layers of the track as you progress.
-- **Confetti**: Reaching inbox zero is an achievement. We celebrate it.
+### 🎮 QoL
+- **Retro Monitor**: old CRT effect on the preview window
+- **Generative Music**: A built-in rhythm game that evolves the music as you work
+- **Inbox Zero**: Reach the end of your queue and celebrate with confetti
 
 
 ## 🔒 Permissions
 
-Tabbit requests only what it needs. Everything is local, and I do not want your data.
+Tabbit only asks for the permissions it needs to work. Everything stays local on your machine—I have no interest in your data, and I never see it.
 
 | Permission | Why |
 |-----------|-----|
@@ -172,9 +185,25 @@ Hotkeys are remappable via the **Hotkeys** panel inside the extension.
 ---
 
 
+## Roadmap
+
+Honestly, nothing much. Have a feature idea? Open an [issue](../../issues) or a discussion. Or at https://tabbit.website/feedback.
+
+---
+
 ## Contributing
 
-Have a feature idea? Open an [issue](../../issues) or a discussion. Or let me know at https://tabbit.website/feedback. You are more than welcome to submit PRs if you feel inclined to.
+Pull requests are welcome. For significant changes, please open an issue first so we can discuss the approach.
+
+```bash
+# Fork, then:
+git clone https://github.com/[your-username]/tabbit.git
+cd tabbit
+pnpm install
+pnpm dev
+```
+
+Please keep PRs focused. One feature or fix per PR.
 
 ## License
 
