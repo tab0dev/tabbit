@@ -1,17 +1,19 @@
 <div align="center">
 
+<br />
+
 <img src="https://raw.githubusercontent.com/tab0dev/tabbit/main/public/icons/icon128.png" width="42" />
 <img src="https://raw.githubusercontent.com/tab0dev/tabbit/main/public/brand-title.svg" height="42" />
 
 <span>close your tabs!!</span>
-<br />
+
+[![Chrome Web Store](https://img.shields.io/badge/Chrome%20Web%20Store-v0.1.1-f8b50a?logo=googlechrome&logoColor=white&style=flat-square)](https://chromewebstore.google.com/detail/tabbit-tab-closer-organiz/calbmnbhppoplenhgpfejepklainehko)
+
 <br />
 
 Tabbit is a Chrome extension that helps you triage your open tabs, one tab at a time. Use keyboard shortcuts or swipe on tab previews to decide if you want to keep, close, bookmark, or group the tab. Built with React, Chrome APIs, and carrots.
 
-[![Chrome Web Store](https://img.shields.io/badge/Chrome%20Web%20Store-v0.1.1-f8b50a?logo=googlechrome&logoColor=white&style=flat-square)](https://chromewebstore.google.com/detail/tabbit-tab-closer-organiz/calbmnbhppoplenhgpfejepklainehko)
-
-Install it on the Google Chrome Web store: 
+Install on the Google Chrome Web Store: 
 https://chromewebstore.google.com/detail/tabbit-tab-closer-organiz/calbmnbhppoplenhgpfejepklainehko
 
 
