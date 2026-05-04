@@ -33,7 +33,6 @@ A messy browser sucks. Tabbit turns your open tabs into a deck of cards so you c
 
 When the queue hits zero — confetti. Every action is fully undoable.
 
-
 ## 📚 Technical Documentation
 
 If you are a developer looking to contribute or understand how Tabbit works under the hood, there are some technical guides to help explain the existing system:
@@ -74,6 +73,13 @@ Tabbit is a simple toolkit to help you make decisions fast and get your browser 
 - **Generative Music**: A built-in rhythm game that evolves the music as you work
 - **Inbox Zero**: Reach the end of your queue and celebrate with confetti
 
+## Lots of functionality
+
+This extension has a lot of features to handle distinct tab management use cases in a single package, and as such, stands on the shoulders of other great extensions. It has the exact same (or better) functionality than these popular extensions:
+- [Simple Tab Sorter](https://chromewebstore.google.com/detail/simple-tab-sorter/cgfpgnepljlgenjclbekbjdlgcodfmjp) for on-demand sorting tabs
+- [Auto-Group Tabs](https://chromewebstore.google.com/detail/auto-group-tabs/danncghahncanipdoajmakdbeaophenb) and [Tab Groups Extension](https://chromewebstore.google.com/detail/tab-groups-extension/nplimhmoanghlebhdiboeellhgmgommi) for auto grouping new tabs on creation
+
+Much love to their creators 🥕
 
 ## 🔒 Permissions
 
