@@ -53,56 +53,7 @@ function DuplicateBadge({ count }) {
   );
 }
 
-function GridTabPreview({ tab }) {
-  const [imageSrc, setImageSrc] = useState(null);
-  const [loadingText, setLoadingText] = useState("Capturing preview…");
-
-  useEffect(() => {
-    if (!tab) return;
-    const cached = getCachedCapture(tab.id);
-    if (cached) {
-      setImageSrc(cached);
-      setLoadingText("");
-      return;
-    }
-    if (didCaptureFail(tab.id)) {
-      setImageSrc(null);
-      setLoadingText("No preview available");
-      return;
-    }
-    setImageSrc(null);
-    setLoadingText("Capturing preview…");
-    let isCurrent = true;
-    captureTab(tab, (dataUrl) => {
-      if (!isCurrent) return;
-      if (dataUrl) {
-        setImageSrc(dataUrl);
-      } else {
-        setImageSrc(null);
-        setLoadingText("No preview available");
-      }
-    });
-    return () => {
-      isCurrent = false;
-    };
-  }, [tab]);
-
-  return (
-    <div className={styles.thumbnailContainer}>
-      {!imageSrc && (
-        <div className={styles.thumbnailLoading}>{loadingText}</div>
-      )}
-      {imageSrc && (
-        <img
-          src={imageSrc}
-          className={styles.thumbnailImg}
-          alt="Preview"
-          draggable="false"
-        />
-      )}
-    </div>
-  );
-}
+import GridTabPreview from "../../Shared/GridTabPreview";
 
 function ShimmerRow() {
   return (
@@ -318,7 +269,7 @@ export default function AutoTabCloserWorkerPanel({ onClose }) {
                       </div>
                       <div className={styles.previewCardUrl}>{tab.url}</div>
                     </div>
-                    <GridTabPreview tab={tab} />
+                    <GridTabPreview tab={tab} className={styles.closerThumbnailOverride} />
                     {typeof tab.lastAccessed === "number" && (
                       <div className={styles.previewCardAge}>
                         {relativeTime(tab.lastAccessed)}

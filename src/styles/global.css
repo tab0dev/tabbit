@@ -59,6 +59,15 @@
   --pill-yellow-border: rgba(234, 179, 8, 0.4);
 
   /* Other */
+  --chrome-grey: #bdc1c6;
+  --chrome-blue: #8ab4f8;
+  --chrome-red: #f28b82;
+  --chrome-yellow: #fde293;
+  --chrome-green: #81c995;
+  --chrome-pink: #ff8bcb;
+  --chrome-purple: #c58af9;
+  --chrome-cyan: #78d9ec;
+  --chrome-orange: #fcad70;
   --magic-dot:   #bd740e;
   --radius:      12px;
   --radius-sm:   8px;

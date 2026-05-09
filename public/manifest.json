@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Tabbit: Tab Closer & Organizer",
-  "version": "0.1.2",
+  "version": "0.2",
   "description": "Finally close all your open tabs. Tab closer & tab manager with hotkeys, bulk close, AI grouping, auto-close, and tab sorting.",
   "permissions": [
     "tabs",

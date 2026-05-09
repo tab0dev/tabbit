@@ -77,6 +77,7 @@ import {
     extractRegistrableDomain,
     extractRootDomain,
     extractSubdomainLabel,
+    extractBaseDomain,
 } from '../utils/domainUtils.js';
 
 import {
@@ -86,7 +87,6 @@ import {
 } from '../utils/domainPreferences.js';
 
 import {
-    extractBaseDomain,
     findCommonTitlePrefix,
     buildSubdomainName,
     buildDomainGroups,

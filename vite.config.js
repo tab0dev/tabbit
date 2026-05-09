@@ -11,7 +11,14 @@ export default defineConfig({
         entryFileNames: `assets/[name].js`,
         chunkFileNames: `assets/[name].js`,
         assetFileNames: `assets/[name].[ext]`
-      }
+      },
+      // @daybrush/utils (react-selecto dep) ships a /*#__PURE__*/ annotation
+      // at an invalid position in its ESM build. Rollup strips it and continues
+      // normally — this just silences the cosmetic warning until they fix it upstream.
+      onwarn(warning, defaultHandler) {
+        if (warning.code === 'INVALID_ANNOTATION' && warning.id?.includes('@daybrush/utils')) return;
+        defaultHandler(warning);
+      },
     }
   }
 })

@@ -1,6 +1,6 @@
 import React from 'react';
 import styles from './Card.module.css';
-import { Clock, HourglassHighIcon, Browsers, ArrowLeft, DotsThree, SpeakerHigh, SpeakerSlash } from '@phosphor-icons/react';
+import { Clock, HourglassHighIcon, Browsers, ArrowLeft, DotsThree, SpeakerHigh, SpeakerSlash, ListBullets } from '@phosphor-icons/react';
 import { formatTime } from '../../utils/formatters';
 import { useMusic } from '../../store/MusicProvider';
 
@@ -41,7 +41,18 @@ export default function CardFooter({
             <Browsers size={14} weight="duotone" />
             <span className={styles.progressText}>{totalTabs - processedTabs} tabs left</span>
           </div>
-          <button
+          <div className={styles.footerDivider} />
+          {activeView === 'default' && (
+            <button
+              className={styles.musicToggleBtn}
+              onClick={(e) => { e.stopPropagation(); handleNavigate('listview'); }}
+              aria-label="Open list view"
+            >
+              <ListBullets size={14} weight="duotone" />
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '13px', fontWeight: 500 }}>list</span>
+            </button>
+          )}
+          {/* <button
             className={styles.musicToggleBtn}
             onClick={(e) => { e.stopPropagation(); toggleMusic(); }}
             aria-label={musicEnabled ? 'Mute music' : 'Enable music'}
@@ -53,7 +64,8 @@ export default function CardFooter({
               <span className={styles.musicLabelDefault}>{defaultLabel}</span>
               <span className={styles.musicLabelHover}>{hoverLabel}</span>
             </span>
-          </button>
+          </button> */}
+
         </div>
         {activeView !== 'default' ? (
           <button

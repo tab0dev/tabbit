@@ -51,6 +51,11 @@ export function usePickerPanel({
         }
     }, [pickerType, currentTabUrl, invalidate]);
 
+    // Use a ref for onConfirmItem so confirmWrapper always calls the
+    // latest version — avoids stale closures when batchTarget changes.
+    const onConfirmItemRef = useRef(onConfirmItem);
+    useEffect(() => { onConfirmItemRef.current = onConfirmItem; });
+
     const confirmWrapper = useCallback(async (overrideItem) => {
         let item = overrideItem;
         if (!item) {
@@ -65,12 +70,12 @@ export function usePickerPanel({
 
         inputRef.current?.blur();
         
-        await onConfirmItem(item);
+        await onConfirmItemRef.current(item);
         recordAndInvalidate(item);
 
         setQuery('');
         onDeactivate?.();
-    }, [customGetSelectedItem, flatItems, selectedIndex, onConfirmItem, recordAndInvalidate, onDeactivate]);
+    }, [customGetSelectedItem, flatItems, selectedIndex, recordAndInvalidate, onDeactivate]);
 
     // Register with PickerContext
     const { registerPicker } = usePicker();

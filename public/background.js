@@ -293,6 +293,11 @@ chrome.runtime.onInstalled.addListener((details) => {
       title: 'Smush duplicate tabs',
       contexts: ['action']
     });
+    chrome.contextMenus.create({
+      id: 'tabbit-merge-windows',
+      title: 'Merge all tabs into one window',
+      contexts: ['action']
+    });
   });
 });
 
@@ -546,5 +551,368 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
     runTabSorter();
   } else if (info.menuItemId === 'tabbit-smush-duplicates') {
     runSmushDuplicates();
+  } else if (info.menuItemId === 'tabbit-merge-windows') {
+    runMergeWindows();
   }
 });
+
+/**
+ * Merge all tabs into one window.
+ * Moves every tab from every other window into the most recently focused
+ * non-extension window, then focuses that window.
+ */
+async function runMergeWindows() {
+  console.log('[Tabbit SW] runMergeWindows() called');
+  try {
+    // Get the focused window to use as the target.
+    const targetWindow = await chrome.windows.getLastFocused({ populate: false });
+    const targetWindowId = targetWindow.id;
+
+    // Query all tabs across all windows.
+    const allTabs = await chrome.tabs.query({});
+
+    // Collect tabs that belong to OTHER windows, preserving document order.
+    const tabsToMove = allTabs
+      .filter(t => t.windowId !== targetWindowId)
+      .sort((a, b) => a.index - b.index);
+
+    if (tabsToMove.length === 0) {
+      console.log('[Tabbit SW] runMergeWindows — all tabs already in one window, nothing to do');
+      return;
+    }
+
+    const tabIds = tabsToMove.map(t => t.id);
+    console.log(`[Tabbit SW] runMergeWindows — moving ${tabIds.length} tabs into window ${targetWindowId}`);
+
+    // Move all foreign tabs to the end of the target window.
+    await chrome.tabs.move(tabIds, { windowId: targetWindowId, index: -1 });
+
+    // Focus the target window.
+    await chrome.windows.update(targetWindowId, { focused: true });
+
+    console.log('[Tabbit SW] runMergeWindows — done');
+  } catch (err) {
+    console.error('[Tabbit SW] runMergeWindows FAILED:', err);
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Auto Tab Grouper Daemon
+───────────────────────────────────────────────────────────────────────────── */
+
+function sanitizeRegex(str) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function generateMatcherRegex(matcher, isRegex, matchType = null) {
+  if (!matcher) return null;
+  const type = matchType || (isRegex ? 'regex' : 'pattern');
+  if (type === 'simple') {
+    let cleaned = matcher.trim().replace(/^https?:\/\//, '').replace(/\/.*$/, '');
+    matcher = `*://*.${cleaned}/*`;
+  }
+  if (type === 'regex' || isRegex) {
+    try {
+      if (matcher.startsWith('/') && matcher.lastIndexOf('/') > 0) {
+        const lastSlash = matcher.lastIndexOf('/');
+        const flags = matcher.substring(lastSlash + 1);
+        const pattern = matcher.substring(1, lastSlash);
+        return new RegExp(pattern, flags);
+      }
+      return new RegExp(matcher);
+    } catch (e) {
+      return null;
+    }
+  }
+  if (matcher === '*') return /^.*$/i;
+  const splitPattern = matcher.split("://");
+  let scheme = splitPattern[0];
+  let rest = splitPattern.slice(1).join("://");
+  if (!rest) { rest = scheme; scheme = "*"; }
+  let schemePattern = scheme === "*" ? "https?" : sanitizeRegex(scheme);
+  const pathIdx = rest.indexOf("/");
+  let host = pathIdx > -1 ? rest.substring(0, pathIdx) : rest;
+  let path = pathIdx > -1 ? rest.substring(pathIdx) : "/*";
+  let hostPattern;
+  if (host === "*") hostPattern = "[^/]+";
+  else if (host.startsWith("*.")) hostPattern = "(?:[^/]+\\.)?" + sanitizeRegex(host.slice(2));
+  else hostPattern = sanitizeRegex(host);
+  if (!/:[0-9]+$/.test(host)) hostPattern += "(?::[0-9]+)?";
+  let pathPattern;
+  if (path === "/*") pathPattern = "(?:/.*)?";
+  else pathPattern = path.split('*').map(sanitizeRegex).join('.*');
+  try { return new RegExp(`^${schemePattern}://${hostPattern}${pathPattern}$`, 'i'); }
+  catch (e) { return null; }
+}
+
+function evaluateRoughMatch(pattern, tab) {
+  if (!pattern || pattern.type !== 'rough') return false;
+  
+  const { target, method, value } = pattern;
+  if (!value) return false;
+  
+  let subject = '';
+  if (target === 'hostname' || target === 'href') {
+    if (!tab.url) return false;
+    try {
+      const urlObj = new URL(tab.url);
+      subject = target === 'hostname' ? urlObj.hostname : urlObj.href;
+    } catch { return false; }
+  } else if (target === 'title' || target === 'title_ignorecase') {
+    subject = tab.title || '';
+  }
+
+  let checkVal = value || '';
+  let subj = subject;
+  if (target === 'title_ignorecase') {
+    subj = subject.toLowerCase();
+    checkVal = checkVal.toLowerCase();
+  }
+
+  switch (method) {
+    case 'includes': return subj.includes(checkVal);
+    case 'startsWith': return subj.startsWith(checkVal);
+    case 'endsWith': return subj.endsWith(checkVal);
+    case 'equals': return subj === checkVal;
+    default: return false;
+  }
+}
+
+/* ─── Suspended tab URL decoder ─────────────────────────────────────────────
+   Mirrors the logic in triageLoader.js. Most tab suspenders (Tiny Suspender,
+   The Marvellous Suspender, etc.) encode the original URL in the ?url= query
+   param of their chrome-extension:// suspension page.
+──────────────────────────────────────────────────────────────────────────── */
+function decodeSuspendedUrl(rawUrl) {
+  try {
+    const u = new URL(rawUrl);
+    const realUrl = u.searchParams.get('url');
+    if (realUrl) return decodeURIComponent(realUrl);
+  } catch { /* ignore */ }
+  return null;
+}
+
+/**
+ * Returns the effective URL for matching and whether the tab is suspended.
+ * For suspended tabs the real URL is decoded from the suspender's query param;
+ * for regular tabs it's just tab.url / tab.pendingUrl.
+ */
+function getTabRealUrl(tab) {
+  const raw = tab.url || tab.pendingUrl || '';
+  if (raw.startsWith('chrome-extension://')) {
+    const decoded = decodeSuspendedUrl(raw);
+    if (decoded) return { realUrl: decoded, isSuspended: true };
+  }
+  return { realUrl: raw, isSuspended: false };
+}
+
+const AG_SETTINGS_KEY = "tabbit_autogrouper_settings";
+const AG_RULES_KEY = "tabbit_autogrouper_rules";
+// Mirrors TabProcessingProvider's chrome.storage.local write so the SW
+// can honour the user's "Exclude Suspended Tabs" preference.
+const AG_SUSPEND_STORAGE_KEY = "tabbit_excludeSuspendedTabs_remote";
+
+let ag_enabled = false;
+let ag_rules = [];
+let ag_compiledRules = [];
+let ag_excludeSuspended = false;
+
+// Track inflight group creations to avoid race conditions: "windowId_ruleId" -> Promise
+const groupCreationTracker = new Map();
+
+async function initAutoGrouper() {
+  const data = await chrome.storage.local.get([AG_SETTINGS_KEY, AG_RULES_KEY, AG_SUSPEND_STORAGE_KEY]);
+  ag_enabled = data[AG_SETTINGS_KEY]?.enabled || false;
+  ag_rules = data[AG_RULES_KEY] || [];
+  ag_excludeSuspended = data[AG_SUSPEND_STORAGE_KEY] ?? false;
+  compileRules();
+}
+
+function compileRules() {
+  ag_compiledRules = ag_rules.map(r => {
+    // Migrate old format to new format on the fly if needed
+    const patterns = r.patterns || [{ value: r.pattern, isRegex: r.isRegex }];
+    const regexPatterns = patterns.filter(p => p.type !== 'rough');
+    const roughPatterns = patterns.filter(p => p.type === 'rough');
+    return {
+      ...r,
+      patterns: patterns,
+      compiledRegexes: regexPatterns.map(p => generateMatcherRegex(p.value, p.isRegex, p.type)).filter(Boolean),
+      roughMatchers: roughPatterns
+    };
+  });
+}
+
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area === "local") {
+    let changed = false;
+    if (changes[AG_SETTINGS_KEY]) {
+      ag_enabled = changes[AG_SETTINGS_KEY].newValue?.enabled || false;
+      changed = true;
+    }
+    if (changes[AG_RULES_KEY]) {
+      ag_rules = changes[AG_RULES_KEY].newValue || [];
+      compileRules();
+      changed = true;
+    }
+    if (changes[AG_SUSPEND_STORAGE_KEY]) {
+      ag_excludeSuspended = changes[AG_SUSPEND_STORAGE_KEY].newValue ?? false;
+    }
+    
+    // If rules changed and we're enabled, sweep all tabs
+    if (changed && ag_enabled) {
+      sweepAllTabs();
+    }
+  }
+});
+
+async function sweepAllTabs() {
+  console.log(`[AutoGrouperWorker] sweepAllTabs called. ag_enabled: ${ag_enabled}`);
+  if (!ag_enabled) return;
+  const tabs = await chrome.tabs.query({});
+  for (const tab of tabs) {
+    await processTab(tab);
+  }
+}
+
+async function processTab(tab) {
+  const tabId = tab.id;
+  // Decode the real URL for matching — suspended tabs have a chrome-extension://
+  // URL that would never match the user's rules without decoding.
+  const { realUrl: url, isSuspended } = getTabRealUrl(tab);
+  const windowId = tab.windowId;
+  const currentGroupId = tab.groupId;
+
+  console.log(`[AutoGrouperWorker] processTab called for tabId: ${tabId}, url: ${url}, suspended: ${isSuspended}, currentGroupId: ${currentGroupId}`);
+  console.log(`[AutoGrouperWorker] ag_enabled is: ${ag_enabled}`);
+  
+  if (!ag_enabled || !url) return;
+
+  // Skip suspended tabs when the user has opted out of including them.
+  if (isSuspended && ag_excludeSuspended) {
+    console.log(`[AutoGrouperWorker] Skipping suspended tab ${tabId} (excludeSuspended=true)`);
+    return;
+  }
+  
+  // Find matching rule — url is already the decoded real URL, so regex patterns
+  // like *://*.github.com/* will correctly match suspended github tabs.
+  let matchedRule = null;
+  for (const rule of ag_compiledRules) {
+    let isMatch = rule.compiledRegexes && rule.compiledRegexes.some(regex => regex.test(url));
+    if (!isMatch && rule.roughMatchers && rule.roughMatchers.length > 0) {
+      // For rough matching pass a tab-like object with the decoded URL so
+      // hostname/href targets resolve correctly for suspended tabs.
+      const tabForMatch = isSuspended ? { ...tab, url } : tab;
+      isMatch = rule.roughMatchers.some(p => evaluateRoughMatch(p, tabForMatch));
+    }
+    if (isMatch) {
+      matchedRule = rule;
+      break;
+    }
+  }
+
+  console.log(`[AutoGrouperWorker] matchedRule:`, matchedRule);
+
+  // If tab is in a group but no longer matches a rule, and the group belongs to a STRICT rule...
+  if (!matchedRule && currentGroupId > 0) {
+    console.log(`[AutoGrouperWorker] No match found, but tab is in group ${currentGroupId}. Checking strict mode.`);
+    try {
+      const group = await chrome.tabGroups.get(currentGroupId);
+      const groupRule = ag_rules.find(r => r.groupName === group.title && r.groupColor === group.color);
+      if (groupRule && groupRule.strict) {
+        console.log(`[AutoGrouperWorker] Strict mode active, ungrouping tab ${tabId}.`);
+        await chrome.tabs.ungroup(tabId);
+      }
+    } catch (e) {
+      // Group might not exist anymore
+    }
+    return;
+  }
+
+  // If we found a matching rule, ensure it's in the correct group
+  if (matchedRule) {
+    const ruleId = matchedRule.id;
+    const title = matchedRule.groupName;
+    const color = matchedRule.groupColor;
+    
+    // Check if it's already in the *right* group
+    if (currentGroupId > 0) {
+      try {
+        const group = await chrome.tabGroups.get(currentGroupId);
+        if (group.title === title && group.color === color) {
+            console.log(`[AutoGrouperWorker] Tab is already in the correct group (${currentGroupId}).`);
+            // Already in right group.
+            return;
+        }
+      } catch (e) {}
+    }
+
+    console.log(`[AutoGrouperWorker] Tab needs to be grouped. Rule: ${title} (${color}). Merge: ${matchedRule.merge}`);
+
+    // Need to group the tab
+    const trackerKey = matchedRule.merge ? `merged_${ruleId}` : `${windowId}_${ruleId}`;
+
+    // Wait for any in-flight group creation for this rule
+    if (groupCreationTracker.has(trackerKey)) {
+        try {
+            const existingGroupId = await groupCreationTracker.get(trackerKey);
+            await chrome.tabs.group({ tabIds: [tabId], groupId: existingGroupId });
+            return;
+        } catch (e) {}
+    }
+
+    // Start a new group creation promise
+    const groupPromise = (async () => {
+        // Query existing groups
+        const queryParams = { title, color };
+        if (!matchedRule.merge) {
+            queryParams.windowId = windowId;
+        }
+        
+        const existingGroups = await chrome.tabGroups.query(queryParams);
+        let targetGroupId;
+
+        if (existingGroups.length > 0) {
+            targetGroupId = existingGroups[0].id;
+            await chrome.tabs.group({ tabIds: [tabId], groupId: targetGroupId });
+        } else {
+            // Create new group
+            // We group it into the tab's current window even if merge is true, 
+            // since this will be the first group.
+            targetGroupId = await chrome.tabs.group({ tabIds: [tabId], createProperties: { windowId } });
+            await chrome.tabGroups.update(targetGroupId, { title, color });
+        }
+        return targetGroupId;
+    })();
+
+    groupCreationTracker.set(trackerKey, groupPromise);
+    try {
+        await groupPromise;
+    } finally {
+        // Clean up the tracker after a short delay to batch any immediate concurrent navigations
+        setTimeout(() => {
+            if (groupCreationTracker.get(trackerKey) === groupPromise) {
+                groupCreationTracker.delete(trackerKey);
+            }
+        }, 100);
+    }
+  }
+}
+
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  console.log(`[AutoGrouperWorker] tabs.onUpdated fired for tabId: ${tabId}, changeInfo:`, changeInfo);
+  if (changeInfo.url || changeInfo.title) {
+    processTab(tab);
+  }
+});
+
+chrome.tabs.onCreated.addListener((tab) => {
+  console.log(`[AutoGrouperWorker] tabs.onCreated fired for tabId: ${tab.id}, url: ${tab.url || tab.pendingUrl}`);
+  const url = tab.url || tab.pendingUrl;
+  if (url && url !== "chrome://newtab/") {
+    processTab(tab);
+  }
+});
+
+// Initialize on load
+initAutoGrouper();

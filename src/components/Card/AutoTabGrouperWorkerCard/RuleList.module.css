@@ -1,0 +1,129 @@
+.ruleRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 20px;
+    gap: 16px;
+    border-bottom: 1px solid var(--border);
+}
+.ruleRow:last-child {
+    border-bottom: none;
+}
+
+.ruleInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+}
+
+.ruleHeader {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.ruleColorBlob {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.ruleName {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.ruleTabCount {
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--text-muted);
+    margin-left: 2px;
+}
+
+.ruleActions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.iconBtn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.iconBtn:hover {
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+}
+.iconBtnDanger:hover {
+    color: var(--red);
+    background: var(--red-dim);
+}
+
+.settingDivider {
+    height: 1px;
+    background: var(--border);
+    margin: 0;
+    transition: background var(--transition);
+}
+
+.settingRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    gap: 24px;
+    transition: border-color var(--transition);
+}
+
+.btnSecondary {
+    padding: 6px 12px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text-primary);
+    font-size: 12px;
+    cursor: pointer;
+}
+.btnSecondary:hover {
+    background: var(--bg-elevated);
+}
+
+/* ─── Pattern Badges ─── */
+.rulePatternTags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 4px;
+}
+.patternTag {
+    display: inline-flex;
+    align-items: center;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-size: 10px;
+    font-family: var(--font-mono);
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+.regexBadge {
+    background: var(--accent-dim);
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 9px;
+    padding: 1px 4px;
+    border-radius: 3px;
+    margin-right: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}

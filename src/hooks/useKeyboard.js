@@ -81,8 +81,17 @@ export function useKeyboard() {
       // no picker active — global hotkeys (disabled in inputs)
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
 
+      // suppress triage hotkeys when a panel view (settings, listview, etc.) is open.
+      // undo is still allowed so users can reverse actions from any view.
+      const panelActive = document.body.hasAttribute('data-active-view');
+
       if (s.mode === Mode.TRIAGING) {
         if (!currentTab) return;
+        if (panelActive) {
+          // only allow undo while a panel is open
+          if (key === hk.undo) actions.undo();
+          return;
+        }
         if (key === hk.keep) actions.keep(currentTab);
         else if (key === hk.close) actions.close(currentTab);
         else if (key === hk.bookmark) pk.setActivePicker('bookmark');

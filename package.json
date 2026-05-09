@@ -1,7 +1,7 @@
 {
   "name": "Tabbit: Tab Closer & Organizer",
   "private": true,
-  "version": "0.1.2",
+  "version": "0.2",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -19,6 +19,8 @@
     "react": "^18.2.0",
     "react-confetti": "^6.4.0",
     "react-dom": "^18.2.0",
+    "react-selecto": "^1.26.3",
+    "tldts": "^7.0.30",
     "tone": "^15.1.22"
   },
   "devDependencies": {

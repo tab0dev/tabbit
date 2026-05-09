@@ -1,6 +1,7 @@
 import { createContext, useContext, useRef, useState, useCallback, useEffect } from 'react';
 import * as Tone from 'tone';
 import { MUSIC_CONFIG } from '../data/musicConfig';
+import { song1 } from '../data/songs/song1';
 
 const MusicContext = createContext(null);
 
@@ -81,7 +82,7 @@ export function MusicProvider({ children }) {
    * BPM is fixed — no ramping. Changing BPM would desync pre-recorded WAV loops.
    */
   const applyLayerCount = useCallback((count) => {
-    const clamped = Math.max(0, Math.min(MUSIC_CONFIG.layers.length - 1, count));
+    const clamped = Math.max(0, Math.min(song1.layers.length - 1, count));
 
     // Fire red flash when a layer actually drops during play
     if (clamped < layerCountRef.current) {
@@ -102,7 +103,7 @@ export function MusicProvider({ children }) {
     engine.players.forEach((player, i) => {
       if (!player) return;
       const isActive  = i <= clamped;
-      const targetVol = isActive ? MUSIC_CONFIG.layers[i].volume : -Infinity;
+      const targetVol = isActive ? song1.layers[i].volume : -Infinity;
       // Short crossfade avoids clicks
       player.volume.rampTo(targetVol, isActive ? 0.5 : 0.2);
     });
@@ -124,7 +125,7 @@ export function MusicProvider({ children }) {
       if (hitStreakRef.current >= MUSIC_CONFIG.hitsToAddLayer) {
         hitStreakRef.current = 0;
         const next = layerCountRef.current + 1;
-        if (next < MUSIC_CONFIG.layers.length) {
+        if (next < song1.layers.length) {
           applyLayerCount(next);
         }
         // Already at max layer — keep playing, nothing to unlock
@@ -170,22 +171,19 @@ export function MusicProvider({ children }) {
       // Create all players — each resolves independently so a single bad file
       // doesn't block the whole engine.
       const players = await Promise.all(
-        MUSIC_CONFIG.layers.map((layer, i) =>
+        song1.layers.map((layer, i) =>
           new Promise((resolve) => {
             try {
-              const player = new Tone.Player({
-                url:    layer.file,
-                loop:   true,
-                volume: i === 0 ? layer.volume : -Infinity,
+              const player = new Tone.Sampler({
+                urls: layer.urls,
+                baseUrl: layer.baseUrl || "",
                 onload: () => resolve(player),
                 onerror: (err) => {
                   console.warn(`[Music] Layer "${layer.id}" failed to load (will be silent):`, err);
                   resolve(null); // null = skip this slot gracefully
                 },
               }).toDestination();
-
-              // Sync to transport and schedule to start at position 0
-              player.sync().start(0);
+              player.volume.value = i === 0 ? layer.volume : -Infinity;
             } catch (err) {
               console.warn(`[Music] Could not create player for "${layer.id}":`, err);
               resolve(null);
@@ -193,6 +191,18 @@ export function MusicProvider({ children }) {
           })
         )
       );
+
+      // Create Parts to sequence the Samplers
+      const parts = players.map((player, i) => {
+        if (!player) return null;
+        const layer = song1.layers[i];
+        const part = new Tone.Part((time, value) => {
+          player.triggerAttackRelease(value.note, value.duration || "8n", time);
+        }, layer.pattern).start(0);
+        part.loop = true;
+        part.loopEnd = "2m"; // 2 bars
+        return part;
+      });
 
       // Bar loop — fires once per bar, starting after the first bar completes.
       // Uses Tone.getDraw() to bridge the audio clock → React render thread.
@@ -237,7 +247,7 @@ export function MusicProvider({ children }) {
       }, '4n');
       beatLoop.start(0); // phase-locked to beat 1 with no grace period
 
-      engineRef.current  = { players, barLoop, beatLoop };
+      engineRef.current  = { players, parts, barLoop, beatLoop };
       bootedRef.current  = true;
     } catch (err) {
       console.error('[Music] Engine boot failed:', err);
@@ -282,7 +292,7 @@ export function MusicProvider({ children }) {
       if (engine) {
         engine.players.forEach((player, i) => {
           if (!player) return;
-          const vol = i === 0 ? MUSIC_CONFIG.layers[0].volume : -Infinity;
+          const vol = i === 0 ? song1.layers[0].volume : -Infinity;
           player.volume.rampTo(vol, 0.3);
         });
       }
@@ -381,6 +391,7 @@ export function MusicProvider({ children }) {
       if (engine) {
         engine.barLoop?.dispose();
         engine.beatLoop?.dispose();
+        engine.parts?.forEach(p => p?.dispose());
         engine.players.forEach(p => p?.dispose());
         Tone.getTransport().stop();
       }

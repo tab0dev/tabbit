@@ -114,7 +114,7 @@ export function buildTabContext(tabs) {
         return {
             index,
             tabId: tab.id,
-            title: (tab.title || '').slice(0, 100),
+            title: (tab.title || '').slice(0, 65),
             domain: extractBaseDomain(tab.url) || '',
             path: safePath(tab.url),
             ageMinutes: ageMs != null ? Math.round(ageMs / 60000) : null,
@@ -150,26 +150,7 @@ function formatTabsForPrompt(tabCtx) {
 // Gemini Nano integration
 // ─────────────────────────────────────────────────────────────────────────────
 
-/** JSON Schema enforced on the model's output via responseConstraint. */
-const GROUP_SCHEMA = {
-    type: 'object',
-    properties: {
-        groups: {
-            type: 'array',
-            items: {
-                type: 'object',
-                properties: {
-                    name: { type: 'string', maxLength: 20 },
-                    tab_indices: { type: 'array', items: { type: 'integer' } },
-                },
-                required: ['name', 'tab_indices'],
-            },
-        },
-    },
-    required: ['groups'],
-};
-
-const SYSTEM_PROMPT = `You are a browser tab organizer. Group tabs into categories based on the user's distinct activities.
+const SYSTEM_PROMPT = `Group tabs into categories based on the user's distinct activities.
 
 INPUT FORMAT:
 [Index] | "[Title]" | [Domain] | [Path] | [Age] | [Opener]
@@ -187,20 +168,18 @@ EXAMPLE INPUT:
 2 | "10 Best Luxury Watches" | youtube.com | /watch | 1m ago | opened-from:1
 3 | "Apply - TechCorp" | techcorp.com | /careers | 1m ago | opened-from:0
 
-EXAMPLE RATIONALE (Internal Monologue):
-Tabs 1 and 2 are about watches. Tabs 0 and 3 are about jobs.
-
-EXAMPLE JSON OUTPUT REPRESENTATION:
-Groups: "Job Search" [0, 3], "Watches" [1, 2]`;
+EXAMPLE OUTPUT:
+Job Search: 0, 3
+Watches: 1, 2`;
 
 /**
  * Calls the Chrome Prompt API (Gemini Nano) to group tabs by intent.
  *
  * @param {chrome.tabs.Tab[]} tabs  — raw tab objects (must have id, title, url, etc.)
- * @param {{ signal?: AbortSignal }} options
+ * @param {{ signal?: AbortSignal, onPhaseChange?: (phase: string) => void }} options
  * @returns {Promise<Array<{ name: string, tabs: chrome.tabs.Tab[] }>>}
  */
-export async function suggestGroups(tabs, { signal } = {}) {
+export async function suggestGroups(tabs, { signal, onPhaseChange } = {}) {
     const tabCtx = buildTabContext(tabs);
     const tabLines = formatTabsForPrompt(tabCtx);
 
@@ -230,13 +209,16 @@ export async function suggestGroups(tabs, { signal } = {}) {
         // This is where Chrome loads Gemini Nano into GPU/CPU memory.
         // The signal is passed so Chrome can abort internally if needed.
         console.log('[Tabbit AI] Creating session…');
+        onPhaseChange?.('initializing');
+        const t0 = performance.now();
         session = await LanguageModel.create({
             initialPrompts: [{ role: 'system', content: SYSTEM_PROMPT }],
             expectedInputs: [{ type: 'text', languages: ['en'] }],
             expectedOutputs: [{ type: 'text', languages: ['en'] }],
             signal,
         });
-        console.log('[Tabbit AI] Session ready — starting inference…');
+        const t1 = performance.now();
+        console.log(`[Tabbit AI] Session ready in ${(t1 - t0).toFixed(0)}ms — starting inference…`);
 
         // Safety valve: if the signal fired in the narrow synchronous window
         // between create() resolving and the await resuming, bail immediately.
@@ -246,20 +228,47 @@ export async function suggestGroups(tabs, { signal } = {}) {
         }
 
         // ── Inference ─────────────────────────────────────────────────────────
+        onPhaseChange?.('inferencing');
         const promptText = `Group these ${tabs.length} browser tabs by intent. Each tab index (0-${tabs.length - 1}) must appear in exactly one group.\n\n${tabLines}`;
 
-        const result = await session.prompt(promptText, {
-            responseConstraint: GROUP_SCHEMA,
-            signal,
-        });
+        const t2 = performance.now();
+        const result = await session.prompt(promptText, { signal });
+        const t3 = performance.now();
+        console.log(`[Tabbit AI] Inference completed in ${(t3 - t2).toFixed(0)}ms`);
+        console.log(`[Tabbit AI] Raw Inference Result:\n------------------\n${result}\n------------------`);
 
-        const parsed = JSON.parse(result);
+        // ── Parsing: Robust Line-by-Line ──────────────────────────────────────
+        onPhaseChange?.('parsing');
+        const parsedGroups = [];
+        const lines = result.split('\n');
+        
+        for (const line of lines) {
+            const colonIdx = line.indexOf(':');
+            if (colonIdx > 0) {
+                // Strip leading/trailing spaces, markdown bullets (- or *), and bold asterisks
+                let name = line.substring(0, colonIdx).replace(/^[-*\s]+|[-*\s]+$/g, '');
+                
+                // If the name is wrapped in quotes, strip them
+                name = name.replace(/^["']|["']$/g, '').trim();
 
-        // ── Post-processing: deduplicate + catch orphans ──────────────────────
-        // Each tab goes to the FIRST group that claims it. Subsequent
-        // claims are silently dropped, guaranteeing no duplicates.
+                const indicesPart = line.substring(colonIdx + 1);
+                
+                // Extract all continuous sequences of digits
+                const indices = [];
+                const numRegex = /\d+/g;
+                let m;
+                while ((m = numRegex.exec(indicesPart)) !== null) {
+                    indices.push(parseInt(m[0], 10));
+                }
+
+                if (name && indices.length > 0) {
+                    parsedGroups.push({ name, tab_indices: indices });
+                }
+            }
+        }
+
         const claimed = new Set();
-        const deduped = parsed.groups
+        const deduped = parsedGroups
             .map(g => {
                 const uniqueIndices = (g.tab_indices || [])
                     .filter(i => i >= 0 && i < tabs.length && !claimed.has(i));

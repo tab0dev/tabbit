@@ -48,14 +48,28 @@ export default function TriageDashboard() {
     }
   };
 
+  // Sync activeView to a body data attribute so useKeyboard can detect
+  // when a panel view is open and suppress triage hotkeys.
+  useEffect(() => {
+    if (activeView !== 'default') {
+      document.body.setAttribute('data-active-view', activeView);
+    } else {
+      document.body.removeAttribute('data-active-view');
+    }
+    return () => document.body.removeAttribute('data-active-view');
+  }, [activeView]);
+
   // reset view to 'default' only when a tab is actually processed
+  // — but not while the list view is open (it handles batch operations)
   const prevIndexRef = useRef(state.currentIndex);
   useEffect(() => {
     if (state.currentIndex !== prevIndexRef.current) {
       prevIndexRef.current = state.currentIndex;
-      setActiveView('default');
+      if (activeView !== 'listview') {
+        setActiveView('default');
+      }
     }
-  }, [state.currentIndex]);
+  }, [state.currentIndex, activeView]);
 
   const handleDismissDebuggerWarning = () => {
     setIsDebuggerWarningDismissed(true);
@@ -105,6 +119,7 @@ export default function TriageDashboard() {
           isActive={activePicker === 'group'}
           onDeactivate={() => setActivePicker(null)}
           onAutoGroup={() => { setActivePicker(null); setShowAutoGroupWizard(true); }}
+          onAutoGrouper={() => { setActivePicker(null); handleNavigate('autotabgrouperworker'); }}
         />
       </div>
       <div className={styles.hotkeys}>

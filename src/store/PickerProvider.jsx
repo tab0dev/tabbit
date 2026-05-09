@@ -8,6 +8,7 @@ const PickerContext = createContext(null);
 
 export function PickerProvider({ children }) {
   const [activePicker, setActivePicker] = useState(null); // null | 'bookmark' | 'group'
+  const [batchTarget, setBatchTarget] = useState(null);   // null | { tabs: Tab[] }
 
   // event listeners registered by each picker panel.
   // keyed by pickerType → { onNavigate, onConfirm, onDeactivate }
@@ -40,6 +41,7 @@ export function PickerProvider({ children }) {
     if (!type) return;
     listenersRef.current[type]?.onDeactivate?.();
     setActivePicker(null);
+    setBatchTarget(null);
   }, [activePicker]);
 
   return (
@@ -50,6 +52,8 @@ export function PickerProvider({ children }) {
       navigatePicker,
       confirmPicker,
       deactivatePicker,
+      batchTarget,
+      setBatchTarget,
     }}>
       {children}
     </PickerContext.Provider>
