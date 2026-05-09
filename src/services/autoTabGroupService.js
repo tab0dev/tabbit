@@ -1,5 +1,5 @@
-import { extractRegistrableDomain, extractRootDomain, extractSubdomainLabel, extractBaseDomain } from '../utils/domainUtils';
-import { isDomainSplit } from '../utils/domainPreferences';
+import { extractRegistrableDomain, extractRootDomain, extractSubdomainLabel, extractBaseDomain } from '../utils/domainUtils.js';
+import { isDomainSplit } from '../utils/domainPreferences.js';
 
 /**
  * autoTabGroupService.js

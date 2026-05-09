@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { isAiAvailable, suggestGroups, downloadModel } from '../../../services/aiGroupingService';
+import '../../../services/aiEvaluationSuite';
 
 // hook to manage AI model availability, download progress, and AI-driven
 // group generation.
@@ -11,6 +12,7 @@ export function useWizardAi({ activeTabs, buildGroups, domainPrefs, setGroups, s
     const [downloadProgress, setDownloadProgress] = useState(0);
     const [showAiModal, setShowAiModal] = useState(false);
     const [isModelPhysicallyAvailable, setIsModelPhysicallyAvailable] = useState(false);
+    const [aiPhase, setAiPhase] = useState('idle'); // 'idle' | 'initializing' | 'inferencing' | 'parsing'
 
     // check ai availability on mount
     useEffect(() => {
@@ -70,8 +72,12 @@ export function useWizardAi({ activeTabs, buildGroups, domainPrefs, setGroups, s
         if (groupMode === 'ai' && (aiStatus === 'available' || aiStatus === 'generating')) {
             const controller = new AbortController();
             setAiStatus('generating');
+            setAiPhase('initializing');
 
-            suggestGroups(activeTabs, { signal: controller.signal })
+            suggestGroups(activeTabs, { 
+                signal: controller.signal,
+                onPhaseChange: setAiPhase 
+            })
                 .then(aiGroups => {
                     const seeded = aiGroups.map((g, i) => ({
                         id: `ai-${i}-${Date.now()}`,
@@ -96,6 +102,9 @@ export function useWizardAi({ activeTabs, buildGroups, domainPrefs, setGroups, s
                     setAiStatus('error');
                     setGroupMode('brand');
                     setGroups(buildGroups(domainPrefs));
+                })
+                .finally(() => {
+                    setAiPhase('idle');
                 });
 
             return () => controller.abort();
@@ -110,5 +119,6 @@ export function useWizardAi({ activeTabs, buildGroups, domainPrefs, setGroups, s
         downloadProgress,
         showAiModal, setShowAiModal,
         isModelPhysicallyAvailable,
+        aiPhase, setAiPhase,
     };
 }

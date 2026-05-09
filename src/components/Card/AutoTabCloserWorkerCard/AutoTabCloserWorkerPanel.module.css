@@ -94,34 +94,6 @@
     opacity: 0.7;
 }
 
-.thumbnailContainer {
-    height: 90px;
-    width: 100%;
-    border-radius: 4px;
-    background: color-mix(in srgb, var(--bg-surface) 60%, transparent);
-    overflow: hidden;
-    margin-top: 4px;
-    border: 1px solid color-mix(in srgb, var(--border) 50%, transparent);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-
-.thumbnailLoading {
-    font-size: 10px;
-    color: var(--text-muted);
-    text-align: center;
-}
-
-.thumbnailImg {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: top;
-    display: block;
-}
-
 .duplicateBadge {
     position: absolute;
     top: -6px;
@@ -502,6 +474,24 @@
     color: var(--text-muted);
     opacity: 0.4;
     margin-bottom: 4px;
+}
+
+.emptySubtext {
+    font-size: 11px;
+    opacity: 0.7;
+}
+
+.closerThumbnailOverride {
+    height: 90px;
+    border-radius: 4px;
+    background: color-mix(in srgb, var(--bg-surface) 60%, transparent);
+    margin-top: 4px;
+    border: 1px solid color-mix(in srgb, var(--border) 50%, transparent);
+    flex-shrink: 0;
+}
+
+.closerThumbnailOverride img {
+    object-position: top;
 }
 
 .emptySubtext {

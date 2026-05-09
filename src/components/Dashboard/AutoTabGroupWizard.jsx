@@ -88,7 +88,7 @@ function AutoTabGroupWizardInner({ onClose }) {
                 {/* header */}
                 <div className={styles.header}>
                     <div className={styles.title} ref={registerTarget('wiz-header')}>
-                        <MagicWand size={14} weight="bold" /> Auto Tab Group
+                        <MagicWand size={14} weight="bold" /> Tab Grouper
                         <InfoIconWithTooltip placement="right">Use AI or domain rules to automatically organize your tabs into logical groups.</InfoIconWithTooltip>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -147,7 +147,12 @@ function AutoTabGroupWizardInner({ onClose }) {
                         <div className={styles.aiIndeterminateContainer}>
                             <div className={styles.aiIndeterminateShimmer} />
                         </div>
-                        <span className={styles.aiOverlayText}>AI is analyzing tabs… this may take a few seconds.</span>
+                        <span className={styles.aiOverlayText}>
+                            {ai.aiPhase === 'initializing' && 'Loading AI session into memory…'}
+                            {ai.aiPhase === 'inferencing' && 'AI is analyzing tabs…'}
+                            {ai.aiPhase === 'parsing' && 'Organizing results…'}
+                            {(!ai.aiPhase || ai.aiPhase === 'idle') && 'AI is analyzing tabs…'}
+                        </span>
                         <button
                             className={styles.aiCancelBtn}
                             onClick={() => ai.setGroupMode('brand')}

@@ -1,0 +1,368 @@
+.addForm {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background: color-mix(in srgb, var(--bg-surface) 50%, transparent);
+}
+
+.formRow {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.formRowHorizontal {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.formLabel {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.textInput {
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+    font-size: 13px;
+}
+.textInput:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+
+.formActions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.btnSecondary {
+    padding: 6px 12px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text-primary);
+    font-size: 12px;
+    cursor: pointer;
+}
+.btnSecondary:hover {
+    background: var(--bg-elevated);
+}
+
+.btnPrimary {
+    padding: 6px 16px;
+    background: var(--accent);
+    border: 1px solid transparent;
+    border-radius: 6px;
+    color: #fff;
+    font-weight: 600;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 100ms ease;
+}
+.btnPrimary:hover:not(:disabled) {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+}
+.btnPrimary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.ruleToggleLabel {
+    font-size: 12px;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    user-select: none;
+}
+.ruleToggleLabel input {
+    margin: 0;
+    cursor: pointer;
+    accent-color: var(--accent);
+}
+
+/* ─── Pattern Rows ─── */
+.patternList {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.patternRow {
+    display: flex;
+    align-items: stretch;
+    background: transparent;
+    padding: 0;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    transition: border-color var(--transition);
+}
+.patternRow:focus-within {
+    border-color: var(--accent);
+}
+.patternInputWrapper {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    min-width: 0;
+    background: var(--bg-elevated);
+    padding: 4px 0 4px 10px;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+}
+.patternInput {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    font-size: 13px;
+    font-family: var(--font-mono);
+    min-width: 0;
+}
+.patternInput:focus {
+    outline: none;
+}
+.validationIcon {
+    display: flex;
+    align-items: center;
+    padding: 0 12px 0 6px;
+}
+.patternActions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 8px 6px 12px;
+    border-left: 1px solid var(--border);
+    background: color-mix(in srgb, var(--bg-elevated) 40%, transparent);
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
+
+.roughInputWrapper {
+    display: flex;
+    flex: 1;
+    gap: 8px;
+    align-items: center;
+    padding-right: 8px;
+}
+.roughSelect {
+    width: 140px;
+}
+
+.patternSelect {
+    min-width: unset !important;
+    width: 140px;
+}
+
+/* ─── Color Picker ─── */
+.colorPickerContainer {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+    padding: 4px 0;
+}
+.colorSwatch {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    cursor: pointer;
+    padding: 0;
+    transition: transform 100ms ease;
+    outline: none;
+}
+.colorSwatch:hover {
+    transform: scale(1.15);
+}
+.colorSwatchSelected {
+    border-color: var(--text-primary);
+    box-shadow: 0 0 0 2px var(--bg-elevated) inset;
+    transform: scale(1.1);
+}
+
+/* ─── Shared UI parts from main CSS ─── */
+.iconBtn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.iconBtn:hover {
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+}
+.iconBtnDanger:hover {
+    color: var(--red);
+    background: var(--red-dim);
+}
+
+.enableToggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.toggleInput {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggleTrack {
+    position: relative;
+    width: 34px;
+    height: 19px;
+    border-radius: 10px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    transition:
+        background 180ms ease,
+        border-color 180ms ease;
+    flex-shrink: 0;
+}
+
+.toggleTrackOn {
+    background: var(--accent);
+    border-color: var(--accent);
+}
+
+.toggleThumb {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+    transition: transform 180ms ease;
+}
+
+.toggleTrackOn .toggleThumb {
+    transform: translateX(15px);
+}
+
+/* ─── Mode Toggles ─── */
+.modeCardsContainer {
+    display: flex;
+    flex-direction: row;
+    gap: 16px;
+    margin-bottom: 0;
+}
+.modeCard {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex: 1;
+    padding: 8px 12px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    transition: border-color var(--transition);
+}
+.modeCardInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+.modeCardTitle {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+}
+.modeCardDesc {
+    font-size: 11px;
+    color: var(--text-secondary);
+}
+
+/* ─── Conflict Validation Icon ─── */
+.validationIconConflict {
+    cursor: pointer;
+    border-radius: 4px;
+    transition: opacity 120ms ease;
+    outline: none;
+    display: flex;
+    align-items: center;
+}
+.validationIconConflict:hover,
+.validationIconConflict:focus-visible {
+    opacity: 0.7;
+}
+
+/* ─── Conflict Tooltip Content ─── */
+.conflictTooltip {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 190px;
+}
+.conflictTooltipHeader {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+.conflictTooltipBody {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin: 0;
+}
+.conflictTooltipList {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+.conflictTooltipItem {
+    font-size: 11px;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 195px;
+    padding-left: 8px;
+    position: relative;
+}
+.conflictTooltipItem::before {
+    content: '•';
+    position: absolute;
+    left: 0;
+    color: var(--warning-color, #f59e0b);
+}
+.conflictTooltipMore {
+    font-size: 11px;
+    color: var(--text-muted);
+    padding-left: 8px;
+}
+.conflictTooltipHint {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin: 0;
+    border-top: 1px solid var(--border);
+    padding-top: 4px;
+}

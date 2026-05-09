@@ -1,12 +1,15 @@
 import React from 'react';
 import styles from './Card.module.css';
 import SettingsCard from './SettingsCard';
+import MusicDevTrackerCard from './MusicDevTrackerCard/MusicDevTrackerCard';
 import AutoCloseCard from './AutoCloseCard/AutoCloseCard';
 import AutoTabCloserWorkerPanel from './AutoTabCloserWorkerCard/AutoTabCloserWorkerPanel';
 import AutoTabGroupWizard from '../Dashboard/AutoTabGroupWizard';
+import AutoTabGrouperWorkerPanel from './AutoTabGrouperWorkerCard/AutoTabGrouperWorkerPanel';
 import TabCard from './TabCard';
 import TabSorterCard from './TabSorterCard/TabSorterCard';
 import WatchLaterCard from './WatchLaterCard/WatchLaterCard';
+import ListView from './ListView/ListView';
 
 export default function CardViewSwitcher({
   activeView,
@@ -24,11 +27,15 @@ export default function CardViewSwitcher({
   stampScale
 }) {
   if (isTop && activeView === 'settings') {
-    return <SettingsCard />;
+    return <SettingsCard handleNavigate={handleNavigate} />;
   }
 
   if (isTop && activeView === 'autoclose') {
     return <AutoCloseCard onClose={() => handleNavigate('default')} />;
+  }
+
+  if (isTop && activeView === 'musicdev') {
+    return <MusicDevTrackerCard onClose={() => handleNavigate('default')} />;
   }
 
   if (isTop && activeView === 'autocloserworker') {
@@ -39,8 +46,16 @@ export default function CardViewSwitcher({
     return <AutoTabGroupWizard onClose={() => handleNavigate('default')} />;
   }
 
+  if (isTop && activeView === 'autotabgrouperworker') {
+    return <AutoTabGrouperWorkerPanel onClose={() => handleNavigate('default')} />;
+  }
+
   if (isTop && activeView === 'tabsorter') {
     return <TabSorterCard />;
+  }
+
+  if (isTop && activeView === 'listview') {
+    return <ListView onClose={() => handleNavigate('default')} />;
   }
 
   if (isTop && activeView === 'watchlater') {

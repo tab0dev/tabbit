@@ -323,6 +323,14 @@
   flex: 1;
 }
 
+.footerDivider {
+  width: 1px;
+  height: 14px;
+  background: var(--text-secondary);
+  opacity: 0.3;
+  flex-shrink: 0;
+}
+
 .settingsButton {
   background: transparent;
   border: none;
@@ -528,11 +536,14 @@
   --hover-bg: color-mix(in srgb, #d93025 15%, transparent);
 }
 
-.menuItemLightning {
+.menuItemLightning,
+.menuItemMagnet {
   --hover-color: #fdd663;
   --hover-bg: color-mix(in srgb, #fdd663 15%, transparent);
 }
-[data-theme="light"] .menuItemLightning {
+
+[data-theme="light"] .menuItemLightning,
+[data-theme="light"] .menuItemMagnet {
   --hover-color: #e37400;
   --hover-bg: color-mix(in srgb, #e37400 15%, transparent);
 }

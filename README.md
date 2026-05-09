@@ -1,22 +1,20 @@
 <div align="center">
 
-<br />
-
 <img src="https://raw.githubusercontent.com/tab0dev/tabbit/main/public/icons/icon128.png" width="42" />
 <img src="https://raw.githubusercontent.com/tab0dev/tabbit/main/public/brand-title.svg" height="42" />
 
 <span>close your tabs!!</span>
-
-[![Chrome Web Store](https://img.shields.io/badge/Chrome%20Web%20Store-v0.1.1-f8b50a?logo=googlechrome&logoColor=white&style=flat-square)](https://chromewebstore.google.com/detail/tabbit-tab-closer-organiz/calbmnbhppoplenhgpfejepklainehko)
-
+<br />
 <br />
 
 Tabbit is a Chrome extension that helps you triage your open tabs, one tab at a time. Use keyboard shortcuts or swipe on tab previews to decide if you want to keep, close, bookmark, or group the tab. Built with React, Chrome APIs, and carrots.
 
-Install on the Google Chrome Web Store: 
+[![Chrome Web Store](https://img.shields.io/badge/Chrome%20Web%20Store-v0.2-f8b50a?logo=googlechrome&logoColor=white&style=flat-square)](https://chromewebstore.google.com/detail/tabbit-tab-closer-organiz/calbmnbhppoplenhgpfejepklainehko)
+
+Install it on the Google Chrome Web store: 
 https://chromewebstore.google.com/detail/tabbit-tab-closer-organiz/calbmnbhppoplenhgpfejepklainehko
 
-<br />
+
 
 </div>
 
@@ -32,6 +30,7 @@ A messy browser sucks. Tabbit turns your open tabs into a deck of cards so you c
 | **Group** | `↓` | Move into a Chrome tab group |
 
 When the queue hits zero — confetti. Every action is fully undoable.
+
 
 ## 📚 Technical Documentation
 
@@ -73,13 +72,6 @@ Tabbit is a simple toolkit to help you make decisions fast and get your browser 
 - **Generative Music**: A built-in rhythm game that evolves the music as you work
 - **Inbox Zero**: Reach the end of your queue and celebrate with confetti
 
-## Lots of functionality
-
-This extension has a lot of features to handle distinct tab management use cases in a single package, and as such, stands on the shoulders of other great extensions. It has the exact same (or better) functionality than these popular extensions:
-- [Simple Tab Sorter](https://chromewebstore.google.com/detail/simple-tab-sorter/cgfpgnepljlgenjclbekbjdlgcodfmjp) for on-demand sorting tabs
-- [Auto-Group Tabs](https://chromewebstore.google.com/detail/auto-group-tabs/danncghahncanipdoajmakdbeaophenb) and [Tab Groups Extension](https://chromewebstore.google.com/detail/tab-groups-extension/nplimhmoanghlebhdiboeellhgmgommi) for auto grouping new tabs on creation
-
-Much love to their creators 🥕
 
 ## 🔒 Permissions
 

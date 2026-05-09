@@ -1,0 +1,20 @@
+.thumbnailContainer {
+  width: 100%;
+  height: 80px;
+  background-color: var(--bg-elevated);
+  border-radius: 6px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 8px;
+}
+.thumbnailLoading {
+  font-size: 11px;
+  color: var(--text-tertiary, var(--text-muted));
+}
+.thumbnailImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}

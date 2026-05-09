@@ -6,6 +6,7 @@ import InlineAddRow from '../Shared/InlineAddRow';
 import { useTriage } from '../../store/TriageProvider';
 import { useTriageActions } from '../../hooks/useTriageActions';
 import { usePickerPanel } from '../../hooks/usePickerPanel';
+import { usePicker } from '../../store/PickerProvider';
 import styles from './Overlay.module.css';
 
 // uFuzzy instance — intraMode:1 allows one intra-word gap between query chars
@@ -29,6 +30,7 @@ function flattenVisible(nodes, expandedIds, depth = 0) {
 export default function BookmarkPickerPanel({ isActive, onDeactivate }) {
     const { state, dispatch } = useTriage();
     const { bookmark: bookmarkAction } = useTriageActions();
+    const { batchTarget, setBatchTarget } = usePicker();
     const currentTab = state.tabs[state.currentIndex];
 
     const [selectedId, setSelectedId] = useState(null);
@@ -68,7 +70,12 @@ export default function BookmarkPickerPanel({ isActive, onDeactivate }) {
         matchFn,
         selectedId, // Trigger auto-scroll when selectedId changes
         onConfirmItem: async (item) => {
-            if (currentTab) bookmarkAction(currentTab, item.id);
+            if (batchTarget?.tabs?.length) {
+                batchTarget.tabs.forEach(tab => bookmarkAction(tab, item.id, true));
+                setBatchTarget(null);
+            } else if (currentTab) {
+                bookmarkAction(currentTab, item.id);
+            }
         },
         customNavigate: (direction, currentFlatItems, currentIdx, setIdx) => {
             if (query.length > 0) {
@@ -205,7 +212,7 @@ export default function BookmarkPickerPanel({ isActive, onDeactivate }) {
                                 Save
                             </button>
                         )}
-                        <button
+                        {/* <button
                             ref={dotsRef}
                             className={styles.pickerIconBtn}
                             onClick={() => chrome?.tabs?.create({ url: 'chrome://bookmarks' })}
@@ -217,7 +224,7 @@ export default function BookmarkPickerPanel({ isActive, onDeactivate }) {
                         </button>
                         <Tooltip anchorRef={dotsRef} visible={dotsHovered} placement="right">
                             Open Chrome Bookmarks Manager
-                        </Tooltip>
+                        </Tooltip> */}
                     </div>
                 </div>
 

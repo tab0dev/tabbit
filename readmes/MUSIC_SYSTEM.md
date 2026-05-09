@@ -6,38 +6,28 @@ Tabbit has a background music system that reacts to user triage activity. It sta
 quiet (just a kick drum) and progressively layers in additional instruments as the
 user works through their tabs. Stop working → layers fade back out.
 
+**New Architecture:** The music system is a **real-time dynamic sequencer** built on `Tone.js`. Rather than playing static pre-rendered `.wav` files, the engine loads `Tone.Sampler` instruments (using simple single-note samples) and sequences them live using `Tone.Part` according to a JSON song definition.
+
 The system has **four completely separate concerns** that must never be confused:
 
 | Concern | Where | When |
 |---------|-------|------|
-| **Audio synthesis** — generating the actual sound files | `scripts/gen-audio.cjs` | Offline (developer runs this) |
-| **Audio playback engine** — playing and mixing the files | `src/store/MusicProvider.jsx` | Runtime (in the browser/extension) |
+| **Song Configuration** — JSON definitions of notes, layers, and sample URLs | `src/data/songs/song1.js` | Dev-time (editable via Music Dev Studio) |
+| **Audio playback engine** — Sampler loading, mixing, and real-time sequencing | `src/store/MusicProvider.jsx` | Runtime (in the browser/extension) |
 | **Beat indicator UI** — visual feedback dot in the monitor | `src/components/Monitor/RetroMonitor.jsx` | Runtime (reads from MusicProvider context) |
 | **Rhythm game UI** — side-scroller game shown when music is on | `src/components/Monitor/RetroMonitorMusicGame.jsx` | Runtime (reads from MusicProvider context) |
-| **Shared configuration** | `src/data/musicConfig.js` | Both (runtime reads it; generator must stay manually aligned) |
+| **Shared game configuration** | `src/data/musicConfig.js` | Runtime (defines progression mechanics and game physics) |
 
 ---
 
 ## File Map
 
 ```
-scripts/
-  gen-audio.cjs           ← Node.js step-sequencer that writes WAV files
-                            Run with: pnpm run gen-audio
-
-public/
-  audio/
-    kick_loop.wav         ← Layer 0: always playing when music is on
-    hihat_loop.wav        ← Layer 1: earned after 1st hit bar
-    snare_loop.wav        ← Layer 2
-    bass_loop.wav         ← Layer 3
-    melody_loop.wav       ← Layer 4
-    lead_loop.wav         ← Layer 5
-    vocal_loop.wav        ← Layer 6: final, sparsest layer
-
 src/
   data/
-    musicConfig.js        ← Runtime config: BPM, layers, progression rules, game physics
+    songs/
+      song1.js            ← JSON-based step-sequencer data
+    musicConfig.js        ← Runtime config: progression rules, game physics
   store/
     MusicProvider.jsx     ← React context + Tone.js engine + beat/action signal state
   hooks/
@@ -47,6 +37,7 @@ src/
   components/Card/
     CardFooter.jsx        ← SpeakerHigh/SpeakerSlash toggle in the footer bar
     SettingsCard.jsx      ← Secondary toggle in settings panel
+    MusicDevTrackerCard/  ← Developer UI for visually editing the step sequencer
   components/Monitor/
     RetroMonitor.jsx      ← Standard bunny monitor with beat indicator dot
     RetroMonitorMusicGame.jsx ← Rhythm game monitor (shown when music is on)
@@ -58,25 +49,14 @@ src/
 
 ---
 
-## Part 1: Audio Generation (`gen-audio.cjs`)
+## Part 1: The Song Data (`song1.js`) & Music Dev Studio
 
-### The fundamental constraint: everything must be grid-locked
+The core musical composition is defined in a standard JSON format inside `src/data/songs/song1.js`. 
+*(Note: This replaces the old offline `gen-audio.cjs` script, but it preserves the exact same note structure and 7-layer sequence.)*
 
-All 7 WAV files are **2-bar loops at 72 BPM**. They must all be exactly the same
-length in samples so that Tone.js can loop them in phase. Any drift between files
-causes the instruments to progressively desync.
+### The Step Grid
 
-The generator uses an **integer 16th-note step sequencer** to guarantee this:
-
-```js
-const TOTAL_SAMPLES = TOTAL_STEPS * STEP;  // exact — no floating-point rounding
-```
-
-Every note's start position is `step * STEP` samples. Every note's duration is
-`len * STEP` samples. Because everything is integer multiples of `STEP`, every
-track's loop boundary lands on the exact same sample.
-
-### The step grid
+The song relies on a 16th-note 32-step grid (2 bars in 4/4 time):
 
 ```
 Steps: 0  1  2  3 | 4  5  6  7 | 8  9 10 11 |12 13 14 15 |16 17 18 19 |20 21 22 23 |24 25 26 27 |28 29 30 31
@@ -86,61 +66,51 @@ Bar:   [────────────────────────
 
 **Duration reference (in steps):**
 
-| Duration | Steps |
-|----------|-------|
-| Whole note | 16 |
-| Half note | 8 |
-| Dotted quarter | 6 |
-| Quarter note | 4 |
-| Dotted 8th | 3 |
-| 8th note | 2 |
-| 16th note | 1 |
+| Duration | Steps | Tone.js format |
+|----------|-------|----------------|
+| Whole note | 16 | "1m" |
+| Half note | 8 | "2n" |
+| Dotted quarter | 6 | "4n." |
+| Quarter note | 4 | "4n" |
+| Dotted 8th | 3 | "8n." |
+| 8th note | 2 | "8n" |
+| 16th note | 1 | "16n" |
 
 ### Current patterns (2-bar, A minor)
 
-| Layer | File | Pattern style |
+| Layer | Type | Pattern style |
 |-------|------|---------------|
-| Kick | `kick_loop.wav` | Steps 0, 8, 16, 24 (beats 1 & 3 each bar) |
-| Hi-hat | `hihat_loop.wav` | Every 2 steps (all 8ths), open hat at steps 6 & 22 |
-| Snare | `snare_loop.wav` | Steps 4, 12, 20, 28 (beats 2 & 4 each bar) |
-| Bass | `bass_loop.wav` | A2/G2/E2/C3 groove; see `BASS_PATTERN` |
-| Pad melody | `melody_loop.wav` | Gentle A minor pad; see `MELODY_PATTERN` |
-| Lead melody | `lead_loop.wav` | Saxophone-style; see `LEAD_PATTERN` |
-| Vocal | `vocal_loop.wav` | Short "ah" one-shots at steps 0 & 16 only |
+| Kick | Sampler | Steps 0, 8, 16, 24 (beats 1 & 3 each bar) |
+| Hi-hat | Sampler | Every 2 steps (all 8ths), open hat at steps 6 & 22 |
+| Snare | Sampler | Steps 4, 12, 20, 28 (beats 2 & 4 each bar) |
+| Bass | Sampler | A2/G2/E2/C3 groove |
+| Pad melody | Sampler | Gentle A minor pad |
+| Lead melody | Sampler | Saxophone-style |
+| Vocal | Sampler | Short "ah" one-shots at steps 0 & 16 only |
 
-### Timbre design
+### Music Dev Studio UI
 
-Each instrument uses additive synthesis (summed sine waves) with an ADSR envelope.
-Key design choices:
-
-- **Kick:** pitch-glide sweep (150 Hz → 50 Hz) + transient click
-- **Hi-hat:** bandpassed noise + two metallic sine partials (5200 Hz, 7000 Hz)
-- **Snare:** noise burst + drum body tone (185 Hz) + click
-- **Bass:** fundamental + 2nd/3rd harmonics, tanh soft-clip overdrive
-- **Pad:** two slightly-detuned sines + 2nd harmonic; slow attack (15ms)
-- **Lead:** warm overtone series (fx4 harmonics); saxophone/muted-trumpet feel; slow attack (20ms)
-- **Vocal:** short "ah" (2 steps ≈ 0.42s); breathy noise consonant + 3-harmonic vowel (A3, 220 Hz)
-
-### Adding a new layer
-
-1. Add a `generateXxx()` function in `gen-audio.cjs` using `renderNote()` + a pattern array
-2. Call `writeWav(path.join(outDir, 'xxx_loop.wav'), generateXxx())` in the Generate block
-3. Add an entry to `MUSIC_CONFIG.layers` in `musicConfig.js` (with matching file path)
-4. Run `pnpm run gen-audio`
-5. Done — the engine will automatically pick up the new layer
+Instead of editing `song1.js` by hand, Tabbit comes with an **in-browser Dev Studio**:
+1. Open the **Settings Panel** inside Tabbit.
+2. Under the "Fun" category, click **"Open"** on the **Music Dev Studio** setting.
+3. The Dev Studio will appear. It is a full 32-step sequencer UI that reads directly from `song1.js`.
+4. **Click and Drag** (or simply click) anywhere on the grid to "paint" or "erase" notes.
+5. Click **Play** to hear your loop update in real-time.
+6. Click the **Download** icon when you are happy with the loop. It will copy the new JSON to your clipboard. You can paste this directly into `song1.js` to save your work!
 
 ---
 
 ## Part 2: Runtime Config (`musicConfig.js`)
 
+While the music notes are in `song1.js`, the **game progression mechanics** remain in `musicConfig.js`:
+
 ```js
 export const MUSIC_CONFIG = {
   beatsPerBar: 4,         // time signature numerator
-  bpm: 72,                // FIXED — must match gen-audio.cjs BPM constant
+  bpm: 72,                // Runtime BPM — should match song1.js for consistency
   missesToLoseLayer: 3,   // bars of inactivity before dropping a layer
   hitsToAddLayer: 1,      // hit bars needed to earn the next layer
-  game: { ... },          // optional — game physics/tuning (see Part 5)
-  layers: [ ... ],        // ordered layer definitions (see file)
+  game: { ... },          // game physics/tuning (see Part 5)
 };
 ```
 
@@ -158,11 +128,12 @@ toggleMusic()
     │
     ├─ ON: bootEngine() [runs once ever]
     │       ├─ Tone.start()              ← unlocks Web Audio (must be in user gesture)
-    │       ├─ Create Tone.Player × 7   (loads WAV buffers via Promise.all)
-    │       ├─ Create Tone.Loop('1m')   ← bar clock, starts after 1st bar grace period
-    │       └─ Create Tone.Loop('4n')   ← beat clock, starts immediately at position 0
+    │       ├─ Create Tone.Sampler × 7   (loads sample URLs via Promise.all)
+    │       ├─ Create Tone.Part × 7      (sequences the JSON notes from song1.js)
+    │       ├─ Create Tone.Loop('1m')    ← bar clock, starts after 1st bar grace period
+    │       └─ Create Tone.Loop('4n')    ← beat clock, starts immediately at position 0
     │
-    ├─ ON: transport.start() → all players begin (layer 0 audible, rest at -∞ dB)
+    ├─ ON: transport.start() → sequencing begins (layer 0 audible, rest at -∞ dB)
     │
     └─ OFF: fade all volumes → setTimeout(500ms) → transport.stop()
 ```
@@ -196,10 +167,6 @@ Two-track pattern is used throughout:
 > drive the bunny jump (so every keypress has immediate visual feedback) and
 > `hitFlash` separately to mark obstacles as cleared and increment the score.
 
-The bar-tick function is re-assigned to `onBarTickRef.current` on every React render
-(not a `useCallback`). This means the Tone.Loop always calls the latest version
-without needing to be recreated when deps change.
-
 ### Beat-window hit detection
 
 `onTabAction()` is called by every triage action (keep / close / bookmark / group).
@@ -210,18 +177,6 @@ whether the action landed inside the beat window:
 HIT_WINDOW_AFTER_MS  = 280   ← user acted up to 280ms after a beat
 HIT_WINDOW_BEFORE_MS = 180   ← user acted within 180ms before the next beat
 BEAT_INTERVAL_MS     = (60 / bpm) * 1000   ← 833ms at 72 BPM
-```
-
-```js
-// Always fires (raw input pulse for the game):
-setActionFlash(true);  → clears after 100ms
-
-// Only fires if on-beat:
-const isOnBeat = sinceBeat < HIT_WINDOW_AFTER_MS || toNextBeat < HIT_WINDOW_BEFORE_MS;
-if (isOnBeat) {
-  hitThisBarRef.current = true;
-  setHitFlash(true);  → clears after 350ms
-}
 ```
 
 **Grace period:** if no beat has fired yet (`lastBeatWallTimeRef === null`, i.e., the
@@ -235,48 +190,24 @@ End of bar fires onBarTickRef.current():
   │   ├─ missStreak = 0
   │   ├─ hitStreak++
   │   └─ hitStreak >= hitsToAddLayer?
-  │       └─ applyLayerCount(current + 1)  ← fade in next layer
+  │       └─ applyLayerCount(current + 1)  ← ramp up next layer's volume
   └─ hitThisBarRef was false? (no on-beat action this bar)
       ├─ hitStreak = 0
       ├─ missStreak++
       ├─ → fires missFlash (yellow dot, 400ms)
       └─ missStreak >= missesToLoseLayer?
-          └─ applyLayerCount(current - 1)  ← fade out top layer + fires layerDownFlash (red, 500ms)
-                                             (never goes below 0 — kick always plays)
+          └─ applyLayerCount(current - 1)  ← ramp down top layer's volume
 ```
 
-### Thread bridging: Tone.getDraw()
+### Thread bridging: Tone.Draw
 
 Tone.js runs on the Web Audio API's high-precision scheduler thread. React runs on
-the main JS thread. `Tone.getDraw().schedule(callback, time)` queues the callback
+the main JS thread. `Tone.Draw.schedule(callback, time)` queues the callback
 to fire on the first animation frame that arrives at or after the audio event time.
-This is used for:
-
-- The bar loop → calls `onBarTickRef.current()` for progression logic
-- The beat loop → stamps `lastBeatWallTimeRef`, updates `beatNumber`, fires `beatFlash` and `barFlash`
-
-### Key correctness properties
-
-- `bootEngine()` only runs once (guarded by `bootedRef` + `bootingRef`)
-- `onTabAction` is fully stable (deps: `[]`) — uses refs for everything it reads
-- All flash timers are individually stored in refs and cleared on toggle-OFF and unmount
-- `beatIndexRef` and `lastBeatWallTimeRef` are reset on every toggle-ON so the beat
-  counter restarts from beat 1 cleanly
 
 ---
 
 ## Part 4: Beat Indicator UI (`RetroMonitor`)
-
-### Overview
-
-A small dot in the **left (bunny) panel of the `RetroMonitor`** pulses in sync with
-the audio transport. It is always phase-locked to the music — driven by the same
-`Tone.Loop('4n')` that stamps `lastBeatWallTimeRef` — not by `setInterval` or
-animation frames.
-
-The dot only renders when `musicEnabled` is true. When music is enabled, the
-bottom status bar shows `RetroMonitorMusicGame` instead (see Part 5). The beat dot
-is still used in any other monitor contexts.
 
 ### Visual states (CSS cascade, later rule wins)
 
@@ -290,84 +221,28 @@ is still used in any other monitor contexts.
 | 6 | Hit flash | `--monitor-dot-green` | 2.3× | On-beat tab action |
 | 7 (highest) | Layer-down flash | `--monitor-dot-red` | 2.6× | Layer dropped |
 
-### Theme accent colors (`--monitor-beat`)
-
-| Theme | Color |
-|-------|-------|
-| `gameboy` | `#3daa10` (bright green) |
-| `calc` | `#1a8878` (teal) |
-| `darkula` | `#a89be0` (lavender) |
-
 ---
 
 ## Part 5: Rhythm Game (`RetroMonitorMusicGame`) — V2
 
 ### Overview
 
-When music is enabled, the bottom status bar's "monitor" face shows
-`RetroMonitorMusicGame` instead of `RetroMonitor`. This is a DOM-based
-side-scrolling rhythm game rendered inside the same CRT shell.
+When music is enabled, the bottom status bar shows `RetroMonitorMusicGame`. This is a DOM-based
+side-scrolling rhythm game. The bunny mascot runs on a ground line. One cactus-shaped obstacle scrolls in
+from the right **per bar**. With `beatsToArrive=3`, the obstacle spawned on beat 1 arrives exactly on beat 4.
 
-The bunny mascot runs on a ground line. One cactus-shaped obstacle scrolls in
-from the right **per bar** — not per beat. With `beatsToArrive=3`, the obstacle
-spawned on beat 1 arrives exactly on beat 4, where the snare plays. The music
-itself is the jump cue. The player interacts purely through their normal triage
-workflow — no separate game controls are needed.
-
-**Core V2 rule:** one obstacle = one decision. Exactly like Chrome Dino.
-
-### Data flow
-
-```
-BottomStatusBar
-  └─ musicEnabled?
-        ├─ YES → <RetroMonitorMusicGame>
-        │           └─ useBeat()           ← reads all signals from MusicProvider
-        │               └─ useMusicGame()  ← game state hook
-        └─ NO  → <RetroMonitor>
-```
-
-### Signal–mechanic mapping (V2)
+### Signal–mechanic mapping
 
 | Signal | Fires when | Game effect |
 |--------|-----------|-------------|
 | `actionFlash` | Every triage keypress | **Bunny jumps** (unconditional) |
 | `hitFlash` | Keypress was on-beat | **Nearest obstacle** → `cleared` state + streak++ |
 | `barFlash` | Beat 1 of new bar | **Spawns one obstacle** (arrives on beat 4 of same bar) |
-| `beatFlash` | Every quarter-note | Beat ring glow only (no spawning in V2) |
 | `missFlash` | Bar ended with no on-beat action | Red screen flash + bunny shake + streak reset |
-| `layerDownFlash` | Layer dropped | Longer red screen flash |
-
-### One obstacle per bar — V2 spawn model
-
-```
-barFlash fires (beat 1 of bar N)  →  ONE cactus spawns at right edge
-                                       travels for 3 beats (beatsToArrive=3)
-beatFlash fires (beat 4 of bar N) →  cactus arrives at BUNNY_LEFT
-                                       snare hits — this is the jump cue
-  ├─ user acted on-beat (hitFlash) →  cactus cleared ✓ + streak++
-  └─ no on-beat action             →  collision check on bar N+1 beat 1
-barFlash fires (beat 1 of bar N+1) → next cactus spawns
-```
-
-The `barId` grouping system from V1 has been removed. Each obstacle is a standalone
-object with no bar group affiliation.
-
-### Cactus shape
-
-The obstacle is styled as a minimal cactus silhouette using CSS:
-- Main `div` = narrow 5px stem
-- `::before` = left arm (6px wide horizontal bar + upward tip via `box-shadow`)
-- `::after`  = right arm (same, offset slightly higher)
-
-Total visual footprint ~17px wide at 8–14px height — readable as a cactus at
-the small CRT panel size.
 
 ### Layer stage indicator
 
-Replaces the V1 score counter. A small inline SVG shape in the top-right corner
-shows which music layer the user has unlocked. The shape gains complexity with
-each stage, matching the music growing richer:
+A small inline SVG shape in the top-right corner shows which music layer the user has unlocked:
 
 | Stage | Layers active | Shape |
 |-------|---------------|-------|
@@ -377,111 +252,7 @@ each stage, matching the music growing richer:
 | 3 | + Bass | Pentagon |
 | 4 | + Pad melody | Hexagon |
 | 5 | + Lead | Heptagon |
-| 6 | + Vocal (full band) | Circle with inner dot |
-
-This is a *status* indicator, not a score. The goal is that users notice the
-shape getting more complex as they work through tabs, not that they try to
-maximize a number.
-
-### Beat-4 glow cue
-
-The beat ring on the left edge glows extra-bright on beat 4 (`data-beat='4'`
-CSS attribute). Beat 4 is when the snare fires and when the incoming obstacle
-reaches the jump zone. This is a subtle environmental cue — not a tutorial
-prompt — consistent with the "forget you're triaging" philosophy.
-
-### Obstacle states
-
-| State | Appearance | Collision |
-|-------|-----------|-----------|
-| **Active** (approaching) | Full opacity + CRT glow | ✓ bunny must be airborne |
-| **Cleared** (hitFlash — on-beat action) | Fades to 12% opacity, no glow | ✗ bypasses collision entirely |
-| **Passed** (scrolled behind bunny) | 5% opacity | N/A — pruned from array shortly |
-
-Transitions use `opacity 240ms ease` so clearing feels like a satisfying "pop".
-
-### Obstacle timing
-
-One obstacle spawns per `barFlash`. The scroll speed is computed from
-`beatIntervalMs` so the obstacle's left edge reaches `BUNNY_LEFT` exactly
-`beatsToArrive` beats after it spawned:
-
-```
-speed (px/ms) = (trackWidth - BUNNY_LEFT) / (beatsToArrive × beatIntervalMs)
-```
-
-With `beatsToArrive = 3`, an obstacle spawned on beat 1 of bar N arrives at the
-jump zone on beat 4 of bar N — exactly on the snare.
-
-### Collision mechanics
-
-Geometric X/Y collision is active for **uncleared** obstacles only:
-
-```
-overlapX    = bunny right edge > (obs.x − slop) AND bunny left < (obs.x + width + slop)
-bunnyClears = bunnyY >= (obstacleHeight − slop)   // feet above obstacle top
-collide if: overlapX AND NOT bunnyClears AND NOT invincible AND NOT obs.cleared
-```
-
-After a collision there is a `600ms` invincibility window. The red screen flash
-(`collideFlash`) plays for 300ms.
-
-**Timing consequence:** acting too early → bunny jumps, peaks, and lands before the
-obstacle arrives → on-ground collision. On-beat (`hitFlash`) → entire bar cleared →
-no geometry check at all.
-
-### Jump physics
-
-Physics are dt-scaled (normalised to 60 fps):
-
-```
-velY += jumpVelocity           // at jump onset
-velY -= gravity × (dt / 16.67) // each frame
-posY += velY  × (dt / 16.67)  // each frame
-if posY <= 0: land
-```
-
-Default values (tunable in `musicConfig.js game block`):
-
-| Parameter | Default | Effect |
-|-----------|---------|--------|
-| `jumpVelocity` | 6 px/frame | Arc height |
-| `gravity` | 0.5 px/frame² | Arc duration (~400ms air time) |
-| `beatsToArrive` | 4 | Obstacle travel time in beats |
-| `obstacleHeightMin/Max` | 5–9 px | Obstacle height range |
-| `collisionSlop` | 2 px | Collision leniency |
-
-> **Note on BunnySprite animation:** The game never sets `animation='jump'` on
-> the BunnySprite. The `animJump` keyframe uses `animation-fill-mode: forwards`
-> and freezes the sprite's wrapper at `translateY(0)` after 0.55 s, which would
-> cancel the physics `translateY` on the parent `.bunnyRunner` div. Only `'shake'`
-> (horizontal rotate) and `'pulse'` (scale) are used — neither touches the Y axis.
-
-### Tuning the game via `musicConfig.js`
-
-All game constants live in the optional `game` block. The hook falls back to
-built-in defaults if the block is absent:
-
-```js
-// musicConfig.js
-game: {
-  jumpVelocity:      7,    // px/frame upward at jump onset (60 fps reference)
-  gravity:           0.45, // px/frame² downward (60 fps reference)
-  beatsToArrive:     3,    // beats until obstacle reaches jump zone after barFlash
-  obstacleWidth:     5,    // px (narrow cactus stem)
-  obstacleHeightMin: 8,    // px
-  obstacleHeightMax: 14,   // px
-  groundHeight:      4,    // px from track bottom
-  collisionSlop:     3,    // px leniency per side
-},
-```
-
-### Streak (replaces score)
-
-The game tracks a consecutive-hit streak. `hitFlash` increments it; `missFlash`
-or a geometric collision resets it to 0. The streak is not displayed numerically —
-the layer stage icon is the primary progress indicator. The streak is used internally
-to drive bunny mood and animation state.
+| 6 | + Vocal | Circle with inner dot |
 
 ---
 
@@ -501,9 +272,6 @@ const {
   missFlash,      // boolean — true ~400ms when bar ends with no hit
   layerDownFlash, // boolean — true ~500ms when a layer drops
   actionFlash,    // boolean — true ~100ms after ANY triage action
-  musicEnabled,   // boolean
-  beatIntervalMs, // number — quarter-note duration in ms (833ms @ 72 BPM)
-  layerCount,     // number — current active layer index (0–6)
 } = useBeat();
 ```
 
@@ -512,40 +280,31 @@ const {
 ## Quick Reference: Making Changes
 
 ### Change the rhythm of an instrument
-Edit the `BASS_PATTERN` / `MELODY_PATTERN` / `LEAD_PATTERN` const in `gen-audio.cjs`.
-`{ step: <0-31>, note: '<name>', len: <1-32> }`. Run `pnpm run gen-audio`.
+Open the **Music Dev Studio** in the app settings, edit the pattern, copy the JSON, and paste it into `song1.js`. Alternatively, manually edit the `pattern` array in `song1.js`.
 
 ### Change how hard it is to progress
-Edit `missesToLoseLayer` and `hitsToAddLayer` in `musicConfig.js`. No audio regen needed.
+Edit `missesToLoseLayer` and `hitsToAddLayer` in `musicConfig.js`.
 
-### Change a layer's volume
-Edit `volume` in the matching `layers[]` entry in `musicConfig.js`. No audio regen needed.
+### Change a layer's default volume
+Edit the `volume` field in `song1.js` for that layer.
 
 ### Change the instrument sound/timbre
-Edit the generator function (`generateBass`, `generateLead`, etc.) in `gen-audio.cjs`.
-Run `pnpm run gen-audio`.
+Edit the `urls` property of the layer in `song1.js` to point to a new `.wav` or `.mp3` sample.
 
 ### Change the BPM
-Edit **both** `BPM = 72` in `gen-audio.cjs` **and** `bpm: 72` in `musicConfig.js`
-to the same value. Run `pnpm run gen-audio`. Both must match or tracks will drift.
-The beat indicator and game scroll speed automatically adapt (both derive from
-`beatIntervalMs` at runtime).
+Edit the `bpm` field inside `song1.js` AND in `musicConfig.js`. The engine and game will automatically adjust their physics and transport speeds.
 
 ### Change the beat hit window
-Edit `HIT_WINDOW_AFTER_MS` and `HIT_WINDOW_BEFORE_MS` at the top of `MusicProvider.jsx`.
-No audio regen needed. Wider = more forgiving; narrower = stricter rhythm-game feel.
+Edit `HIT_WINDOW_AFTER_MS` and `HIT_WINDOW_BEFORE_MS` at the top of `MusicProvider.jsx`. Wider = more forgiving; narrower = stricter rhythm-game feel.
 
 ### Tune game physics / obstacle difficulty
-Edit the `game` block in `musicConfig.js`. No audio regen needed. See Part 5 table above.
+Edit the `game` block in `musicConfig.js`.
 
 ### Change beat dot colors / sizes
-Edit the `.beatDot` rule family in `Monitor.module.css`. Per-theme accent colors
-are the `--monitor-beat` CSS custom properties defined on each theme class.
+Edit the `.beatDot` rule family in `Monitor.module.css`.
 
 ### Change obstacle visual styles
-Edit `MusicGame.module.css`. The `.obstacle`, `.obstacle[data-cleared='true']`, and
-`.obstacle[data-passed='true']` rules control appearance. All colors inherit from
-`--monitor-fg` so they adapt to the three CRT themes automatically.
+Edit `MusicGame.module.css`.
 
 ### Add a new layer
-See "Adding a new layer" in Part 1 above.
+In `song1.js`, add a new layer object to the `layers` array. The engine will automatically pick it up, it will appear in the progression sequence, and the Music Dev Studio will let you sequence it.

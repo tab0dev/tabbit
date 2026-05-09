@@ -1,4 +1,4 @@
-import { MULTI_SEGMENT_SUFFIXES } from '../data/publicSuffixes.js';
+import { parse } from 'tldts';
 
 // strips protocol, www, ports, and paths — returns the bare hostname.
 // canonical version used across picker history, auto grouping, and ai grouping.
@@ -22,6 +22,12 @@ const BRAND_MAP = {
     'whatsapp': 'WhatsApp',
 };
 
+const capitalize = (s) => {
+    if (!s) return '';
+    if (BRAND_MAP[s]) return BRAND_MAP[s];
+    return s.charAt(0).toUpperCase() + s.slice(1);
+};
+
 /**
  * Extracts the registrable domain (e.g., 'youtube' from 'app.youtube.com' or 'google' from 'google.co.uk').
  * 
@@ -30,34 +36,15 @@ const BRAND_MAP = {
  */
 export function extractRegistrableDomain(hostname) {
     if (!hostname) return 'Unknown';
-
+    
+    const parsed = parse(hostname, { allowPrivateDomains: true });
+    
+    if (parsed.domainWithoutSuffix) {
+        return capitalize(parsed.domainWithoutSuffix);
+    }
+    
+    // Fallback for single segments like "localhost"
     const segments = hostname.toLowerCase().split('.');
-    
-    const capitalize = (s) => {
-        if (BRAND_MAP[s]) return BRAND_MAP[s];
-        return s.charAt(0).toUpperCase() + s.slice(1);
-    };
-
-    if (segments.length <= 1) return capitalize(hostname);
-
-    let suffixSegments = 1; // Default to single segment TLD (.com, .org)
-    
-    // Check for multi-segment suffixes
-    for (const suffix of MULTI_SEGMENT_SUFFIXES) {
-        if (hostname.endsWith(`.${suffix}`)) {
-            suffixSegments = suffix.split('.').length;
-            break;
-        }
-    }
-
-    // The domain name is the segment immediately preceding the suffix
-    const domainIndex = segments.length - suffixSegments - 1;
-    
-    if (domainIndex >= 0) {
-        return capitalize(segments[domainIndex]);
-    }
-
-    // Fallback: take the first segment
     return capitalize(segments[0]);
 }
 
@@ -70,23 +57,11 @@ export function extractRegistrableDomain(hostname) {
  */
 export function extractRootDomain(hostname) {
     if (!hostname) return '';
-
+    
     const h = hostname.toLowerCase().replace(/^www\./, '');
-    const segments = h.split('.');
-
-    if (segments.length <= 2) return h;
-
-    let suffixSegments = 1;
-    for (const suffix of MULTI_SEGMENT_SUFFIXES) {
-        if (h.endsWith(`.${suffix}`)) {
-            suffixSegments = suffix.split('.').length;
-            break;
-        }
-    }
-
-    // registrable domain = brand segment + suffix
-    const domainIndex = segments.length - suffixSegments - 1;
-    return segments.slice(Math.max(0, domainIndex)).join('.');
+    const parsed = parse(h, { allowPrivateDomains: true });
+    
+    return parsed.domain || h;
 }
 
 /**
@@ -99,12 +74,9 @@ export function extractRootDomain(hostname) {
  */
 export function extractSubdomainLabel(hostname) {
     if (!hostname) return null;
-
+    
     const h = hostname.toLowerCase().replace(/^www\./, '');
-    const root = extractRootDomain(h);
-    if (!root || h === root) return null;
-
-    // Everything before the root domain
-    const prefix = h.slice(0, h.length - root.length - 1); // strip trailing '.'
-    return prefix || null;
+    const parsed = parse(h, { allowPrivateDomains: true });
+    
+    return parsed.subdomain || null;
 }

@@ -20,9 +20,9 @@ function buildSettingsSections(ctx) {
       settings: [
         {
           id: 'sort_order',
-          title: 'Sort Order',
+          title: 'Stack Order',
           icon: SortAscending,
-          description: 'Change the order which tabs are presented in the card stack',
+          description: 'Change the sort order of the tabs in the stack',
           type: 'select',
           options: [
             { value: 'auto', label: 'Auto' },
@@ -39,7 +39,7 @@ function buildSettingsSections(ctx) {
           id: 'theme_toggle',
           title: 'Light Mode',
           icon: Moon,
-          description: 'Switch between light and dark themes',
+          description: 'Switch between light and dark modes',
           type: 'toggle',
           getValue: () => ctx.theme === 'light',
           onChange: () => ctx.toggleTheme(),
@@ -54,14 +54,14 @@ function buildSettingsSections(ctx) {
           id: 'ai_model_management',
           title: 'Manage Local AI Models',
           icon: Robot,
-          description: "Enable Chrome's offline, local Gemini Nano model for context-aware tab grouping",
+          description: "Enable Chrome's offline, local Gemini Nano model only for context-aware tab grouping",
           type: 'custom',
         },
         {
           id: 'exclude_suspended_tabs',
           title: 'Exclude Suspended Tabs',
           icon: Pause,
-          description: 'Hide tabs paused by a tab suspender extension from the card stack.',
+          description: 'Hide tabs paused by a tab suspender extension from the card stack & auto tab grouper',
           type: 'toggle',
           getValue: () => ctx.excludeSuspendedTabs,
           onChange: (e) => ctx.setExcludeSuspendedTabs(e.target.checked),
@@ -71,7 +71,7 @@ function buildSettingsSections(ctx) {
           id: 'suspender_extension_id',
           title: 'Suspender Extension ID',
           icon: Pause,
-          description: 'Defaults to Tiny Suspender. If you use a different one, find its 32-character ID in chrome://extensions and paste it here.',
+          description: 'Defaults to Tiny Suspender. If you use a different one, find its 32-character ID in chrome://extensions and paste it here',
           type: 'text_input',
           getValue: () => ctx.suspenderExtensionId,
           onChange: (e) => {
@@ -92,7 +92,7 @@ function buildSettingsSections(ctx) {
           id: 'show_tutorial_startup',
           title: 'Show Tutorial on Startup',
           icon: Info,
-          description: 'Always show the interactive tutorial when the app opens',
+          description: 'Always show the controls modal when the app opens',
           type: 'toggle',
           getValue: () => !ctx.isTutorialDisabled,
           onChange: (e) => ctx.setTutorialDisabled(!e.target.checked),
@@ -101,7 +101,7 @@ function buildSettingsSections(ctx) {
           id: 'suppress_debugger_warning',
           title: 'Hide Debugger Warning',
           icon: Warning,
-          description: 'Never show the explanation dialog for the Chrome debugger',
+          description: 'Never show the warning dialog about the Chrome Debugger API',
           type: 'toggle',
           getValue: () => ctx.suppressDebugger,
           onChange: (e) => {
@@ -125,21 +125,29 @@ function buildSettingsSections(ctx) {
           getValue: () => ctx.crtEnabled,
           onChange: () => ctx.toggleCRT(),
         },
-        {
-          id: 'music',
-          title: 'Music',
-          icon: MusicNoteSimpleIcon,
-          description: 'Play a little song while triaging',
-          type: 'toggle',
-          getValue: () => ctx.musicEnabled,
-          onChange: () => ctx.toggleMusic(),
-        },
+        // {
+        //   id: 'music',
+        //   title: 'Music',
+        //   icon: MusicNoteSimpleIcon,
+        //   description: 'Play a little song while triaging',
+        //   type: 'toggle',
+        //   getValue: () => ctx.musicEnabled,
+        //   onChange: () => ctx.toggleMusic(),
+        // },
+        // {
+        //   id: 'music_dev',
+        //   title: 'Music Dev Studio',
+        //   icon: MusicNoteSimpleIcon,
+        //   description: 'Developer piano roll for sequencing music.',
+        //   type: 'button',
+        //   onClick: () => ctx.handleNavigate('musicdev'),
+        // },
       ],
     },
   ];
 }
 
-export default function SettingsCard() {
+export default function SettingsCard({ handleNavigate }) {
   const { mode, setMode, excludeSuspendedTabs, setExcludeSuspendedTabs } = useTabProcessing();
   const hasSuspendedTabs = useHasSuspendedTabs();
   const { isTutorialDisabled, setTutorialDisabled } = useTutorial();
@@ -182,6 +190,7 @@ export default function SettingsCard() {
     musicEnabled, toggleMusic,
     suppressDebugger, setSuppressDebugger,
     suspenderExtensionId, setSuspenderExtensionId,
+    handleNavigate,
   });
 
   const renderSettingRow = (setting) => {
@@ -234,6 +243,11 @@ export default function SettingsCard() {
                 <div className={`${styles.badge} ${styles.badgeInactive}`}>Not Active</div>
               ) : null}
             </div>
+          )}
+          {setting.type === 'button' && (
+            <button className={styles.button} onClick={setting.onClick}>
+              Open
+            </button>
           )}
         </div>
       </div>

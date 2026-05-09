@@ -1,11 +1,12 @@
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import uFuzzy from '@leeoniya/ufuzzy';
-import { Tabs, FloppyDisk, Plus, DotsThreeOutline, MagicWand, MagnifyingGlassIcon } from '@phosphor-icons/react';
+import { Tabs, FloppyDisk, Plus, DotsThreeOutline, MagicWand, MagnifyingGlassIcon, Magnet } from '@phosphor-icons/react';
 import Tooltip from '../Shared/Tooltip';
 import InlineAddRow from '../Shared/InlineAddRow';
 import { useTriage, Mode } from '../../store/TriageProvider';
 import { useTriageActions } from '../../hooks/useTriageActions';
 import { usePickerPanel } from '../../hooks/usePickerPanel';
+import { usePicker } from '../../store/PickerProvider';
 import styles from './Overlay.module.css';
 
 
@@ -18,15 +19,18 @@ export const GROUP_COLORS = {
     green: '#81c995', pink: '#ff8ac0', purple: '#d1bcff', cyan: '#78d1e8', orange: '#fcad70',
 };
 
-export default function TabGroupPickerPanel({ isActive, onDeactivate, onAutoGroup }) {
+export default function TabGroupPickerPanel({ isActive, onDeactivate, onAutoGroup, onAutoGrouper }) {
     const { state, dispatch } = useTriage();
     const { group: groupAction } = useTriageActions();
+    const { batchTarget, setBatchTarget } = usePicker();
     const [isAdding, setIsAdding] = useState(false);
     const [newGroupName, setNewGroupName] = useState('');
     const [dotsHovered, setDotsHovered] = useState(false);
     const [wandHovered, setWandHovered] = useState(false);
+    const [magnetHovered, setMagnetHovered] = useState(false);
     const dotsRef = useRef(null);
     const wandRef = useRef(null);
+    const magnetRef = useRef(null);
 
     const rawItems = state.tabGroups ?? [];
 
@@ -59,7 +63,12 @@ export default function TabGroupPickerPanel({ isActive, onDeactivate, onAutoGrou
         currentTabUrl,
         matchFn,
         onConfirmItem: (item) => {
-            if (currentTab) groupAction(currentTab, item.id);
+            if (batchTarget?.tabs?.length) {
+                batchTarget.tabs.forEach(tab => groupAction(tab, item.id, true));
+                setBatchTarget(null);
+            } else if (currentTab) {
+                groupAction(currentTab, item.id);
+            }
         }
     });
 
@@ -151,14 +160,29 @@ export default function TabGroupPickerPanel({ isActive, onDeactivate, onAutoGrou
                             onClick={onAutoGroup}
                             onMouseEnter={() => setWandHovered(true)}
                             onMouseLeave={() => setWandHovered(false)}
-                            aria-label="Auto Tab Group"
+                            aria-label="Tab Grouper"
                             disabled={isComplete}
                         >
                             ✦
                             {/* <MagicWand size={14} weight="bold" /> */}
                         </button>
                         <Tooltip anchorRef={wandRef} visible={wandHovered} placement="right">
-                            Auto Tab Group
+                            Manual & AI Tab Grouper
+                        </Tooltip>
+
+                        <button
+                            ref={magnetRef}
+                            className={styles.pickerIconBtn}
+                            onClick={onAutoGrouper}
+                            onMouseEnter={() => setMagnetHovered(true)}
+                            onMouseLeave={() => setMagnetHovered(false)}
+                            aria-label="Auto Grouper"
+                            disabled={isComplete}
+                        >
+                            <Magnet size={14} weight="duotone" />
+                        </button>
+                        <Tooltip anchorRef={magnetRef} visible={magnetHovered} placement="right">
+                            Automatic Tab Grouper
                         </Tooltip>
 
                         <button
