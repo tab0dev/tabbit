@@ -1,5 +1,7 @@
 <div align="center">
 
+<br />
+
 <img src="https://raw.githubusercontent.com/tab0dev/tabbit/main/public/icons/icon128.png" width="42" />
 <img src="https://raw.githubusercontent.com/tab0dev/tabbit/main/public/brand-title.svg" height="42" />
 
