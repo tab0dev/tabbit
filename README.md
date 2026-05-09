@@ -9,8 +9,7 @@
 
 Tabbit is a Chrome extension that helps you triage your open tabs, one tab at a time. Use keyboard shortcuts or swipe on tab previews to decide if you want to keep, close, bookmark, or group the tab. Built with React, Chrome APIs, and carrots.
 
-[![Chrome Web Store](https://img.shields.io/badge/Chrome%20Web%20Store-v0.1.1-f8b50a?logo=googlechrome&logoColor=white&style=flat-square)](https://chromewebstore.google.com/detail/tabbit-tab-closer-organiz/calbmnbhppoplenhgpfejepklainehko)
-[![This Repo](https://img.shields.io/badge/This%20Repo-v0.2-f8b50a?logo=github&logoColor=white&style=flat-square)](https://chromewebstore.google.com/detail/tabbit-tab-closer-organiz/calbmnbhppoplenhgpfejepklainehko)
+[![Chrome Web Store](https://img.shields.io/badge/Chrome%20Web%20Store-v0.2-f8b50a?logo=googlechrome&logoColor=white&style=flat-square)](https://chromewebstore.google.com/detail/tabbit-tab-closer-organiz/calbmnbhppoplenhgpfejepklainehko)
 
 Install it on the Google Chrome Web store: 
 https://chromewebstore.google.com/detail/tabbit-tab-closer-organiz/calbmnbhppoplenhgpfejepklainehko
@@ -41,11 +40,16 @@ If you are a developer looking to contribute or understand how Tabbit works unde
 - **[Data Model & State Management](./readmes/DATA_MODEL.md)**
 - **[Module Directory Map](./readmes/MODULES.md)**
 - **[UI, Animation & Hotkeys](./readmes/UI.md)**
+- **[Bookmark & Tab Group Picker](./readmes/PICKER_HISTORY.md)**
 - **[Tab Sorter Engine](./readmes/TAB_SORTER.md)**
 - **[Auto Tab Closer Worker](./readmes/AUTO_CLOSER.md)**
+- **[Auto Tab Grouper Daemon](./readmes/AUTO_TAB_GROUPER.md)**
+- **[Tab Grouper Wizard (AI / Domain)](./readmes/TAB_GROUPER.md)**
+- **[Tab List View (Batch Triage)](./readmes/TAB_LIST_VIEW.md)**
 - **[Watch Later Batch Automation](./readmes/WATCH_LATER.md)**
 - **[Permissions & Privacy Justifications](./readmes/PERMISSIONS.md)**
 - **[Generative Music Engine](./readmes/MUSIC_SYSTEM.md)**
+- **[Development Guide](./readmes/DEVELOPMENT.md)**
 
 
 ## ✨ Features & Product Outline
@@ -60,13 +64,16 @@ Tabbit is a simple toolkit to help you make decisions fast and get your browser 
 
 ### 🧠 Smart Organization
 - **AI Tab Grouping**: Clusters tabs into named groups using local on-device AI
+- **Auto Tab Grouper**: Persistent background daemon that moves new tabs into Chrome tab groups the moment they open, based on your custom URL/regex rules. Supports Strict Mode, cross-window Merge Mode, suspended tab awareness, and a template library covering 20+ categories with regional variants
+- **Tab List View**: Full batch triage overlay — filter, sort, group, and select tabs with click, Shift+click ranges, or rubber-band drag, then bulk-keep/close/bookmark/group in one shot
 - **Quick Pickers**: Fuzzy-search folders and groups in milliseconds when bookmarking or adding to tab groups
-- **YouTube Batching**: Batch save YouTube videos into the native Youtube "Watch Later" folder
+- **Watch Later Automation**: Batch-save a queue of YouTube video tabs to your native Watch Later playlist automatically, then closes each tab on success
 
 ### 🧹 Background Cleaning
 - **Auto Tab Closer**: Quietly prunes tabs of a certain age you set. Easy to recover pruned tabs.
-- **One-Click Sorting**: Right click the Tabbit icon to sort your windows alphabetically or by URL
-- **Tab Smusher**: Reduce duplicates down to a single copy (prioritizing recent interactions) in one click
+- **One-Click Sorting**: Right-click the Tabbit icon to sort all tabs alphabetically by title or URL
+- **Smush Duplicates**: Right-click the Tabbit icon to close every duplicate tab in one shot (pinned tabs always kept)
+- **Merge Windows**: Right-click the Tabbit icon to consolidate all browser windows into one instantly
 
 ### 🎮 QoL
 - **Retro Monitor**: old CRT effect on the preview window
@@ -87,8 +94,9 @@ Tabbit only asks for the permissions it needs to work. Everything stays local on
 | `debugger` | Capture visual tab previews securely in the background |
 | `alarms` | Run the Auto Tab Closer worker on a schedule |
 | `storage` | Save preferences and the auto-closer graveyard |
-| `contextMenus` | Add instant sorting shortcuts to the extension icon |
-| `<all_urls>` / `*://*.youtube.com/*` *(optional)* | Required for "Watch Later" script injection and robust tab previews |
+| `contextMenus` | Add right-click shortcuts to the extension icon: sort by title, sort by URL, smush duplicates, merge windows |
+| `scripting` + `*://*.youtube.com/*` | Inject the Watch Later automation script into live YouTube tabs |
+| `windows` | Identify and focus the target window during Merge Windows |
 
 For the exhaustive breakdown required by the Chrome Web Store, see the **[Permissions & Privacy Justifications](./readmes/PERMISSIONS.md)**.
 
