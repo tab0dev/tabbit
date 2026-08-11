@@ -1,8 +1,49 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styles from './Card.module.css';
-import { Clock, HourglassHighIcon, Browsers, ArrowLeft, DotsThree, SpeakerHigh, SpeakerSlash, ListBullets } from '@phosphor-icons/react';
+import { Clock, HourglassHighIcon, Browsers, ArrowLeft, DotsNine, SpeakerHigh, SpeakerSlash, ListBullets } from '@phosphor-icons/react';
 import { formatTime } from '../../utils/formatters';
-import { useMusic } from '../../store/MusicProvider';
+import { useMusic } from '../../store/music/MusicProvider';
+import { useTabProcessing } from '../../store/TabProcessingProvider';
+import { useTriage } from '../../store/TriageProvider';
+
+function InlineSortPicker({ mode, setMode, sortOptions, dispatch }) {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const currentLabel = sortOptions.find(o => o.value === mode)?.label || 'Auto';
+
+  if (!isExpanded) {
+    return (
+      <button 
+        className={styles.inlineSortTrigger}
+        onClick={(e) => { e.stopPropagation(); setIsExpanded(true); }}
+      >
+        {currentLabel}
+      </button>
+    );
+  }
+
+  return (
+    <div className={styles.inlineSortExpanded}>
+      {sortOptions.map((opt, index) => (
+        <React.Fragment key={opt.value}>
+          <button
+            className={`${styles.inlineSortOption} ${mode === opt.value ? styles.inlineSortActive : ''}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              setMode(opt.value);
+              dispatch({ type: 'START_REORDER' });
+              dispatch({ type: 'REORDER_TABS', payload: opt.value });
+              setIsExpanded(false);
+            }}
+          >
+            {opt.label}
+          </button>
+          {index < sortOptions.length - 1 && <span className={styles.inlineSortDivider}>·</span>}
+        </React.Fragment>
+      ))}
+    </div>
+  );
+}
 
 export default function CardFooter({
   progressPercent,
@@ -15,6 +56,17 @@ export default function CardFooter({
   menuRect
 }) {
   const { musicEnabled, toggleMusic } = useMusic();
+  const { mode, setMode } = useTabProcessing();
+  const { dispatch } = useTriage();
+
+  const sortOptions = [
+    { value: 'auto', label: 'auto' },
+    { value: 'oldest_first', label: 'oldest' },
+    { value: 'newest_first', label: 'newest' },
+    { value: 'group_by_site', label: 'site' },
+    { value: 'alphabetical', label: 'a-z' },
+    { value: 'random', label: 'random' },
+  ];
 
   // Both labels are always rendered in a grid overlap so the button width
   // never changes — eliminating the hover-flicker loop entirely.
@@ -67,26 +119,31 @@ export default function CardFooter({
           </button> */}
 
         </div>
-        {activeView !== 'default' ? (
-          <button
-            className={styles.backButton}
-            onClick={(e) => {
-              e.stopPropagation();
-              handleNavigate('default');
-            }}
-          >
-            <ArrowLeft size={16} weight="duotone" />
-            <span className={styles.settingsText}>back</span>
-          </button>
-        ) : (
-          <button
-            className={`${styles.settingsButton} ${menuRect ? styles.settingsButtonActive : ''}`}
-            onClick={handleMenuClick}
-            aria-label="Menu"
-          >
-            <DotsThree size={16} weight="bold" />
-          </button>
-        )}
+        <div className={styles.timerRight}>
+          {activeView !== 'default' ? (
+            <button
+              className={styles.backButton}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleNavigate('default');
+              }}
+            >
+              <ArrowLeft size={16} weight="duotone" />
+              <span className={styles.settingsText}>back</span>
+            </button>
+          ) : (
+            <>
+              <InlineSortPicker mode={mode} setMode={setMode} sortOptions={sortOptions} dispatch={dispatch} />
+              <button
+                className={`${styles.settingsButton} ${menuRect ? styles.settingsButtonActive : ''}`}
+                onClick={handleMenuClick}
+                aria-label="Menu"
+              >
+                <DotsNine size={16} weight="bold" />
+              </button>
+            </>
+          )}
+        </div>
       </div>
     </div>
   );

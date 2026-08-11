@@ -1,4 +1,4 @@
-import { TAB_PROCESSING_MODES } from '../store/tabProcessingModes';
+import { TAB_PROCESSING_MODES } from '../constants/tabProcessingModes';
 
 function withOriginalIndex(tabs) {
   return tabs.map((tab, index) => ({ tab, index }));

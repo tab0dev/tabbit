@@ -8,6 +8,7 @@ const ACTIONS = [
   { id: 'close', label: 'Close', triageOnly: true },
   { id: 'bookmark', label: 'Bookmark', triageOnly: true },
   { id: 'group', label: 'Group', triageOnly: true },
+  { id: 'openTab', label: 'Open', triageOnly: true },
   // { id: 'back', label: 'Back', secondary: true, triageOnly: true },
 ];
 
@@ -23,6 +24,7 @@ export default function ActionHints({ actions, embedded = false }) {
       case 'close': if (currentTab) actions.close(currentTab); break;
       case 'bookmark': document.getElementById('picker-search-bookmark')?.focus(); break;
       case 'group': document.getElementById('picker-search-group')?.focus(); break;
+      case 'openTab': if (currentTab) actions.openTab(currentTab); break;
       // case 'back': actions.back(); break;
       case 'undo': actions.undo(); break;
     }
@@ -55,6 +57,7 @@ export default function ActionHints({ actions, embedded = false }) {
         <div className={styles.gridCenter}>
           {renderAction('group')}
           {renderAction('bookmark')}
+          {renderAction('openTab')}
         </div>
         <div className={styles.gridRight}>
           {renderAction('keep')}

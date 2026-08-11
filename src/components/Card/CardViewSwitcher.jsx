@@ -1,15 +1,18 @@
 import React from 'react';
 import styles from './Card.module.css';
-import SettingsCard from './SettingsCard';
-import MusicDevTrackerCard from './MusicDevTrackerCard/MusicDevTrackerCard';
-import AutoCloseCard from './AutoCloseCard/AutoCloseCard';
-import AutoTabCloserWorkerPanel from './AutoTabCloserWorkerCard/AutoTabCloserWorkerPanel';
-import AutoTabGroupWizard from '../Dashboard/AutoTabGroupWizard';
-import AutoTabGrouperWorkerPanel from './AutoTabGrouperWorkerCard/AutoTabGrouperWorkerPanel';
+import SettingsCard from '../Tools/Settings/SettingsCard';
+import MusicDevTrackerCard from '../Tools/MusicDev/MusicDevTrackerCard';
+import CloseOldTabsCard from '../Tools/CloseOldTabs/CloseOldTabsCard';
+import AutoTabCloserPanel from '../Tools/AutoTabCloser/AutoTabCloserPanel';
+import ManualTabGroupWizard from '../Tools/TabGroupWizard/ManualTabGroupWizard';
+import AutoTabGrouperPanel from '../Tools/AutoTabGrouper/AutoTabGrouperPanel';
+import AutoSmusherPanel from '../Tools/AutoSmusher/AutoSmusherPanel';
 import TabCard from './TabCard';
-import TabSorterCard from './TabSorterCard/TabSorterCard';
-import WatchLaterCard from './WatchLaterCard/WatchLaterCard';
-import ListView from './ListView/ListView';
+import AutoSorterPanel from '../Tools/AutoSorter/AutoSorterPanel';
+import WatchLaterCard from '../Tools/WatchLater/WatchLaterCard';
+import ListView from '../Tools/ListView/ListView';
+import BookmarkManagerCard from '../Tools/BookmarkManager/BookmarkManagerCard';
+
 
 export default function CardViewSwitcher({
   activeView,
@@ -31,7 +34,7 @@ export default function CardViewSwitcher({
   }
 
   if (isTop && activeView === 'autoclose') {
-    return <AutoCloseCard onClose={() => handleNavigate('default')} />;
+    return <CloseOldTabsCard onClose={() => handleNavigate('default')} />;
   }
 
   if (isTop && activeView === 'musicdev') {
@@ -39,27 +42,35 @@ export default function CardViewSwitcher({
   }
 
   if (isTop && activeView === 'autocloserworker') {
-    return <AutoTabCloserWorkerPanel onClose={() => handleNavigate('default')} />;
+    return <AutoTabCloserPanel onClose={() => handleNavigate('default')} />;
   }
 
   if (isTop && activeView === 'autotabgroup') {
-    return <AutoTabGroupWizard onClose={() => handleNavigate('default')} />;
+    return <ManualTabGroupWizard onClose={() => handleNavigate('default')} />;
   }
 
   if (isTop && activeView === 'autotabgrouperworker') {
-    return <AutoTabGrouperWorkerPanel onClose={() => handleNavigate('default')} />;
+    return <AutoTabGrouperPanel onClose={() => handleNavigate('default')} />;
   }
 
   if (isTop && activeView === 'tabsorter') {
-    return <TabSorterCard />;
+    return <AutoSorterPanel onClose={() => handleNavigate('default')} />;
   }
 
   if (isTop && activeView === 'listview') {
     return <ListView onClose={() => handleNavigate('default')} />;
   }
 
+  if (isTop && activeView === 'bookmarks') {
+    return <BookmarkManagerCard onClose={() => handleNavigate('default')} />;
+  }
+
   if (isTop && activeView === 'watchlater') {
     return <WatchLaterCard onClose={() => handleNavigate('default')} />;
+  }
+
+  if (isTop && activeView === 'autosmush') {
+    return <AutoSmusherPanel onClose={() => handleNavigate('default')} />;
   }
 
   if (isReordering) {

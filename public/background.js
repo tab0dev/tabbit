@@ -10,6 +10,27 @@ const SETTINGS_KEY = "tabbit_autoclose_settings";
 const GRAVEYARD_KEY = "tabbit_graveyard";
 const GRAVEYARD_MAX = 200;
 
+// ─── Auto Smusher storage keys ───────────────────────────────────────────────
+const SMUSH_SETTINGS_KEY = 'tabbit_autosmush_settings';
+const DEFAULT_SMUSH_SETTINGS = {
+  enabled: false,
+  skipPinned: true,
+  ignoreFragments: false,
+  ignoreQueryStrings: false,
+};
+
+// In-memory smusher state (populated by initAutoSmusher on load)
+let smush_enabled = false;
+let smush_skipPinned = true;
+let smush_ignoreFragments = false;
+let smush_ignoreQueryStrings = false;
+// Track tabs that have already been processed to avoid double-firing
+const smush_processedTabIds = new Set();
+
+// ─── Auto Sorter in-memory state ──────────────────────────────────────────────
+let autoSort_enabled = false;
+let autoSort_debounceTimer = null;
+
 const DEFAULT_SETTINGS = {
   enabled: false,
   thresholdMs: 1000 * 60 * 60 * 24 * 7, // 7 days
@@ -277,6 +298,8 @@ chrome.runtime.onInstalled.addListener((details) => {
   console.log("[Tabbit SW] runtime.onInstalled — reason:", details.reason);
   setupAlarm();
   warmupAiModel();
+  initAutoSmusher();
+  initAutoSorter();
   chrome.contextMenus.removeAll(() => {
     chrome.contextMenus.create({
       id: 'tabbit-sort-tabs-title',
@@ -305,6 +328,8 @@ chrome.runtime.onStartup.addListener(() => {
   console.log("[Tabbit SW] runtime.onStartup fired");
   setupAlarm();
   warmupAiModel();
+  initAutoSmusher();
+  initAutoSorter();
 });
 
 chrome.alarms.onAlarm.addListener((alarm) => {
@@ -316,6 +341,14 @@ chrome.alarms.onAlarm.addListener((alarm) => {
   );
   if (alarm.name === "tabbit-auto-close") {
     runAutoClose();
+  }
+  // Safety-net catch-up sort — re-reads settings fresh from storage each fire
+  if (alarm.name === 'tabbit-auto-sort-keepalive') {
+    chrome.storage.local.get(TAB_SORTER_SETTINGS_KEY).then((raw) => {
+      if (raw[TAB_SORTER_SETTINGS_KEY]?.autoSortEnabled) {
+        runTabSorter().catch((err) => console.warn('[AutoSorter] keepalive sort error:', err));
+      }
+    });
   }
   // wl-keepalive: no-op — the alarm firing itself resets the SW idle timer
 });
@@ -336,6 +369,25 @@ chrome.storage.onChanged.addListener((changes, area) => {
     console.log("[Tabbit SW]   oldValue:", JSON.stringify(oldValue));
     console.log("[Tabbit SW]   newValue:", JSON.stringify(newValue));
     setupAlarm();
+  }
+
+  // Auto Smusher — update in-memory flags when React saves settings
+  if (area === "local" && SMUSH_SETTINGS_KEY in changes) {
+    const next = { ...DEFAULT_SMUSH_SETTINGS, ...(changes[SMUSH_SETTINGS_KEY].newValue ?? {}) };
+    smush_enabled = next.enabled;
+    smush_skipPinned = next.skipPinned;
+    smush_ignoreFragments = next.ignoreFragments;
+    smush_ignoreQueryStrings = next.ignoreQueryStrings;
+    console.log('[Tabbit SW] Auto Smusher settings updated:', JSON.stringify(next));
+    // Hide manual smush menu item when the daemon is running
+    setSmushMenuVisibility(!smush_enabled);
+  }
+
+  // Auto Sorter — re-run full keepalive setup whenever settings change.
+  // setupSortKeepalive() reads from storage, syncs menu visibility, and
+  // creates/clears the alarm — no in-memory flag needed here.
+  if (area === "local" && TAB_SORTER_SETTINGS_KEY in changes) {
+    setupSortKeepalive();
   }
 });
 
@@ -390,38 +442,25 @@ console.log("[Tabbit SW] ── All event listeners registered ──");
  * Prioritizes keeping pinned tabs and tabs with lower indices (usually older).
  */
 async function runSmushDuplicates() {
-  console.log("[Tabbit SW] runSmushDuplicates() called");
+  console.log('[Tabbit SW] runSmushDuplicates() called');
   try {
     const allTabs = await chrome.tabs.query({});
-    const urlMap = new Map();
+    const groups = smushBuildGroups(allTabs);
     const toClose = [];
 
-    for (const tab of allTabs) {
-      if (!tab.url) continue;
-
-      if (urlMap.has(tab.url)) {
-        const existingTab = urlMap.get(tab.url);
-        // If we already have this URL, but the current tab is pinned and the 
-        // existing one is not, we swap them to keep the pinned one.
-        if (tab.pinned && !existingTab.pinned) {
-          toClose.push(existingTab.id);
-          urlMap.set(tab.url, tab);
-        } else {
-          toClose.push(tab.id);
-        }
-      } else {
-        urlMap.set(tab.url, tab);
-      }
+    for (const tabs of groups.values()) {
+      // Keep tabs[0] (first/oldest); close the rest
+      for (let i = 1; i < tabs.length; i++) toClose.push(tabs[i].id);
     }
 
     if (toClose.length > 0) {
       console.log(`[Tabbit SW] Smushing ${toClose.length} duplicate tabs`);
       await chrome.tabs.remove(toClose);
     } else {
-      console.log("[Tabbit SW] No duplicate tabs found to smush");
+      console.log('[Tabbit SW] No duplicate tabs found to smush');
     }
   } catch (err) {
-    console.error("[Tabbit SW] runSmushDuplicates FAILED:", err);
+    console.error('[Tabbit SW] runSmushDuplicates FAILED:', err);
   }
 }
 
@@ -429,10 +468,11 @@ async function runSmushDuplicates() {
 
 const TAB_SORTER_SETTINGS_KEY = 'tabbit_tabsorter_settings';
 const DEFAULT_SORTER_SETTINGS = {
-  sortBy: "url", // "url" or "title"
+  sortBy: 'url', // 'url' or 'title'
   groupSuspendedTabs: false,
-  tabSuspenderExtensionId: "bbomjaikkcabgmfaomdichgcodnaeecf",
-  sortPinnedTabs: false
+  tabSuspenderExtensionId: 'bbomjaikkcabgmfaomdichgcodnaeecf',
+  sortPinnedTabs: false,
+  autoSortEnabled: false,
 };
 
 // Return whether tab is currently suspended
@@ -485,7 +525,7 @@ async function runTabSorter(forceSortMode = null) {
     var groupOffset = pinnedTabs.length;
 
     if (pinnedTabs.length > 0 && settings.sortPinnedTabs) {
-        sortTabsList(pinnedTabs, pinnedTabs[0].groupId, settings);
+        sortTabsList(pinnedTabs, pinnedTabs[0].groupId, settings, 'pinned tabs');
     }
 
     let tabGroups = await chrome.tabGroups.query({ windowId: currentWindow.id });
@@ -494,24 +534,25 @@ async function runTabSorter(forceSortMode = null) {
     });
 
     for (let i = 0; i < tabGroups.length; i++) {
-        let groupId = tabGroups[i].id;
-        chrome.tabGroups.move(groupId, { index: groupOffset });
-        let tabs = await chrome.tabs.query({ windowId: currentWindow.id, groupId: groupId });
+        let group = tabGroups[i];
+        chrome.tabGroups.move(group.id, { index: groupOffset });
+        let tabs = await chrome.tabs.query({ windowId: currentWindow.id, groupId: group.id });
         groupOffset += tabs.length;
-        sortTabsList(tabs, groupId, settings);
+        const groupLabel = group.title ? `'${group.title}' tab group (id ${group.id})` : `unnamed tab group (id ${group.id})`;
+        sortTabsList(tabs, group.id, settings, groupLabel);
     }
 
     let ungroupedTabs = await chrome.tabs.query({ windowId: currentWindow.id, pinned: false, groupId: -1 });
-    sortTabsList(ungroupedTabs, -1, settings);
+    sortTabsList(ungroupedTabs, -1, settings, 'ungrouped tabs');
 }
 
-function sortTabsList(tabs, groupId, settings) {
+function sortTabsList(tabs, groupId, settings, label = `group id ${groupId}`) {
     if (tabs.length === 0) return;
-    
+
     let firstTabIndex = tabs[0].index;
-    
-    console.log(`[TabSorter] Before sort (Group ${groupId}):`, tabs.map(t => ({ id: t.id, title: t.title, url: t.url, pinned: t.pinned })));
-    
+
+    console.log(`[TabSorter] Before sort — ${label}:`, tabs.map(t => ({ id: t.id, title: t.title, url: t.url, pinned: t.pinned })));
+
     tabs.sort(function (a, b) {
         if (!settings.sortPinnedTabs && (a.pinned || b.pinned)) {
             return 0;
@@ -533,7 +574,7 @@ function sortTabsList(tabs, groupId, settings) {
         }
     });
 
-    console.log(`[TabSorter] After sort (Group ${groupId}):`, tabs.map(t => ({ id: t.id, title: t.title, url: t.url, pinned: t.pinned })));
+    console.log(`[TabSorter] After sort — ${label}:`, tabs.map(t => ({ id: t.id, title: t.title, url: t.url, pinned: t.pinned })));
 
     const tabIds = tabs.map(tab => tab.id);
     chrome.tabs.move(tabIds, { index: firstTabIndex });
@@ -899,20 +940,265 @@ async function processTab(tab) {
   }
 }
 
-chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-  console.log(`[AutoGrouperWorker] tabs.onUpdated fired for tabId: ${tabId}, changeInfo:`, changeInfo);
-  if (changeInfo.url || changeInfo.title) {
-    processTab(tab);
-  }
-});
-
 chrome.tabs.onCreated.addListener((tab) => {
   console.log(`[AutoGrouperWorker] tabs.onCreated fired for tabId: ${tab.id}, url: ${tab.url || tab.pendingUrl}`);
   const url = tab.url || tab.pendingUrl;
   if (url && url !== "chrome://newtab/") {
     processTab(tab);
   }
+  // Auto Smusher — check for duplicates on new tab open
+  smushNewTab(tab);
+  // Auto Sorter — re-sort on new tab
+  runAutoSort();
 });
 
 // Initialize on load
 initAutoGrouper();
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Auto Smusher Daemon
+   Listens for newly created or navigated tabs and closes duplicates in real
+   time, refocusing the user on the original copy.
+───────────────────────────────────────────────────────────────────────────── */
+
+/**
+ * Reads persisted Auto Smusher settings and populates in-memory flags.
+ * Called on install, startup, and when storage changes.
+ */
+async function initAutoSmusher() {
+  console.log('[Tabbit SW] initAutoSmusher() called');
+  try {
+    const raw = await chrome.storage.local.get(SMUSH_SETTINGS_KEY);
+    const settings = { ...DEFAULT_SMUSH_SETTINGS, ...(raw[SMUSH_SETTINGS_KEY] ?? {}) };
+    smush_enabled = settings.enabled;
+    smush_skipPinned = settings.skipPinned;
+    smush_ignoreFragments = settings.ignoreFragments;
+    smush_ignoreQueryStrings = settings.ignoreQueryStrings;
+    console.log('[Tabbit SW] initAutoSmusher — settings loaded:', JSON.stringify(settings));
+    // Sync menu visibility with persisted state on startup
+    setSmushMenuVisibility(!smush_enabled);
+  } catch (err) {
+    console.error('[Tabbit SW] initAutoSmusher FAILED:', err);
+  }
+}
+
+/**
+ * Shows or hides the manual "Smush duplicate tabs" context menu item.
+ * Hidden when the Auto Smusher daemon is running — a manual smush would
+ * be immediately re-applied by the daemon on the next tab event anyway.
+ */
+function setSmushMenuVisibility(visible) {
+  chrome.contextMenus.update('tabbit-smush-duplicates', { visible }).catch(() => {});
+}
+
+/**
+ * Builds a Map<normUrl, tab[]> from a list of tabs, applying the current
+ * in-memory smusher settings (skipPinned, ignoreFragments, ignoreQueryStrings)
+ * and suspended-tab URL decoding. Only groups with 2+ tabs are included.
+ * Shared by both runSmushDuplicates() and smushNewTab().
+ */
+function smushBuildGroups(tabs) {
+  const map = new Map();
+  for (const tab of tabs) {
+    const rawUrl = tab.url || tab.pendingUrl || '';
+    if (!rawUrl || rawUrl.startsWith('chrome://')) continue;
+    if (smush_skipPinned && tab.pinned) continue;
+    const key = smushNormaliseUrl(rawUrl);
+    if (!map.has(key)) map.set(key, []);
+    map.get(key).push(tab);
+  }
+  // Discard groups with only one tab (no duplicate)
+  for (const [key, tabs] of map) {
+    if (tabs.length < 2) map.delete(key);
+  }
+  return map;
+}
+
+/**
+ * Normalises a URL for duplicate comparison according to user settings.
+ * Strips hash and/or query string when the relevant flags are enabled.
+ * Decodes suspended-tab real URLs encoded in ?url= query params.
+ */
+function smushNormaliseUrl(rawUrl) {
+  try {
+    const u = new URL(rawUrl);
+    const realUrlParam = u.searchParams.get('url');
+    const base = realUrlParam ? new URL(decodeURIComponent(realUrlParam)) : u;
+    let href = base.origin + base.pathname;
+    if (!smush_ignoreQueryStrings) href += base.search;
+    if (!smush_ignoreFragments)   href += base.hash;
+    return href;
+  } catch {
+    return rawUrl;
+  }
+}
+
+/**
+ * Called whenever a tab is created. If the smusher is enabled and another tab
+ * with the same normalised URL already exists, closes the new tab and focuses
+ * the original.
+ */
+async function smushNewTab(tab) {
+  if (!smush_enabled) return;
+
+  const rawUrl = tab.url || tab.pendingUrl || '';
+  if (!rawUrl || rawUrl === 'chrome://newtab/' || rawUrl.startsWith('chrome://')) return;
+
+  // Avoid double-processing the same tab across onCreated + onUpdated
+  if (smush_processedTabIds.has(tab.id)) return;
+
+  const normUrl = smushNormaliseUrl(rawUrl);
+  if (smush_skipPinned && tab.pinned) return;
+  console.log(`[AutoSmusher] smushNewTab — tabId: ${tab.id}, normUrl: ${normUrl}`);
+
+  try {
+    const allTabs = await chrome.tabs.query({});
+    // Find an existing tab with the same normalised URL that is NOT this new tab
+    const original = allTabs.find(t => {
+      if (t.id === tab.id) return false;
+      if (smush_skipPinned && t.pinned) return false;
+      return smushNormaliseUrl(t.url || t.pendingUrl || '') === normUrl;
+    });
+
+    if (!original) {
+      console.log(`[AutoSmusher] No duplicate found for tabId ${tab.id}`);
+      return;
+    }
+
+    console.log(`[AutoSmusher] Duplicate detected — closing tabId ${tab.id}, focusing original tabId ${original.id}`);
+    smush_processedTabIds.add(tab.id);
+
+    // Close the newly opened duplicate
+    await chrome.tabs.remove(tab.id);
+
+    // Focus the original tab's window then the tab itself
+    await chrome.windows.update(original.windowId, { focused: true });
+    await chrome.tabs.update(original.id, { active: true });
+
+    console.log(`[AutoSmusher] Done — refocused original tabId ${original.id}`);
+  } catch (err) {
+    console.warn('[Tabbit SW] smushNewTab error (non-fatal):', err.message);
+    smush_processedTabIds.delete(tab.id);
+  } finally {
+    // Clean up the tracking set after a short delay
+    setTimeout(() => smush_processedTabIds.delete(tab.id), 2000);
+  }
+}
+
+// Also intercept the pendingUrl → url transition so tabs opened via address bar
+// (which often start with an empty url at onCreated) are caught on first navigation.
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  // Auto Grouper handling (existing)
+  console.log(`[AutoGrouperWorker] tabs.onUpdated fired for tabId: ${tabId}, changeInfo:`, changeInfo);
+  if (changeInfo.url || changeInfo.title) {
+    processTab(tab);
+  }
+  // Auto Smusher — catch the first real URL assignment (pendingUrl → url)
+  if (changeInfo.url && !smush_processedTabIds.has(tabId)) {
+    smushNewTab(tab);
+  }
+  // Auto Sorter — re-sort when a tab navigates to a new URL
+  if (changeInfo.url) {
+    runAutoSort();
+  }
+});
+
+// Auto Sorter — re-sort when a user manually drags a tab to a new position
+chrome.tabs.onMoved.addListener(() => runAutoSort());
+
+// Auto Sorter — re-sort when a tab is dragged in from another window
+chrome.tabs.onAttached.addListener(() => runAutoSort());
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Auto Sorter Daemon
+   Re-sorts tabs in the focused window after every tab-creation or navigation
+   event, using the existing runTabSorter() engine.
+
+   Reliability architecture (three layers):
+   1. runAutoSort() reads autoSortEnabled from storage on every call — the
+      in-memory flag is never trusted, so SW suspension never breaks sorting.
+   2. chrome.idle.onStateChanged fires a catch-up sort the moment the user
+      returns to Chrome after a period of inactivity.
+   3. A silent 1-min chrome.alarms keepalive acts as a belt-and-suspenders
+      safety net for any edge case not caught by the above two.
+───────────────────────────────────────────────────────────────────────────── */
+
+/**
+ * Shows or hides the two manual sort context menu items.
+ * Hidden when the Auto Sorter daemon is running (they'd be immediately undone);
+ * restored when the daemon is disabled.
+ */
+function setSortMenuVisibility(visible) {
+  chrome.contextMenus.update('tabbit-sort-tabs-title', { visible }).catch(() => {});
+  chrome.contextMenus.update('tabbit-sort-tabs-url',   { visible }).catch(() => {});
+}
+
+/**
+ * Reads persisted Auto Sorter settings, syncs menu visibility, and manages
+ * the 'tabbit-auto-sort-keepalive' alarm lifecycle.
+ * Called on install, startup, and whenever TAB_SORTER_SETTINGS_KEY changes.
+ */
+async function setupSortKeepalive() {
+  console.log('[Tabbit SW] setupSortKeepalive() called');
+  try {
+    const raw = await chrome.storage.local.get(TAB_SORTER_SETTINGS_KEY);
+    const settings = { ...DEFAULT_SORTER_SETTINGS, ...(raw[TAB_SORTER_SETTINGS_KEY] ?? {}) };
+    const enabled = settings.autoSortEnabled ?? false;
+    console.log('[Tabbit SW] setupSortKeepalive — autoSortEnabled:', enabled);
+
+    // Sync context menu visibility
+    setSortMenuVisibility(!enabled);
+
+    // Always clear first to avoid duplicate alarms
+    await chrome.alarms.clear('tabbit-auto-sort-keepalive');
+
+    if (!enabled) return;
+
+    // Create the silent 1-min safety-net keepalive (Chrome minimum)
+    chrome.alarms.create('tabbit-auto-sort-keepalive', { periodInMinutes: 1 });
+
+    // Immediate catch-up sort so tabs sort the moment the user enables
+    await runTabSorter();
+  } catch (err) {
+    console.error('[Tabbit SW] setupSortKeepalive FAILED:', err);
+  }
+}
+
+// Back-compat alias — onInstalled and onStartup call initAutoSorter()
+function initAutoSorter() { return setupSortKeepalive(); }
+
+/**
+ * Debounced sort trigger. Reads autoSortEnabled from storage on every call
+ * so the check is always correct even after the SW was suspended and the
+ * in-memory autoSort_enabled flag was reset to false.
+ *
+ * Multiple rapid tab events (e.g., session restore) collapse into a single
+ * runTabSorter() call after 500 ms of quiet.
+ */
+async function runAutoSort() {
+  const raw = await chrome.storage.local.get(TAB_SORTER_SETTINGS_KEY);
+  if (!raw[TAB_SORTER_SETTINGS_KEY]?.autoSortEnabled) return;
+  if (autoSort_debounceTimer) clearTimeout(autoSort_debounceTimer);
+  autoSort_debounceTimer = setTimeout(() => {
+    autoSort_debounceTimer = null;
+    console.log('[AutoSorter] Running debounced sort');
+    runTabSorter().catch((err) => console.warn('[AutoSorter] runTabSorter error:', err));
+  }, 500);
+}
+
+// ─── chrome.idle: catch-up sort when the user returns after inactivity ────────
+// 60s of no mouse/keyboard input transitions the state to "idle".
+// When the user returns ("active"), we run a catch-up sort in case any tab
+// events were missed while the SW was suspended.
+chrome.idle.setDetectionInterval(60);
+
+chrome.idle.onStateChanged.addListener((newState) => {
+  console.log('[AutoSorter] idle state changed to:', newState);
+  if (newState !== 'active') return;
+  chrome.storage.local.get(TAB_SORTER_SETTINGS_KEY).then((raw) => {
+    if (raw[TAB_SORTER_SETTINGS_KEY]?.autoSortEnabled) {
+      console.log('[AutoSorter] idle→active catch-up sort triggered');
+      runTabSorter().catch((err) => console.warn('[AutoSorter] idle catch-up error:', err));
+    }
+  });
+});

@@ -73,12 +73,16 @@ export function useTutorial() {
   }, []);
 
   return {
-    isTutorialActive,
-    isTutorialDisabled,
-    isReturningUser,
-    isLoading,
-    completeTutorial,
-    resetTutorial,
-    setTutorialDisabled,
+    state: {
+      isActive: isTutorialActive,
+      isDisabled: isTutorialDisabled,
+      isReturningUser,
+      isLoading,
+    },
+    actions: {
+      complete: completeTutorial,
+      reset: resetTutorial,
+      setDisabled: setTutorialDisabled,
+    },
   };
 }

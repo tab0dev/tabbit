@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from 'react';
-import styles from '../Overlay/Overlay.module.css';
+import styles from './InlineAddRow.module.css';
 
 // shared inline input row for creating new items (folders, groups, etc.)
 // auto-focuses on mount, submits on enter, cancels on escape.

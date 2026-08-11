@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { CaretDown } from '@phosphor-icons/react';
 import styles from './Select.module.css';
 
-export default function Select({ value, onChange, options, className = '' }) {
+export default function Select({ value, onChange, options, className = '', direction = 'down', variant = 'default' }) {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef(null);
 
@@ -30,8 +30,8 @@ export default function Select({ value, onChange, options, className = '' }) {
     <div className={`${styles.container} ${className}`} ref={containerRef}>
       <button 
         type="button" 
-        className={`${styles.trigger} ${isOpen ? styles.open : ''}`}
-        onClick={() => setIsOpen(!isOpen)}
+        className={`${styles.trigger} ${isOpen ? styles.open : ''} ${variant === 'minimal' ? styles.minimal : ''}`}
+        onClick={(e) => { e.stopPropagation(); setIsOpen(!isOpen); }}
         aria-haspopup="listbox"
         aria-expanded={isOpen}
       >
@@ -40,14 +40,14 @@ export default function Select({ value, onChange, options, className = '' }) {
       </button>
 
       {isOpen && (
-        <div className={styles.dropdown} role="listbox">
+        <div className={`${styles.dropdown} ${direction === 'up' ? styles.up : styles.down}`} role="listbox">
           {options.map((opt) => (
             <div
               key={opt.value}
               role="option"
               aria-selected={opt.value === value}
               className={`${styles.option} ${opt.value === value ? styles.selected : ''}`}
-              onClick={() => handleSelect(opt.value)}
+              onClick={(e) => { e.stopPropagation(); handleSelect(opt.value); }}
             >
               {opt.label}
             </div>

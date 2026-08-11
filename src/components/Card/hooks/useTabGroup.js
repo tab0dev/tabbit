@@ -1,5 +1,5 @@
 import { useTriage } from '../../../store/TriageProvider';
-import { GROUP_COLORS } from '../../Overlay/TabGroupPickerPanel';
+import { GROUP_COLORS } from '../../Dashboard/TabGroupPickerPanel';
 
 export function useTabGroup(tab) {
   const { state } = useTriage();

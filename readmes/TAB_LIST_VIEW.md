@@ -4,7 +4,7 @@ The List View (also called the "batch panel") is Tabbit's primary interface for 
 
 ## Entry Point
 
-`src/components/Card/ListView/ListView.jsx` is the top-level component. It is rendered as an overlay from `TriageDashboard`. It receives a single `onClose` prop and owns all internal state — no selection state, filter state, or view mode leaks up to the parent.
+`src/components/Tools/ListView/ListView.jsx` is the top-level component. It is rendered as an overlay from `TriageDashboard`. It receives a single `onClose` prop and owns all internal state — no selection state, filter state, or view mode leaks up to the parent.
 
 ---
 

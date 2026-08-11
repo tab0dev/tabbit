@@ -11,7 +11,7 @@ import { useProgress } from './hooks/useProgress';
 import { TabProcessingProvider, useTabProcessing } from './store/TabProcessingProvider';
 import { ThemeProvider } from './store/ThemeProvider';
 import { CRTEffectProvider } from './store/CRTEffectProvider';
-import { MusicProvider } from './store/MusicProvider';
+import { MusicProvider } from './store/music/MusicProvider';
 import { TimerProvider } from './store/TimerProvider';
 import { PickerProvider } from './store/PickerProvider';
 

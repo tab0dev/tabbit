@@ -74,7 +74,6 @@ export default function Card({ tab, isTop, index, actions, activeView, onNavigat
         rotate,
         zIndex: 100 - index,
       }}
-      layout
       drag={isTop && activeView === 'default' ? "x" : false}
       dragConstraints={{ left: 0, right: 0 }}
       onDragEnd={handleDragEnd}

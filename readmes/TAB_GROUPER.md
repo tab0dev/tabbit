@@ -42,8 +42,8 @@ To accurately parse domains worldwide, the system relies on `tldts`, a fast and 
 
 ## Interactive Wizard Architecture
 
-The UI is built as a complex React state machine (`useWizardState`):
+The UI is built as a complex React state machine (`ManualTabGroupWizard` at `src/components/Tools/TabGroupWizard/ManualTabGroupWizard.jsx`):
 - Tab drag-and-drop between groups using `@dnd-kit`.
 - Real-time previews of split/merge operations.
 - State exclusion (users can uncheck specific tabs to exclude them from the grouping operation).
-- Upon confirmation, it batches `chrome.tabs.group` and `chrome.tabGroups.update` calls, respecting window boundaries since Chrome Tab Groups cannot span multiple windows.
+- Upon confirmation, it batches `chrome.tabs.group` and `chrome.tabGroups.update` calls. If a group contains tabs from multiple windows, it intelligently moves them into a single target window (the one holding the majority of the group's tabs) to prevent fragmenting the group across windows.

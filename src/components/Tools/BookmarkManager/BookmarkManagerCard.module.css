@@ -1,0 +1,499 @@
+/* ═══════════════════════════════════════════════════════════
+   BOOKMARK MANAGER CARD
+   Extends ListView.module.css (shared) with bookmark-specific
+   additions. Import both in components that need them.
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── Mode tabs (Browse / Cold Storage) ──────────────────── */
+.modeTabs {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 2px;
+}
+
+.modeTab {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-muted);
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 10px;
+  cursor: pointer;
+  transition: all 120ms ease;
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+.modeTab:hover {
+  color: var(--text-primary);
+  background: var(--bg-surface);
+}
+
+.modeTabActive {
+  color: var(--text-primary);
+  background: var(--bg-surface);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+}
+
+/* ── Checkbox: indeterminate dash state ─────────────────── */
+/* Overrides the base .checkboxChecked to show a dash instead of a tick */
+.checkboxIndeterminate {
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* ── Tree folder rows ────────────────────────────────────── */
+.bmFolderRow {
+  /* Folders don't have hover-open behaviour like BookmarkPickerPanel — 
+     clicking toggles selection; the expand caret is a separate target */
+  cursor: pointer;
+}
+
+.bmTreeChevron {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 0 2px;
+  border-radius: 3px;
+  flex-shrink: 0;
+  transition: color 100ms ease;
+}
+
+.bmTreeChevron:hover {
+  color: var(--text-primary);
+}
+
+.bmTreeChevronSpacer {
+  display: inline-block;
+  width: 10px;
+}
+
+.bmFolderIcon {
+  flex-shrink: 0;
+  font-size: 13px;
+}
+
+.bmFolderLabel {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bmFolderCount {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.bmDraftFolderInput {
+  flex: 1;
+  min-width: 0;
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  color: var(--text-primary);
+  font-size: 13px;
+  font-family: inherit;
+  padding: 2px 6px;
+  outline: none;
+}
+.bmDraftFolderInput:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+.bmFolderEmpty {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--accent-orange, #f5a623);
+  background: color-mix(in srgb, var(--accent-orange, #f5a623) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent-orange, #f5a623) 30%, transparent);
+  border-radius: 4px;
+  padding: 1px 6px;
+  flex-shrink: 0;
+}
+
+/* ── Bookmark rows ───────────────────────────────────────── */
+.bmFavicon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bmDateBadge {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Stacks "Used" + "Added" dates in a right-aligned column */
+.bmDateStack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.bmPathBadge {
+  font-size: 10px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 160px;
+  flex-shrink: 0;
+}
+
+/* ── Cold Storage file status chip ──────────────────────── */
+.archiveStatus {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-elevated);
+  flex-shrink: 0;
+}
+
+.archiveStatusIcon {
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.archiveStatusText {
+  flex: 1;
+  font-size: 12px;
+  color: var(--text-secondary);
+  overflow: hidden;
+}
+
+.archiveStatusFilename {
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.archiveStatusCount {
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+}
+
+.archiveStatusBtn {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 4px 9px;
+  cursor: pointer;
+  transition: all 100ms ease;
+  font-family: inherit;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.archiveStatusBtn:hover {
+  color: var(--text-primary);
+  background: var(--bg-surface);
+  border-color: color-mix(in srgb, var(--text-secondary) 40%, transparent);
+}
+
+/* ── Onboarding empty state for Cold Storage ────────────── */
+.archiveEmpty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 40px 24px;
+  text-align: center;
+}
+
+.archiveEmptyIcon {
+  font-size: 36px;
+  opacity: 0.5;
+}
+
+.archiveEmptyTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.archiveEmptyBody {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.6;
+  max-width: 280px;
+}
+
+.archiveEmptyBtn {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+  background: var(--accent);
+  border: none;
+  border-radius: 6px;
+  padding: 8px 18px;
+  cursor: pointer;
+  transition: opacity 120ms ease;
+  font-family: inherit;
+}
+
+.archiveEmptyBtn:hover {
+  opacity: 0.88;
+}
+
+/* ── Header centre slot (mode tabs + search) ────────────── */
+.headerCentre {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+/* ── Cold Storage body wrapper ──────────────────────────── */
+.coldStorageBody {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ── "No archive" muted label inside status chip ────────── */
+.archiveStatusEmpty {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+/* ── Scrollable list area inside ColdStoragePanel ──────── */
+.archiveScrollArea {
+  flex: 1;
+  overflow-y: auto;
+  position: relative;
+}
+
+
+/* ── Hidden file input ──────────────────────────────────── */
+.hiddenInput {
+  display: none;
+}
+
+/* ── BrowsePanel outer column ───────────────────────────── */
+/* Wraps the flex-row body + the action bar so the action bar
+   stacks at the bottom, not beside the sidebar.
+   flex: 1 + overflow: hidden ensures it fills the parent listView. */
+.browsePanelRoot {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* ── Drag & Drop ─────────────────────────────────────────── */
+
+/* Folder receiving a drop-inside */
+.bmDropTarget {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+  border-radius: 5px;
+  background: color-mix(in srgb, var(--accent) 6%, transparent);
+}
+
+/* Spacer between rows — real drop zone for index-based moves */
+.bmDropSpacer {
+  height: 10px;
+  display: flex;
+  align-items: center;
+  pointer-events: auto;
+  position: relative;
+  flex-shrink: 0;
+}
+
+/* The 2px accent line, invisible at rest */
+.bmDropSpacer::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 2px;
+  border-radius: 1px;
+  background: var(--accent);
+  opacity: 0;
+  transition: opacity 60ms ease;
+}
+
+.bmDropSpacerActive::after {
+  opacity: 1;
+}
+
+/* Tree view list container — gap:0 because spacers supply the visual gap */
+.listLayoutTree {
+  gap: 0 !important;
+}
+
+/* Source row ghost while dragging */
+.bmDragGhost {
+  opacity: 0.35;
+}
+
+/* DragOverlay: floating row clone */
+.bmDragOverlay {
+  background: var(--bg-surface);
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-primary);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.26);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  pointer-events: none;
+  cursor: grabbing;
+}
+
+/* Staged changes footer */
+.bmStagedBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  background: color-mix(in srgb, var(--accent) 8%, var(--bg-elevated));
+  border-top: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+  flex-shrink: 0;
+  gap: 10px;
+}
+
+.bmStagedLabel {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.bmStagedActions {
+  display: flex;
+  gap: 6px;
+}
+
+.bmStagedRevert {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 4px 10px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 100ms ease;
+}
+.bmStagedRevert:hover {
+  color: var(--text-primary);
+  border-color: var(--text-muted);
+}
+
+.bmStagedAccept {
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--accent);
+  border: none;
+  border-radius: 5px;
+  padding: 4px 12px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: opacity 100ms ease;
+}
+.bmStagedAccept:hover {
+  opacity: 0.88;
+}
+
+/* ── Duplicate Finder UX ────────────────────────────────── */
+.duplicateHighlight {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+.duplicateBadge {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+  border-radius: 4px;
+  padding: 2px 6px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin-left: 8px;
+}
+
+.floatingIndicator {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg-surface);
+  border: 1px solid var(--accent);
+  color: var(--text-primary);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 20px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+  z-index: 100;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  pointer-events: none;
+  animation: floatIn 150ms ease-out;
+}
+
+.floatingIndicatorTop {
+  top: 54px; /* below the grid header */
+}
+
+.floatingIndicatorBottom {
+  bottom: 24px;
+}
+
+@keyframes floatIn {
+  from { opacity: 0; transform: translate(-50%, 8px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}

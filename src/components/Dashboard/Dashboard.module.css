@@ -8,15 +8,17 @@
   gap: clamp(10px, 1.5vw, 16px);
   padding: clamp(10px, 1.5vw, 16px);
   height: 100vh;
-  animation: fadeIn 250ms ease;
+  animation: fadeIn 600ms ease;
   overflow: hidden;
 }
 
 .main {
-  grid-area: 1 / 1 / 7 / 4;
+  grid-column: 1 / var(--main-col-end, 4);  /* 4 = normal, 6 = CenterView (full width) */
+  grid-row: 1 / var(--main-row-end, 7);       /* 7 = normal, 8 = CenterView (full height) */
   position: relative;
   overflow: visible;
   z-index: 10;
+  view-transition-name: main-card;
 }
 
 .cardStack {
@@ -32,20 +34,26 @@
 }
 
 .hotkeys {
-  grid-area: 7 / 1 / 8 / 4;
+  grid-column: 1 / var(--main-col-end, 4);
+  grid-row: 7 / 8;     /* last row — slides off-screen in CenterView via CSS animation */
   min-width: 0;
   min-height: 62px;
   height: 100%;
   position: relative;
   z-index: 20;
+  view-transition-name: hotkeys-bar;
+  /* No overflow:hidden needed — .dashboard overflow:hidden clips the translateY exit */
 }
 
+/* Slide off-screen via CSS transform in CenterView */
 .bookmarks {
   grid-area: 1 / 4 / 5 / 6;
+  view-transition-name: bookmarks-panel;
 }
 
 .tabGroups {
   grid-area: 5 / 4 / 8 / 6;
+  view-transition-name: tabgroups-panel;
 }
 
 /* .monitor {
@@ -64,4 +72,21 @@
   min-width: 0;
   min-height: 0;
   height: 100%;
+  /* Ensure default state is set so transitions calculate from here */
+  transform: translate(0, 0);
+}
+
+[data-center-view="true"] .bookmarks,
+[data-center-view="true"] .tabGroups {
+  transform: translateX(calc(100% + 16px));
+  opacity: 0;
+  pointer-events: none;
+}
+
+[data-center-view="true"] .hotkeys {
+  transform: translateY(calc(100% + 16px));
+}
+
+[data-reduce-motion="true"] .panel {
+  transition: none;
 }

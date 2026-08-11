@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useMagicDot } from './MagicDotProvider';
 import styles from './MagicDot.module.css';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -50,6 +51,10 @@ const getCoordinatesForPosition = (rect, position) => {
   return { x, y };
 };
 
+// Timing-aware dim background transition: stays short even on brief steps,
+// and tightens up proportionally when the step itself is very short.
+const getDimAnimMs = (step) => Math.min(200, Math.max(80, (step.duration || 2500) / 8));
+
 /**
  * @param {{ sequence: MagicDotStep[], onSequenceComplete?: () => void, autoStart?: boolean, introDelay?: number, fixedMode?: boolean }} props
  */
@@ -60,6 +65,50 @@ export default function MagicDot({ sequence = [], onSequenceComplete, autoStart 
   const [showTooltip, setShowTooltip] = useState(false);
   const dotRef = useRef(null);
   const currentStepRef = useRef(-1);
+  const tooltipRef = useRef(null);
+
+  const adjustTooltipBounds = (x, y, step) => {
+    if (!tooltipRef.current) return;
+    const tooltipEl = tooltipRef.current;
+    const pos = step.tooltipPosition || 'bottom';
+    const dotSize = step.size || 24;
+    const MARGIN = 32; // 16px css margin + 16px edge padding
+    
+    let maxWidth = 300;
+    if (pos.includes('right')) {
+      maxWidth = window.innerWidth - x - (dotSize / 2) - MARGIN;
+    } else if (pos.includes('left')) {
+      maxWidth = x - (dotSize / 2) - MARGIN;
+    } else {
+      maxWidth = window.innerWidth - MARGIN;
+    }
+    
+    maxWidth = Math.max(120, maxWidth);
+    tooltipEl.style.setProperty('--max-tooltip-width', `${maxWidth}px`);
+    
+    // reset shifts to calculate natural bounding box
+    tooltipEl.style.setProperty('--shift-x', '0px');
+    tooltipEl.style.setProperty('--shift-y', '0px');
+    
+    const rect = tooltipEl.getBoundingClientRect();
+    let shiftX = 0;
+    let shiftY = 0;
+    
+    if (rect.right > window.innerWidth - 16) {
+      shiftX = (window.innerWidth - 16) - rect.right;
+    } else if (rect.left < 16) {
+      shiftX = 16 - rect.left;
+    }
+    
+    if (rect.bottom > window.innerHeight - 16) {
+      shiftY = (window.innerHeight - 16) - rect.bottom;
+    } else if (rect.top < 16) {
+      shiftY = 16 - rect.top;
+    }
+    
+    if (shiftX !== 0) tooltipEl.style.setProperty('--shift-x', `${shiftX}px`);
+    if (shiftY !== 0) tooltipEl.style.setProperty('--shift-y', `${shiftY}px`);
+  };
 
   useEffect(() => {
     if (!autoStart || sequence.length === 0) return;
@@ -80,12 +129,28 @@ export default function MagicDot({ sequence = [], onSequenceComplete, autoStart 
         
         setShowTooltip(false);
         
+        const targetTimeout = step.timeout !== undefined ? step.timeout : 2500;
         let targetEl = await new Promise(resolve => {
-           unsubscribe = subscribeTarget(step.target, resolve);
+          let resolved = false;
+          const timer = setTimeout(() => {
+            if (!resolved) {
+              resolved = true;
+              console.warn(`[MagicDot] target '${step.target}' never appeared within ${targetTimeout}ms — skipping step`);
+              resolve(null);
+            }
+          }, targetTimeout);
+          unsubscribe = subscribeTarget(step.target, (node) => {
+            if (!resolved) {
+              resolved = true;
+              clearTimeout(timer);
+              resolve(node);
+            }
+          });
         });
         if (unsubscribe) unsubscribe();
         unsubscribe = null;
         if (destroyed) return;
+        if (!targetEl) continue;
 
         let rect = targetEl.getBoundingClientRect();
         if (rect.width === 0 && rect.height === 0) {
@@ -139,6 +204,10 @@ export default function MagicDot({ sequence = [], onSequenceComplete, autoStart 
         }
 
         setShowTooltip(true);
+        
+        await new Promise(r => requestAnimationFrame(r));
+        if (destroyed) return;
+        adjustTooltipBounds(x, y, step);
 
         if (step.onEnter) {
           step.onEnter();
@@ -179,6 +248,8 @@ export default function MagicDot({ sequence = [], onSequenceComplete, autoStart 
            const y = baseCoords.y + (step.offsetY || 0);
            dotRef.current.style.transition = 'none';
            dotRef.current.style.transform = `translate(calc(${x}px - 50%), calc(${y}px - 50%))`;
+           
+           adjustTooltipBounds(x, y, step);
         });
         unsubs();
       }
@@ -189,11 +260,16 @@ export default function MagicDot({ sequence = [], onSequenceComplete, autoStart 
 
   if (!activeStep || currentStepRef.current >= sequence.length) return null;
 
-  return (
+  return createPortal(
     <>
       <div ref={dotRef} className={styles.magicDot}>
         {!fixedMode && activeStep.tooltip && showTooltip && (
-          <div className={styles.tooltip} data-position={activeStep.tooltipPosition || 'bottom'}>
+          <div
+            ref={tooltipRef}
+            className={`${styles.tooltip}${activeStep.dimBackground ? ` ${styles.tooltipDim}` : ''}`}
+            data-position={activeStep.tooltipPosition || 'bottom'}
+            style={activeStep.dimBackground ? { '--tooltip-anim': `${getDimAnimMs(activeStep)}ms` } : undefined}
+          >
             {activeStep.tooltip}
           </div>
         )}
@@ -235,6 +311,7 @@ export default function MagicDot({ sequence = [], onSequenceComplete, autoStart 
           </AnimatePresence>
         </motion.div>
       )}
-    </>
+    </>,
+    document.body
   );
 }

@@ -2,15 +2,15 @@ import { useCallback } from 'react';
 import { useTriage } from '../store/TriageProvider';
 import { useCardTransition } from './useCardTransition';
 import { useMonitor } from './useMonitor';
-import { useMusic } from '../store/MusicProvider';
-import { pickQuip, TRIAGE_QUIPS } from '../data/quips';
+import { useMusic } from '../store/music/MusicProvider';
+import { pickQuip, TRIAGE_QUIPS } from '../constants/quips';
 
 /**
  * A persistent module-level stack (parallel to state.undoStack) that stores everything
  * needed to reverse each Chrome API call when undo() is invoked. Hoisted outside the hook
  * so multiple hook instances (e.g. UI vs Hotkeys) share the exact same Chrome action history.
  */
-const globalChromeUndoStack = [];
+export const globalChromeUndoStack = [];
 
 /**
  * Centralized triage action creators that bundle Chrome API side effects
@@ -111,11 +111,15 @@ export function useTriageActions() {
     else delayedDispatch(action);
   }, [dispatch, delayedDispatch, postStatus, onTabAction]);
 
-  const undo = useCallback(() => {
+  const undo = useCallback(async () => {
     if (state.undoStack.length === 0) return;
     const chromeData = globalChromeUndoStack.pop();
     if (chromeData) {
       switch (chromeData.type) {
+        case 'bookmarks_manager_custom': {
+          await chromeData.undoFn();
+          break;
+        }
         case 'close':
         case 'bookmark': {
           chromeData.tabs.forEach(t => {
@@ -161,5 +165,11 @@ export function useTriageActions() {
     dispatch({ type: 'OPEN_PICKER', payload: type });
   }, [dispatch, postStatus]);
 
-  return { keep, close, closeBatch, bookmark, group, undo, back, openPicker };
+  const openTab = useCallback((tab) => {
+    if (!chrome?.tabs) return;
+    chrome?.windows?.update(tab.windowId, { focused: true }).catch(() => { });
+    chrome?.tabs?.update(tab.id, { active: true }).catch(() => { });
+  }, []);
+
+  return { keep, close, closeBatch, bookmark, group, undo, back, openPicker, openTab };
 }

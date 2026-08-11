@@ -97,6 +97,7 @@ export function useKeyboard() {
         else if (key === hk.bookmark) pk.setActivePicker('bookmark');
         else if (key === hk.group) pk.setActivePicker('group');
         else if (key === hk.back) actions.back();
+        else if (key === hk.openTab) { e.preventDefault(); actions.openTab(currentTab); }
         else if (key === hk.undo) actions.undo();
       } else if (s.mode === Mode.COMPLETE) {
         if (key === hk.undo) actions.undo();

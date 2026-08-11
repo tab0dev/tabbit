@@ -56,7 +56,7 @@ To simplify the onboarding experience, the extension ships with a massive, local
 
 The auto-grouper is fully aware of tabs paused by a tab-suspender extension (e.g. Tiny Suspender). The behaviour is governed by the **Exclude Suspended Tabs** toggle in Settings, which is stored in both `localStorage` (for the React UI) and `chrome.storage.local` (as `tabbit_excludeSuspendedTabs_remote`) so the service worker daemon can read it directly.
 
-### Preview Panel (`AutoTabGrouperWorkerPanel`)
+### Preview Panel (`AutoTabGrouperPanel`)
 
 `previewTabs` pre-filters `state.tabs` against `excludeSuspendedTabs` (read from `TabProcessingProvider`) before running any rule matching. Because `triageLoader.js` already decodes the real URL, title, and favicon out of each suspender URL and stamps `isSuspended: true` on the tab object, the panel only needs a single guard:
 
@@ -102,7 +102,7 @@ On confirm, tabs are processed per-rule: if a Chrome tab group with the matching
 
 ### Rule List Tab Count
 
-Each rule row in `RuleList` displays a live count of tabs currently in the matching Chrome tab group (e.g., `· 20 tabs`), derived from a `groupTabCountMap` useMemo in `AutoTabGrouperWorkerPanel`. The count is only shown when greater than zero and updates reactively with `state.tabs` and `state.tabGroups`.
+Each rule row in `RuleList` displays a live count of tabs currently in the matching Chrome tab group (e.g., `· 20 tabs`), derived from a `groupTabCountMap` useMemo in `AutoTabGrouperPanel`. The count is only shown when greater than zero and updates reactively with `state.tabs` and `state.tabGroups`.
 
 ### Auto Grouper Shortcut in Tab Group Picker
 

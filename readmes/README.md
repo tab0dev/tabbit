@@ -17,8 +17,8 @@ This folder contains everything you need to grok the codebase, understand the po
 
 Tabbit isn't just a triage tool. It comes with powerful built-in utilities:
 
-- **[TAB_SORTER.md](./TAB_SORTER.md)** — How Tabbit natively sorts browser tabs across groups and windows.
-- **[WATCH_LATER.md](./WATCH_LATER.md)** — The orchestration layer that automatically saves YouTube tabs to your Watch Later playlist.
+- **[AUTO_TAB_SORTER.md](./AUTO_TAB_SORTER.md)** — How Tabbit natively sorts browser tabs across groups and windows.
+- **[YT_WATCH_LATER.md](./YT_WATCH_LATER.md)** — The orchestration layer that automatically saves YouTube tabs to your Watch Later playlist.
 - **[AUTO_CLOSER.md](./AUTO_CLOSER.md)** — The background worker that silently cleans up stale tabs over time.
 - **[MUSIC_SYSTEM.md](./MUSIC_SYSTEM.md)** — Deep dive into the interactive 7-layer generative music engine.
 

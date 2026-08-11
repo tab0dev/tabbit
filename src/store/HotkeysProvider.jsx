@@ -6,7 +6,8 @@ const defaultHotkeys = {
   bookmark: 'ARROWUP',
   group: 'ARROWDOWN',
   back: 'J',
-  undo: 'Z'
+  undo: 'Z',
+  openTab: ' '
 };
 
 export const HotkeysContext = createContext();

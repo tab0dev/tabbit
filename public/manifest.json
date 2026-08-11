@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Tabbit: Tab Closer & Organizer",
-  "version": "0.2",
-  "description": "Finally close all your open tabs. Tab closer & tab manager with hotkeys, bulk close, AI grouping, auto-close, and tab sorting.",
+  "version": "0.3",
+  "description": "Close old tabs, manage bookmarks, and organize groups, quick as a rabbit.",
   "permissions": [
     "tabs",
     "scripting",
@@ -12,7 +12,8 @@
     "debugger",
     "alarms",
     "storage",
-    "contextMenus"
+    "contextMenus",
+    "idle"
   ],
   "host_permissions": [
     "*://*.youtube.com/*"

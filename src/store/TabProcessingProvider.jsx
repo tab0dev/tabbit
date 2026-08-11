@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { TAB_PROCESSING_MODES, TAB_PROCESSING_STORAGE_KEY } from './tabProcessingModes';
+import { TAB_PROCESSING_MODES, TAB_PROCESSING_STORAGE_KEY } from '../constants/tabProcessingModes';
 
 const TabProcessingContext = createContext(null);
 

@@ -323,6 +323,13 @@
   flex: 1;
 }
 
+.timerRight {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
 .footerDivider {
   width: 1px;
   height: 14px;
@@ -374,6 +381,73 @@
 .settingsText {
   font-size: 12px;
   margin-left: 4px;
+}
+
+/* ── Inline Sort Picker ─────────────────────────────────────────────────── */
+.inlineSortTrigger {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.inlineSortTrigger:hover {
+  color: var(--text-primary);
+  background: var(--bg-elevated);
+}
+
+.inlineSortExpanded {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  animation: inlineExpand 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+}
+
+@keyframes inlineExpand {
+  from {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.inlineSortOption {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+}
+
+.inlineSortOption:hover {
+  color: var(--text-primary);
+}
+
+.inlineSortActive {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.inlineSortDivider {
+  color: var(--border);
+  font-size: 12px;
+  user-select: none;
 }
 
 /* ── Music toggle button (footer) ─────────────────────────────────────── */
@@ -537,25 +611,29 @@
 }
 
 .menuItemLightning,
-.menuItemMagnet {
+.menuItemMagnet, 
+.menuItemSmush,
+.menuItemSort {
   --hover-color: #fdd663;
   --hover-bg: color-mix(in srgb, #fdd663 15%, transparent);
 }
 
 [data-theme="light"] .menuItemLightning,
-[data-theme="light"] .menuItemMagnet {
+[data-theme="light"] .menuItemMagnet, 
+[data-theme="light"] .menuItemSmush,
+[data-theme="light"] .menuItemSort {
   --hover-color: #e37400;
   --hover-bg: color-mix(in srgb, #e37400 15%, transparent);
 }
 
-.menuItemSort {
+/* .menuItemSort {
   --hover-color: #81c995;
   --hover-bg: color-mix(in srgb, #81c995 15%, transparent);
 }
 [data-theme="light"] .menuItemSort {
   --hover-color: #1e8e3e;
   --hover-bg: color-mix(in srgb, #1e8e3e 15%, transparent);
-}
+} */
 
 .menuActiveIcon {
   color: #fdd663;

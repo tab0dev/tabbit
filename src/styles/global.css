@@ -305,3 +305,53 @@ body {
 .view[hidden] {
   display: none;
 }
+
+/* Disable whole-page crossfade so Framer Motion panels can slide smoothly */
+::view-transition-group(root) {
+  animation: none;
+}
+
+/* Match the exact duration and easing of the slide */
+::view-transition-group(bookmarks-panel),
+::view-transition-old(bookmarks-panel),
+::view-transition-new(bookmarks-panel),
+::view-transition-group(tabgroups-panel),
+::view-transition-old(tabgroups-panel),
+::view-transition-new(tabgroups-panel),
+::view-transition-group(hotkeys-bar),
+::view-transition-old(hotkeys-bar),
+::view-transition-new(hotkeys-bar) {
+  animation-duration: 0.8s;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Custom Card Crossfade Sequence */
+::view-transition-group(main-card) {
+  animation-duration: 0.8s;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  background-color: var(--bg-surface);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+::view-transition-old(main-card) {
+  animation: card-fade-out 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  object-fit: none;
+  object-position: center;
+}
+
+::view-transition-new(main-card) {
+  animation: card-fade-in 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.4s both;
+  object-fit: none;
+  object-position: center;
+}
+
+@keyframes card-fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes card-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

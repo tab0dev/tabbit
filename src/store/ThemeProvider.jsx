@@ -22,6 +22,13 @@ function resolveInitialTheme() {
 
 export function ThemeProvider({ children }) {
   const [theme, setTheme] = useState(resolveInitialTheme);
+  const [reduceMotion, setReduceMotion] = useState(() => {
+    try {
+      return localStorage.getItem('reduceMotion') === 'true';
+    } catch {
+      return false;
+    }
+  });
 
   // Apply data-theme attribute on <html> whenever theme changes
   useEffect(() => {
@@ -36,10 +43,22 @@ export function ThemeProvider({ children }) {
     } catch { /* ignore */ }
   }, [theme]);
 
+  useEffect(() => {
+    try {
+      localStorage.setItem('reduceMotion', reduceMotion.toString());
+      if (reduceMotion) {
+        document.documentElement.setAttribute('data-reduce-motion', 'true');
+      } else {
+        document.documentElement.removeAttribute('data-reduce-motion');
+      }
+    } catch { /* ignore */ }
+  }, [reduceMotion]);
+
   const toggleTheme = () => setTheme(t => (t === 'dark' ? 'light' : 'dark'));
+  const toggleReduceMotion = () => setReduceMotion(prev => !prev);
 
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
+    <ThemeContext.Provider value={{ theme, toggleTheme, reduceMotion, toggleReduceMotion }}>
       {children}
     </ThemeContext.Provider>
   );

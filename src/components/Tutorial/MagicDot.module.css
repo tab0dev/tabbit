@@ -51,7 +51,9 @@
   padding: 8px 12px;
   border-radius: 8px;
   font-size: 13px;
-  white-space: nowrap;
+  white-space: pre-wrap;
+  width: max-content;
+  max-width: var(--max-tooltip-width, 300px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
   border: 1px solid var(--border);
 }
@@ -59,28 +61,28 @@
 .tooltip[data-position="bottom"] {
   top: 100%;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translate(calc(-50% + var(--shift-x, 0px)), var(--shift-y, 0px));
   margin-top: 16px;
 }
 
 .tooltip[data-position="top"] {
   bottom: 100%;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translate(calc(-50% + var(--shift-x, 0px)), var(--shift-y, 0px));
   margin-bottom: 16px;
 }
 
 .tooltip[data-position="left"] {
   right: 100%;
   top: 50%;
-  transform: translateY(-50%);
+  transform: translate(var(--shift-x, 0px), calc(-50% + var(--shift-y, 0px)));
   margin-right: 16px;
 }
 
 .tooltip[data-position="right"] {
   left: 100%;
   top: 50%;
-  transform: translateY(-50%);
+  transform: translate(var(--shift-x, 0px), calc(-50% + var(--shift-y, 0px)));
   margin-left: 16px;
 }
 
@@ -118,6 +120,22 @@
   transform: translate(-50%, -50%);
 }
 
+/* Dark, near-opaque background for steps with dimBackground: true.
+   Animation duration is set inline (--tooltip-anim) from the step's duration,
+   so short steps get a short, clean transition. */
+.tooltipDim {
+  background-color: var(--overlay-bg);
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.55);
+  transition: background-color 200ms ease, border-color 200ms ease;
+  animation: tooltipDimIn var(--tooltip-anim, 200ms) ease-out;
+}
+
+@keyframes tooltipDimIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
 .magicDotFixed {
   box-shadow: none !important;
   background-color: transparent !important;
@@ -146,6 +164,7 @@
   box-sizing: border-box;
   min-height: 40px;
   min-width: 0;
+  z-index: 2147483647;
 }
 
 .emptyTooltip {

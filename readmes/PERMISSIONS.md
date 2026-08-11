@@ -21,10 +21,12 @@ Required to enumerate and manage all open tabs across all windows.
 - `chrome.tabs.getCurrent()`: Exclude the extension's own tab from the queue.
 
 #### `bookmarks`
-Required to let users save tabs to bookmark folders during triage. 
-- `chrome.bookmarks.getTree()`: Builds a searchable folder picker during initialization.
-- `chrome.bookmarks.create()`: Saves a triaged tab's URL and title into the user's chosen folder.
-- `chrome.bookmarks.remove()`: Reverses a bookmark action during an "Undo".
+Required to let users save tabs to bookmark folders during triage, and to power the **Bookmark Cleaner** feature.
+- `chrome.bookmarks.getTree()`: Builds a searchable folder picker during triage initialization; fetches the full annotated bookmark tree for Bookmark Cleaner's Browse and Cold Storage modes; resolves the top-level container ID map (`"Bookmarks bar"` → `"1"`, etc.) needed to correctly rebuild folder paths during archive restore.
+- `chrome.bookmarks.create()`: Saves a triaged tab's URL and title into the user's chosen folder; recreates archived bookmarks at their original folder path during a Cold Storage restore operation.
+- `chrome.bookmarks.remove()`: Reverses a bookmark action during an "Undo"; removes bookmarks selected for deletion or cold-storage archival in the Bookmark Cleaner.
+- `chrome.bookmarks.move()`: Rescues orphaned bookmark children to a safe parent position when a partially-selected folder is deleted or archived.
+- `chrome.bookmarks.getChildren()`: Walks existing subfolder chains during a restore operation to find or create the correct parent folder before inserting the bookmark.
 
 #### `tabGroups`
 Required to manage existing Chrome tab groups and create new ones.
@@ -50,6 +52,11 @@ Tabbit includes an opt-in Auto Tab Closer that automatically closes tabs the use
 - It then queries all open tabs, compares the `lastAccessed` time against the threshold, and closes qualifying tabs.
 - The alarm is dynamically cleared and re-created whenever the user changes settings.
 
+A second alarm (`tabbit-auto-sort-keepalive`) supports the opt-in Auto Tab Sorter daemon:
+- Chrome MV3 service workers are suspended after ~30 s of inactivity, wiping all in-memory state. Without a periodic wakeup, the daemon cannot guarantee tabs stay sorted across SW suspensions.
+- The alarm fires every minute (Chrome's minimum `periodInMinutes`) as a belt-and-suspenders safety net, triggering a catch-up sort pass that reads the enabled flag directly from `chrome.storage.local`.
+- This alarm is hidden from the user — there is no configurable interval. It is created when the user enables Auto Sort and cleared when they disable it.
+
 #### `storage`
 Required to persist state across two isolated contexts (the UI and the background service worker).
 - **Auto Tab Closer**: `chrome.storage.local` persists settings (enabled flag, inactivity threshold, check interval). `chrome.storage.session` holds a temporary graveyard log of recently auto-closed tabs so users can review and restore them.
@@ -72,3 +79,9 @@ Required exclusively for the **Watch Later Batch** feature. Tabbit uses `chrome.
 Required by the **Merge Windows** feature.
 - `chrome.windows.getLastFocused()`: Identifies the target window that all other tabs will be consolidated into.
 - `chrome.windows.update()`: Brings the target window to the foreground after the merge so the user can immediately see the result.
+
+#### `idle`
+Required by the opt-in **Auto Tab Sort** feature as a wake-up trigger to detect when the user returns to their computer. Since Chrome suspends service workers after short periods of inactivity, the extension misses tab lifecycle events while asleep. This permission allows the extension to wake up and sort tabs before the user resumes browsing.
+- `chrome.idle.setDetectionInterval(60)`: Defines a 60-second inactivity threshold.
+- `chrome.idle.onStateChanged`: Detects when the user transitions back to an `"active"` state. Upon waking, the extension checks if auto-sort is enabled and immediately calls `chrome.tabs.move()` to sort the tabs. 
+- **Safety**: This listener does not monitor activity, track keystrokes, or access any browsing data. It only reads a single boolean preference to determine if it should sort the tabs.

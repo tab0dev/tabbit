@@ -129,6 +129,13 @@ function triageReducer(state, action) {
         mode: foundNext ? state.mode : Mode.COMPLETE
       };
     }
+    case 'PROCESS_BOOKMARKS_MANAGER_ACTION': {
+      const { batchSize } = action.payload;
+      return {
+        ...state,
+        undoStack: [...state.undoStack, { type: 'BOOKMARKS_MANAGER_ACTION', batchSize }]
+      };
+    }
     case 'UNDO': {
       if (state.undoStack.length === 0) return state;
       const stack = [...state.undoStack];
@@ -137,7 +144,9 @@ function triageReducer(state, action) {
       const newTabs = [...state.tabs];
       let restoredIndex = -1;
 
-      if (lastAction.batch) {
+      if (lastAction.type === 'BOOKMARKS_MANAGER_ACTION') {
+        // No tab state to restore, just pop the stack (already popped)
+      } else if (lastAction.batch) {
         lastAction.previousStates.forEach(({ tabId, state: oldState, originalIndex }) => {
           const tabIndex = newTabs.findIndex(t => t.id === tabId);
           if (tabIndex !== -1) {

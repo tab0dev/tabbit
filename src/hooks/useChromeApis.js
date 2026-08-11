@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useTriage, Mode } from '../store/TriageProvider';
 import { loadTriageData } from '../services/triageLoader';
 import { useMonitor } from './useMonitor';
-import { TAB_PROCESSING_MODES, TAB_PROCESSING_STORAGE_KEY } from '../store/tabProcessingModes';
+import { TAB_PROCESSING_MODES, TAB_PROCESSING_STORAGE_KEY } from '../constants/tabProcessingModes';
 
 export function useChromeApis() {
   const { dispatch } = useTriage();

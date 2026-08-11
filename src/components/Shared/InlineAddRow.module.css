@@ -1,0 +1,83 @@
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.inlineAddRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  padding-right: 12px;
+  background: color-mix(in srgb, var(--accent) 6%, transparent);
+  border-left: 2px solid var(--accent);
+  animation: scaleIn 100ms ease;
+}
+
+.inlineAddInput {
+  flex: 1;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 4px 8px;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  outline: none;
+  transition: border-color 120ms ease;
+  min-width: 0;
+}
+
+.inlineAddInput:focus {
+  border-color: var(--accent);
+}
+
+.inlineAddCreateBtn {
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: color 120ms ease, border-color 120ms ease, background 120ms ease;
+  line-height: 1.4;
+}
+
+.inlineAddCreateBtn:hover {
+  color: var(--text-primary);
+  border-color: color-mix(in srgb, var(--text-primary) 35%, transparent);
+  background: var(--bg-elevated);
+}
+
+.inlineAddCancelBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 11px;
+  flex-shrink: 0;
+  transition: color 120ms ease;
+}
+
+.inlineAddCancelBtn:hover {
+  color: var(--text-primary);
+}

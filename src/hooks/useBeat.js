@@ -1,4 +1,4 @@
-import { useMusic } from '../store/MusicProvider';
+import { useMusic } from '../store/music/MusicProvider';
 
 /**
  * useBeat

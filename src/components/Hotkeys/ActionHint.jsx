@@ -72,6 +72,7 @@ export default function ActionHint({
         if (uk === 'ARROWRIGHT') return '→';
         if (uk === 'ENTER') return '↵';
         if (uk === 'ESCAPE') return 'Esc';
+        if (uk === ' ') return '␣';
         return k;
     };
 

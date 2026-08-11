@@ -11,7 +11,7 @@ Because this feature must run reliably without user intervention, it executes en
 Unlike persistent background pages in MV2, Chrome MV3 Service Workers are heavily aggressively suspended by the browser when idle. `setTimeout` and `setInterval` are unreliable and will be terminated.
 
 To keep the Auto-Closer ticking, we use the `chrome.alarms` API:
-1. When the user enables the Auto-Closer from the `AutoTabCloserWorkerPanel` UI, the React app writes the configuration (e.g., threshold and interval) to `chrome.storage.local`.
+1. When the user enables the Auto-Closer from the `AutoTabCloserPanel` UI (`src/components/Tools/AutoTabCloser/AutoTabCloserPanel.jsx`), the React app writes the configuration (e.g., threshold and interval) to `chrome.storage.local`.
 2. The Service Worker listens to `chrome.storage.onChanged`. When it detects a new configuration, it evaluates the settings.
 3. If enabled, it creates an alarm (`chrome.alarms.create("tabbit-auto-close", { periodInMinutes })`).
 4. Chrome guarantees that the Service Worker will be woken up when the alarm fires, executing the `runAutoClose()` function.
@@ -30,4 +30,4 @@ When the daemon wakes up, it executes the following sequence:
 5. **Tombstoning**: Tabbit records the metadata (URL, Title, Favicon) of the closed tabs into an array of "Tombstones".
 6. **Session Storage**: These Tombstones are prepended to `chrome.storage.session`. This is a specialized storage area that persists across extension reloads but clears when the browser completely closes, preventing endless bloat. 
 
-When the user later opens the Tabbit Dashboard, the `AutoTabCloserWorkerPanel` queries this `chrome.storage.session` graveyard to proudly display a visual log of how many tabs the background worker saved them from.
+When the user later opens the Tabbit Dashboard, the `AutoTabCloserPanel` queries this `chrome.storage.session` graveyard to proudly display a visual log of how many tabs the background worker saved them from.

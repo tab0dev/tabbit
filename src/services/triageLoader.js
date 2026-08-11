@@ -1,5 +1,7 @@
 import { Mode } from '../store/TriageProvider';
 import { createTriageTab, normalizeUrl } from '../utils/tabUtils';
+import { buildFolderTree, flattenTree } from '../utils/bookmarkUtils';
+
 
 // ─── Known tab-suspender extensions ──────────────────────────────────────────
 // Tiny Suspender encodes the original URL in the ?url= query param of its
@@ -113,38 +115,13 @@ export async function loadTriageData(dispatch, { silent = false } = {}) {
       const tree = await chrome.bookmarks.getTree();
 
       // Build recursive tree (folders only, exclude synthetic root id "0").
-      const buildTree = (nodes, path = '') =>
-        nodes
-          .filter(n => !n.url && n.id !== '0')
-          .map(n => {
-            const newPath = path ? `${path} / ${n.title}` : n.title;
-            return {
-              id: n.id,
-              title: n.title,
-              path: newPath,
-              children: n.children ? buildTree(n.children, newPath) : [],
-            };
-          });
-
-      // Chrome's root (id "0") has children: Bookmarks Bar, Other Bookmarks, Mobile Bookmarks.
-      // skip id "0" itself and expose its children as the top-level roots.
+      // buildFolderTree is shared with bookmarkService via bookmarkUtils.js.
       const rootNode = tree[0];
-      bookmarkTree = rootNode?.children ? buildTree(rootNode.children) : [];
+      bookmarkTree    = rootNode?.children ? buildFolderTree(rootNode.children) : [];
 
-      // Build flat list for keyboard nav and fuzzy search by flattening the computed tree.
-      // This ensures items in bookmarkFolders are explicit references to the exact same nodes
-      // in bookmarkTree, automatically providing the `.children` property for free.
-      const flattenComputed = (nodes) => {
-        let result = [];
-        for (const node of nodes) {
-          result.push(node);
-          if (node.children?.length > 0) {
-            result = result.concat(flattenComputed(node.children));
-          }
-        }
-        return result;
-      };
-      bookmarkFolders = flattenComputed(bookmarkTree);
+      // Build flat list for keyboard nav and fuzzy search.
+      // flattenTree is also shared with bookmarkService via bookmarkUtils.js.
+      bookmarkFolders = flattenTree(bookmarkTree);
     } catch { }
 
     let tabGroups = [];

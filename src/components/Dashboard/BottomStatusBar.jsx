@@ -4,13 +4,13 @@ import { motion } from 'framer-motion';
 import { ArrowCounterClockwise, KeyReturn, Terminal } from '@phosphor-icons/react';
 import ActionHints from '../Hotkeys/ActionHints';
 import Tooltip from '../Shared/Tooltip';
-import RetroMonitor from '../Monitor/RetroMonitor';
-import RetroMonitorMusicGame from '../Monitor/RetroMonitorMusicGame';
+import RetroMonitor from './Monitor/RetroMonitor';
+import RetroMonitorMusicGame from './Monitor/RetroMonitorMusicGame';
 import { useMonitor } from '../../hooks/useMonitor';
 import { useTriage } from '../../store/TriageProvider';
-import { useMusic } from '../../store/MusicProvider';
+import { useMusic } from '../../store/music/MusicProvider';
 import styles from './BottomStatusBar.module.css';
-import BatchUndoWarningModal from './BatchUndoWarningModal';
+import BatchUndoWarningModal from '../Modals/BatchUndoWarningModal';
 
 export default function BottomStatusBar({ actions }) {
   const { mode, setMode } = useMonitor();
@@ -23,14 +23,17 @@ export default function BottomStatusBar({ actions }) {
   const [showBatchUndoWarning, setShowBatchUndoWarning] = useState(false);
 
   const nextUndoItem = hasUndo ? state.undoStack[state.undoStack.length - 1] : null;
-  const nextUndoIsBatch = nextUndoItem?.batch;
+  const isBookmarksManagerAction = nextUndoItem?.type === 'BOOKMARKS_MANAGER_ACTION';
+  const nextUndoIsBatch = nextUndoItem?.batch || (isBookmarksManagerAction && nextUndoItem?.batchSize > 1);
   const batchTabCount = useMemo(() => {
-    if (!nextUndoIsBatch || !nextUndoItem.previousStates) return 0;
+    if (!nextUndoIsBatch) return 0;
+    if (isBookmarksManagerAction) return nextUndoItem.batchSize;
+    if (!nextUndoItem.previousStates) return 0;
     return nextUndoItem.previousStates.reduce((acc, entry) => {
       const dups = entry.state.duplicates?.length || 0;
       return acc + 1 + dups;
     }, 0);
-  }, [nextUndoIsBatch, nextUndoItem]);
+  }, [nextUndoIsBatch, nextUndoItem, isBookmarksManagerAction]);
 
   const handleToggleMode = () => {
     const nextMode = isMonitor ? 'hotkeys' : 'monitor';
@@ -116,6 +119,8 @@ export default function BottomStatusBar({ actions }) {
       {showBatchUndoWarning && createPortal(
         <BatchUndoWarningModal
           tabCount={batchTabCount}
+          itemType={isBookmarksManagerAction ? 'items' : 'tabs'}
+          actionText={isBookmarksManagerAction ? 'affect' : 'restore'}
           onConfirm={handleConfirmBatchUndo}
           onDismiss={() => setShowBatchUndoWarning(false)}
         />,

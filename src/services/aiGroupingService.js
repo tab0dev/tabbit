@@ -17,6 +17,19 @@ import { relativeTime } from '../utils/formatters';
 // Availability check
 // ─────────────────────────────────────────────────────────────────────────────
 
+function getAIModel() {
+    if (typeof window !== 'undefined' && window.ai && window.ai.languageModel) {
+        return window.ai.languageModel;
+    }
+    if (typeof window !== 'undefined' && window.ai && typeof window.ai.create === 'function') {
+        return window.ai;
+    }
+    if (typeof LanguageModel !== 'undefined') {
+        return LanguageModel;
+    }
+    return null;
+}
+
 /**
  * Checks whether the Chrome Prompt API is available and the Gemini Nano
  * model is downloaded and ready.
@@ -25,11 +38,24 @@ import { relativeTime } from '../utils/formatters';
  */
 export async function isAiAvailable() {
     try {
-        if (typeof LanguageModel === 'undefined') {
+        const model = getAIModel();
+        if (!model) {
             return { available: false, downloading: false, status: 'unsupported' };
         }
 
-        const status = await LanguageModel.availability();
+        if (typeof model.capabilities === 'function') {
+            const caps = await model.capabilities();
+            console.log('[Tabbit AI] capabilities:', caps);
+            const status = caps.available;
+            return {
+                available: status === 'readily',
+                downloading: false,
+                downloadable: status === 'after-download',
+                status: status,
+            };
+        }
+
+        const status = await model.availability();
         console.log('[Tabbit AI] availability status:', status);
         return {
             available: status === 'available',
@@ -52,17 +78,43 @@ export async function isAiAvailable() {
  */
 export async function downloadModel(onProgress, { signal } = {}) {
     console.log('[Tabbit AI] downloadModel() — triggering download...');
-    const session = await LanguageModel.create({
-        monitor(m) {
-            m.addEventListener('downloadprogress', (e) => {
-                console.log(`[Tabbit AI] download progress: ${(e.loaded * 100).toFixed(1)}%`);
-                onProgress?.(e.loaded);
+    const model = getAIModel();
+    console.log('[Tabbit AI] downloadModel() — model selected:', model);
+    
+    return new Promise(async (resolve, reject) => {
+        let lastProgressTime = Date.now();
+        
+        // Timeout if Chrome is stuck downloading (e.g. no disk space)
+        const timeoutId = setInterval(() => {
+            if (Date.now() - lastProgressTime > 20000) {
+                clearInterval(timeoutId);
+                reject(new Error("Chrome download timed out. Check if you have 22GB of free disk space."));
+            }
+        }, 5000);
+
+        try {
+            const session = await model.create({
+                monitor(m) {
+                    console.log('[Tabbit AI] downloadModel() — monitor callback attached:', m);
+                    m.addEventListener('downloadprogress', (e) => {
+                        lastProgressTime = Date.now();
+                        console.log(`[Tabbit AI] download progress raw event: loaded=${e.loaded}, total=${e.total}`);
+                        const progress = e.total ? e.loaded / e.total : (e.loaded > 1 ? 0.99 : e.loaded);
+                        onProgress?.(progress);
+                    });
+                },
+                signal,
             });
-        },
-        signal,
+            clearInterval(timeoutId);
+            session.destroy(); // free memory, model stays cached
+            console.log('[Tabbit AI] downloadModel() — model ready');
+            resolve();
+        } catch (err) {
+            clearInterval(timeoutId);
+            console.error('[Tabbit AI] downloadModel() — error during create:', err);
+            reject(err);
+        }
     });
-    session.destroy(); // free memory, model stays cached
-    console.log('[Tabbit AI] downloadModel() — model ready');
 }
 
 /** safely extract pathname from a url (e.g. "/recipes/fried-chicken"). */
@@ -211,8 +263,10 @@ export async function suggestGroups(tabs, { signal, onPhaseChange } = {}) {
         console.log('[Tabbit AI] Creating session…');
         onPhaseChange?.('initializing');
         const t0 = performance.now();
-        session = await LanguageModel.create({
-            initialPrompts: [{ role: 'system', content: SYSTEM_PROMPT }],
+        const model = getAIModel();
+        session = await model.create({
+            systemPrompt: SYSTEM_PROMPT, // Newer API
+            initialPrompts: [{ role: 'system', content: SYSTEM_PROMPT }], // Older API
             expectedInputs: [{ type: 'text', languages: ['en'] }],
             expectedOutputs: [{ type: 'text', languages: ['en'] }],
             signal,

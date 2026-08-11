@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { MUSIC_CONFIG } from '../data/musicConfig';
+import { MUSIC_CONFIG } from '../store/music/musicConfig';
 
 export const BUNNY_LEFT = 10;
 export const BUNNY_W    = 16;

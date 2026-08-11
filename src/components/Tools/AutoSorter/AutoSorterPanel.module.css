@@ -1,0 +1,513 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+   AutoSorterPanel.module.css
+   Visual language mirrors AutoSmusherPanel.module.css exactly.
+   Root class renamed to .autoSorterPanel; preview shows a flat tab list.
+───────────────────────────────────────────────────────────────────────────── */
+
+/* ─── Root shell ─────────────────────────────────────────────────────────── */
+.autoSorterPanel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  color: var(--text-secondary);
+  background: var(--bg-surface);
+  border-radius: var(--radius) var(--radius) 0 0;
+  overflow: hidden;
+}
+
+/* ─── Header ─────────────────────────────────────────────────────────────── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  min-height: 53px;
+  transition: border-color var(--transition);
+}
+
+.title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ─── Enable toggle (pill) ───────────────────────────────────────────────── */
+.enableToggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.toggleInput {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggleTrack {
+  position: relative;
+  width: 34px;
+  height: 19px;
+  border-radius: 10px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  transition:
+    background 180ms ease,
+    border-color 180ms ease;
+  flex-shrink: 0;
+}
+
+.toggleTrackOn {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.toggleThumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+  transition: transform 180ms ease;
+}
+
+.toggleTrackOn .toggleThumb {
+  transform: translateX(15px);
+}
+
+.toggleLabel {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  min-width: 34px;
+  transition: color var(--transition);
+}
+
+.toggleTrackOn ~ .toggleLabel {
+  color: var(--accent);
+}
+
+/* ─── Content ────────────────────────────────────────────────────────────── */
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+
+/* ─── Settings card-in-card ──────────────────────────────────────────────── */
+.sectionBody {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  transition:
+    border-color var(--transition),
+    opacity var(--transition);
+  flex-shrink: 0;
+}
+
+.sectionBodyDisabled {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+.settingRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  gap: 24px;
+}
+
+.settingDivider {
+  height: 1px;
+  background: var(--border);
+  margin: 0;
+  transition: background var(--transition);
+}
+
+.settingInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.settingTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.settingIcon {
+  color: var(--text-primary);
+}
+
+.settingDesc {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.settingControl {
+  flex-shrink: 0;
+}
+
+.code {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 1px 4px;
+  color: var(--text-secondary);
+}
+
+/* ─── Checkbox toggle ────────────────────────────────────────────────────── */
+.toggle {
+  appearance: none;
+  width: 36px;
+  height: 20px;
+  background: color-mix(in srgb, var(--bg-surface) 50%, transparent);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  position: relative;
+  cursor: pointer;
+  outline: none;
+  transition: all 150ms ease;
+  flex-shrink: 0;
+}
+
+.toggle::after {
+  content: '';
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  width: 16px;
+  height: 16px;
+  background: var(--text-secondary);
+  border-radius: 50%;
+  transition: transform 150ms ease, background 150ms ease;
+}
+
+.toggle:hover {
+  border-color: color-mix(in srgb, var(--text-primary) 35%, transparent);
+}
+
+.toggle:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 20%, transparent);
+}
+
+.toggle:checked {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.toggle:checked::after {
+  transform: translateX(16px);
+  background: var(--bg-surface);
+}
+
+/* ─── Sort by select ─────────────────────────────────────────────────────── */
+.select {
+  font-size: 12px;
+  min-width: 80px;
+}
+
+/* ─── Suspender ID text input ────────────────────────────────────────────── */
+.textInput {
+  font-size: 11px;
+  font-family: var(--font-mono);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-primary);
+  padding: 5px 8px;
+  width: 200px;
+  outline: none;
+  transition: border-color 150ms ease;
+}
+
+.textInput:focus {
+  border-color: var(--accent);
+}
+
+/* ─── Live preview card-in-card ──────────────────────────────────────────── */
+.previewContainer {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: border-color var(--transition);
+  min-height: 160px;
+}
+
+/* URL sort mode — extra settings rows shrink the preview, so enforce a taller floor */
+.previewContainerExpanded {
+  min-height: 240px;
+}
+
+.previewHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  background: color-mix(in srgb, var(--bg-surface) 50%, transparent);
+  flex-shrink: 0;
+}
+
+.previewHeaderTitle {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.sortNowBtn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: inherit;
+  color: var(--text-secondary);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 3px 8px;
+  cursor: pointer;
+  transition: all 100ms ease;
+}
+
+.sortNowBtn:hover {
+  color: var(--text-primary);
+  border-color: color-mix(in srgb, var(--text-primary) 30%, transparent);
+  transform: translateY(-1px);
+}
+
+.previewScroll {
+  flex: 1;
+  overflow-y: auto;
+}
+
+
+/* ─── Preview tab rows ───────────────────────────────────────────────────── */
+.previewList {
+  display: flex;
+  flex-direction: column;
+}
+
+.previewRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 40%, transparent);
+  transition: background 80ms ease;
+}
+
+.previewRow:last-child {
+  border-bottom: none;
+}
+
+.previewRow:hover {
+  background: color-mix(in srgb, var(--bg-elevated) 60%, transparent);
+}
+
+.previewFavicon {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.previewFaviconFallback {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.previewTitle {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  line-height: 1.3;
+}
+
+.previewDomain {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+  opacity: 0.75;
+}
+
+/* URL-sort-mode: domain is primary (bright, left), title is secondary (dim) */
+.previewDomainPrimary {
+  font-size: 12px;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  color: var(--text-primary);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.previewDot {
+  color: var(--text-muted);
+  opacity: 0.4;
+  flex-shrink: 0;
+  font-size: 11px;
+  line-height: 1;
+  align-self: center;
+}
+
+.previewTitleDim {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  opacity: 0.65;
+  line-height: 1.3;
+}
+
+/* ─── Window sections ────────────────────────────────────────────────────── */
+.windowSection {
+  display: flex;
+  flex-direction: column;
+}
+
+.windowSection + .windowSection {
+  border-top: 1px solid var(--border);
+}
+
+.windowLabel {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 5px 14px;
+  font-size: 10px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  background: color-mix(in srgb, var(--bg-surface) 92%, transparent);
+  backdrop-filter: blur(4px);
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 50%, transparent);
+}
+
+/* ─── Empty state ────────────────────────────────────────────────────────── */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 40px 24px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.emptyIcon {
+  color: var(--text-muted);
+  opacity: 0.4;
+  margin-bottom: 4px;
+}
+
+.emptySubtext {
+  font-size: 11px;
+  color: var(--text-muted);
+  opacity: 0.7;
+  max-width: 220px;
+  line-height: 1.5;
+}
+
+/* ─── Footer ─────────────────────────────────────────────────────────────── */
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+  gap: 8px;
+  flex-shrink: 0;
+  background: var(--bg-surface);
+}
+
+.footerLeft {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.footerMeta {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
+
+.footerRight {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btnDone {
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--accent);
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 6px 16px;
+  cursor: pointer;
+  transition: all 100ms ease;
+}
+
+.btnDone:hover:not(:disabled) {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+
+.btnDone:disabled {
+  background: var(--bg-elevated);
+  color: var(--text-muted);
+  border-color: var(--border);
+  cursor: not-allowed;
+  opacity: 0.7;
+}

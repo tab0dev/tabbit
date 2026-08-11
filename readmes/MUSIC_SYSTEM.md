@@ -12,11 +12,11 @@ The system has **four completely separate concerns** that must never be confused
 
 | Concern | Where | When |
 |---------|-------|------|
-| **Song Configuration** — JSON definitions of notes, layers, and sample URLs | `src/data/songs/song1.js` | Dev-time (editable via Music Dev Studio) |
-| **Audio playback engine** — Sampler loading, mixing, and real-time sequencing | `src/store/MusicProvider.jsx` | Runtime (in the browser/extension) |
-| **Beat indicator UI** — visual feedback dot in the monitor | `src/components/Monitor/RetroMonitor.jsx` | Runtime (reads from MusicProvider context) |
-| **Rhythm game UI** — side-scroller game shown when music is on | `src/components/Monitor/RetroMonitorMusicGame.jsx` | Runtime (reads from MusicProvider context) |
-| **Shared game configuration** | `src/data/musicConfig.js` | Runtime (defines progression mechanics and game physics) |
+| **Song Configuration** — JSON definitions of notes, layers, and sample URLs | `src/store/music/songs/song1.js` | Dev-time (editable via Music Dev Studio) |
+| **Audio playback engine** — Sampler loading, mixing, and real-time sequencing | `src/store/music/MusicProvider.jsx` | Runtime (in the browser/extension) |
+| **Beat indicator UI** — visual feedback dot in the monitor | `src/components/Dashboard/Monitor/RetroMonitor.jsx` | Runtime (reads from MusicProvider context) |
+| **Rhythm game UI** — side-scroller game shown when music is on | `src/components/Dashboard/Monitor/RetroMonitorMusicGame.jsx` | Runtime (reads from MusicProvider context) |
+| **Shared game configuration** | `src/store/music/musicConfig.js` | Runtime (defines progression mechanics and game physics) |
 
 ---
 
@@ -24,34 +24,34 @@ The system has **four completely separate concerns** that must never be confused
 
 ```
 src/
-  data/
+  store/music/
+    MusicProvider.jsx     ← React context + Tone.js engine + beat/action signal state
+    musicConfig.js        ← Runtime config: progression rules, game physics
     songs/
       song1.js            ← JSON-based step-sequencer data
-    musicConfig.js        ← Runtime config: progression rules, game physics
-  store/
-    MusicProvider.jsx     ← React context + Tone.js engine + beat/action signal state
   hooks/
     useTriageActions.js   ← Calls onTabAction() after every triage action
     useBeat.js            ← Consumer hook for all beat/action signals
     useMusicGame.js       ← Game state hook (obstacles, physics, score, collision)
   components/Card/
     CardFooter.jsx        ← SpeakerHigh/SpeakerSlash toggle in the footer bar
-    SettingsCard.jsx      ← Secondary toggle in settings panel
-    MusicDevTrackerCard/  ← Developer UI for visually editing the step sequencer
-  components/Monitor/
-    RetroMonitor.jsx      ← Standard bunny monitor with beat indicator dot
-    RetroMonitorMusicGame.jsx ← Rhythm game monitor (shown when music is on)
-    Monitor.module.css    ← Beat dot styles and flash state CSS
-    MusicGame.module.css  ← Game-specific: obstacles, ground, bunny runner, overlays
+  components/Tools/
+    Settings/             ← SettingsCard.jsx secondary toggle
+    MusicDev/             ← MusicDevTrackerCard.jsx developer UI for editing step sequencer
   components/Dashboard/
     BottomStatusBar.jsx   ← Switches between hotkeys bar ↔ monitor/game on toggle
+    Monitor/
+      RetroMonitor.jsx          ← Standard bunny monitor with beat indicator dot
+      RetroMonitorMusicGame.jsx ← Rhythm game monitor (shown when music is on)
+      Monitor.module.css        ← Beat dot styles and flash state CSS
+      MusicGame.module.css      ← Game-specific: obstacles, ground, bunny runner, overlays
 ```
 
 ---
 
 ## Part 1: The Song Data (`song1.js`) & Music Dev Studio
 
-The core musical composition is defined in a standard JSON format inside `src/data/songs/song1.js`. 
+The core musical composition is defined in a standard JSON format inside `src/store/music/songs/song1.js`. 
 *(Note: This replaces the old offline `gen-audio.cjs` script, but it preserves the exact same note structure and 7-layer sequence.)*
 
 ### The Step Grid

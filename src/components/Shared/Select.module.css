@@ -32,6 +32,23 @@
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 20%, transparent);
 }
 
+.trigger.minimal {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  gap: 4px;
+  width: auto;
+  color: var(--text-secondary);
+}
+
+.trigger.minimal:hover, .trigger.minimal.open, .trigger.minimal:focus-visible {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  color: var(--text-primary);
+}
+
 .selectedLabel {
   white-space: nowrap;
   overflow: hidden;
@@ -52,7 +69,6 @@
 
 .dropdown {
   position: absolute;
-  top: calc(100% + 6px);
   right: 0;
   width: 100%;
   min-width: max-content;
@@ -65,8 +81,18 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
-  animation: dropdownFadeIn 200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dropdown.down {
+  top: calc(100% + 6px);
   transform-origin: top;
+  animation: dropdownFadeIn 200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dropdown.up {
+  bottom: calc(100% + 6px);
+  transform-origin: bottom;
+  animation: dropdownFadeInUp 200ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 [data-theme="light"] .dropdown {
@@ -99,6 +125,17 @@
   from {
     opacity: 0;
     transform: translateY(-8px) scaleY(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scaleY(1);
+  }
+}
+
+@keyframes dropdownFadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scaleY(0.95);
   }
   to {
     opacity: 1;

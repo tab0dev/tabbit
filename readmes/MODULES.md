@@ -15,13 +15,19 @@ Tabbit strictly isolates components, hooks, services, and utilities across a mod
 - `PickerProvider.jsx`: Manages the display and data callbacks of the Bookmark and Tab Group picker overlays.
 - `HotkeysProvider.jsx`: Bootstraps customizable user keybindings and manages synchronization with `localStorage`.
 - `MonitorProvider.jsx`: Drives the scrolling log lines in the Retro Monitor component.
+- `store/music/`: Houses `MusicProvider.jsx`, `musicConfig.js`, and song data definitions (`songs/song1.js`).
 
 #### `src/components/` (The View Layer)
 - `App.jsx` & `Dashboard/TriageDashboard.jsx`: The core orchestration layouts determining which phase (Triage deck, Wizard, Completion) is rendered.
-- `Card/PreviewPanel.jsx`: Visual rendering of `base64` image screenshots wrapped in CRT scanlines.
-- `Overlay/`: Contains `BookmarkPickerPanel` and `TabGroupPickerPanel` for rendering keyboard-accessible fuzzy-search dropdowns.
-- `Dashboard/AutoTabGroupWizard/`: Advanced UI flow leveraging Gemini Nano to prompt the user to automatically group uncategorized tabs.
-- `Monitor/`: The pixel-art CRT console that scrolls action events and houses the integrated Rhythm Music Game mascot.
+- `Card/`: Main swipable triage card deck (`Card.jsx`, `TabCard.jsx`, `CardActionMenu.jsx`, `CardViewSwitcher.jsx`, and `Card/hooks/`).
+- `Dashboard/`: Main entry layout (`TriageDashboard.jsx`), status bar HUD (`BottomStatusBar.jsx`), side drawers (`BookmarkPickerPanel.jsx`, `TabGroupPickerPanel.jsx`), and virtual pet mascot (`Dashboard/Monitor/`).
+- `Modals/`: Co-located application dialogs (`Modal.jsx`, `AiOptInModal.jsx`, `ApplyTabsModal.jsx`, `BatchUndoWarningModal.jsx`, `DebuggingWarningModal.jsx`, `SmushConfirmModal.jsx`).
+- `Tools/`: Feature tool cards and panels (`TabGroupWizard`, `AutoTabGrouper`, `CloseOldTabs`, `AutoTabCloser`, `AutoSmusher`, `AutoSorter`, `ListView`, `BookmarkManager`, `WatchLater`, `Settings`, `MusicDev`).
+- `Shared/`: Reusable UI primitives (`Select`, `Tooltip`, `Favicon`, `InlineAddRow`).
+
+#### `src/constants/` (Static Copy & App Enums)
+- `quips.js`: Mascot notification quotes and quips.
+- `tabProcessingModes.js`: Stack sort and filter mode enum constants.
 
 #### `src/hooks/` (Business Logic & Actions)
 - `useTriageActions.js`: Provides `keep()`, `close()`, `bookmark()`, and `group()` functions, tightly coupled with the global undo stack patching.
@@ -35,3 +41,4 @@ Tabbit strictly isolates components, hooks, services, and utilities across a mod
 #### `src/utils/` (Helpers)
 - `capture.js`: Lazily takes visual screenshots of Chrome windows via MV3 Debugger messages. Implements caching and fast-failure fallbacks for restricted protocols.
 - `watchLaterBatch.js`: Orchestration utility coordinating the sequential injection of `watchLaterAutomation.js` into targeted YouTube tabs.
+- `publicSuffixes.js`: Public Suffix List rules for registrable domain extraction.

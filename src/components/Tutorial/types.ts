@@ -30,6 +30,8 @@ export interface MagicDotStep {
   size?: number;
   /** Text to render in the tooltip popup */
   tooltip?: string;
+  /** Renders the positioned (non-fixed) tooltip on a dark, near-opaque background for contrast */
+  dimBackground?: boolean;
   /** Manual X offset additive to the auto-calculated bounding coordinates */
   offsetX?: number;
   /** Manual Y offset additive to the auto-calculated bounding coordinates */
