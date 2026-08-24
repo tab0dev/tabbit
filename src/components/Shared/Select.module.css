@@ -18,7 +18,10 @@
   font-family: inherit;
   cursor: pointer;
   outline: none;
-  transition: border-color 150ms ease, background 150ms ease, box-shadow 150ms ease;
+  transition:
+    border-color 150ms ease,
+    background 150ms ease,
+    box-shadow 150ms ease;
 }
 
 .trigger:hover {
@@ -26,7 +29,8 @@
   border-color: color-mix(in srgb, var(--text-primary) 35%, transparent);
 }
 
-.trigger:focus-visible, .trigger.open {
+.trigger:focus-visible,
+.trigger.open {
   border-color: var(--accent);
   background-color: var(--bg-surface);
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 20%, transparent);
@@ -42,7 +46,9 @@
   color: var(--text-secondary);
 }
 
-.trigger.minimal:hover, .trigger.minimal.open, .trigger.minimal:focus-visible {
+.trigger.minimal:hover,
+.trigger.minimal.open,
+.trigger.minimal:focus-visible {
   background: transparent;
   border: none;
   box-shadow: none;
@@ -58,7 +64,9 @@
 .icon {
   margin-left: 8px;
   color: var(--text-secondary);
-  transition: transform 150ms ease, color 150ms ease;
+  transition:
+    transform 150ms ease,
+    color 150ms ease;
   flex-shrink: 0;
 }
 
@@ -95,7 +103,7 @@
   animation: dropdownFadeInUp 200ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-[data-theme="light"] .dropdown {
+[data-theme='light'] .dropdown {
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
 }
 
@@ -105,7 +113,9 @@
   color: var(--text-secondary);
   border-radius: 4px;
   cursor: pointer;
-  transition: background 150ms ease, color 150ms ease;
+  transition:
+    background 150ms ease,
+    color 150ms ease;
   display: flex;
   align-items: center;
 }

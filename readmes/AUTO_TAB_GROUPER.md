@@ -98,7 +98,9 @@ The preview panel only surfaces tabs that are **actionable** — i.e., tabs that
 
 After clicking **Save & Apply**, if the auto-grouper is being left **enabled** and the filtered preview contains at least one actionable tab, a confirmation modal (`ApplyTabsModal`) is presented. The user can choose to immediately move those tabs into their target groups, or skip. 
 
-On confirm, tabs are processed per-rule: if a Chrome tab group with the matching name already exists, tabs are merged into it via `chrome.tabs.group`; otherwise a new group is created via `chrome.tabs.group` + `chrome.tabGroups.update`. Each tab action goes through `groupAction` from `useTriageActions`, which pushes a `{ type: 'group' }` entry onto `globalChromeUndoStack` and dispatches `PROCESS_TAB` — making the operation fully undoable and properly reflected in the triage deck.
+On confirm, tabs are processed per-rule: if a Chrome tab group with the matching name already exists, tabs are merged into it via `groupBatch` from `useTriageActions`; otherwise a new group is created via `chrome.tabs.group` + `chrome.tabGroups.update`. `groupBatch` is the canonical cross-window-safe path for merging tabs into an existing group — it consolidates tabs from other windows into the target group's window before calling `chrome.tabs.group` once for all tabs together, then dispatches `PROCESS_BATCH` to atomically mark them all processed.
+
+**Undo behavior:** `groupBatch` pushes a `{ type: 'group', tabIds, pinnedStatus }` entry onto `globalChromeUndoStack`. Undo calls `chrome.tabs.ungroup(tabIds)`, removing all tabs from the group and restoring any previously pinned tabs. The undo button becomes active immediately after the batch completes. **Limitation:** the `chrome.tabs.move` that consolidated cross-window tabs is not reversed — ungrouped tabs remain in the window they were moved to, not their original windows. This is an inherent tradeoff of the move-then-group strategy.
 
 ### Rule List Tab Count
 

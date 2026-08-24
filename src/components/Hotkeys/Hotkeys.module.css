@@ -123,7 +123,11 @@
   font-weight: 600;
   color: var(--text-primary);
   position: relative;
-  transition: background-color var(--transition), border-color var(--transition), color var(--transition), box-shadow var(--transition);
+  transition:
+    background-color var(--transition),
+    border-color var(--transition),
+    color var(--transition),
+    box-shadow var(--transition);
 }
 
 .hint kbd:hover,
@@ -133,8 +137,6 @@
   border-color: var(--accent-vibrant);
   box-shadow: 0 0 12px rgba(108, 140, 255, 0.3);
 }
-
-
 
 .hintLabel {
   display: inline-block;

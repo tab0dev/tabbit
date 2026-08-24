@@ -3,44 +3,44 @@
 /* ─── Dark Mode (default) ─────────────────────────────────────────────────── */
 :root {
   /* Backgrounds */
-  --bg:           #0f1117;
-  --bg-surface:   #1a1d27;
-  --bg-elevated:  #242836;
+  --bg: #0f1117;
+  --bg-surface: #1a1d27;
+  --bg-elevated: #242836;
 
   /* Borders */
-  --border:       #2e3345;
-  --card-border:  #2e3345;
+  --border: #2e3345;
+  --card-border: #2e3345;
 
   /* Text */
-  --text-primary:   #e8eaf0;
+  --text-primary: #e8eaf0;
   --text-secondary: #8b8fa3;
-  --text-muted:     #5c6078;
+  --text-muted: #5c6078;
 
   /* Accent */
-  --accent:         #6c8cff;
+  --accent: #6c8cff;
   --accent-vibrant: #1f2b52;
-  --accent-dim:     rgba(108, 140, 255, 0.15);
+  --accent-dim: rgba(108, 140, 255, 0.15);
 
   /* Status colors */
-  --green:      #4ade80;
-  --green-dim:  rgba(74, 222, 128, 0.15);
-  --red:        #f87171;
-  --red-dim:    rgba(248, 113, 113, 0.15);
-  --orange:     #fb923c;
+  --green: #4ade80;
+  --green-dim: rgba(74, 222, 128, 0.15);
+  --red: #f87171;
+  --red-dim: rgba(248, 113, 113, 0.15);
+  --orange: #fb923c;
   --orange-dim: rgba(251, 146, 60, 0.15);
-  --purple:     #a78bfa;
+  --purple: #a78bfa;
   --purple-dim: rgba(167, 139, 250, 0.15);
 
   /* Component-specific semantic tokens */
   --scrollbar-thumb: #2e3345;
-  --timer-fill:      #272F4D;
-  --backdrop:        rgba(0, 0, 0, 0.6);
-  --overlay-bg:      rgba(26, 29, 39, 0.92);
-  --card-shadow:     0 10px 30px rgba(0, 0, 0, 0.2);
-  --card-hover-title:  #ffffff;
+  --timer-fill: #272f4d;
+  --backdrop: rgba(0, 0, 0, 0.6);
+  --overlay-bg: rgba(26, 29, 39, 0.92);
+  --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  --card-hover-title: #ffffff;
   --card-hover-domain: #ffffff;
-  --card-hover-url:    #ffffff;
-  --favicon-bg:        transparent;
+  --card-hover-url: #ffffff;
+  --favicon-bg: transparent;
 
   /* Pills */
   --pill-font-weight: 700;
@@ -68,51 +68,51 @@
   --chrome-purple: #c58af9;
   --chrome-cyan: #78d9ec;
   --chrome-orange: #fcad70;
-  --magic-dot:   #bd740e;
-  --radius:      12px;
-  --radius-sm:   8px;
-  --font:        'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-  --font-mono:   'JetBrains Mono', 'Fira Code', 'SF Mono', monospace;
-  --transition:  180ms ease;
+  --magic-dot: #bd740e;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', monospace;
+  --transition: 180ms ease;
 }
 
 /* ─── Light Mode ──────────────────────────────────────────────────────────── */
-[data-theme="light"] {
+[data-theme='light'] {
   /* Backgrounds */
-  --bg:           #f0f2f7;
-  --bg-surface:   #ffffff;
-  --bg-elevated:  #e8ebf2;
+  --bg: #f0f2f7;
+  --bg-surface: #ffffff;
+  --bg-elevated: #e8ebf2;
 
   /* Borders */
-  --border:       #d1d5e0;
-  --card-border:  #d1d5e0;
+  --border: #d1d5e0;
+  --card-border: #d1d5e0;
   /* --card-border:  #b2b7c7; */
 
   /* Text */
-  --text-primary:   #111827;
+  --text-primary: #111827;
   --text-secondary: #4b5563;
-  --text-muted:     #9ca3af;
+  --text-muted: #9ca3af;
 
   /* Accent — same hue, both modes */
   --accent-vibrant: #dde5ff;
-  --accent-dim:     rgba(108, 140, 255, 0.12);
+  --accent-dim: rgba(108, 140, 255, 0.12);
 
   /* Status dims — lighter on white backgrounds */
-  --green-dim:  rgba(74, 222, 128, 0.14);
-  --red-dim:    rgba(248, 113, 113, 0.14);
+  --green-dim: rgba(74, 222, 128, 0.14);
+  --red-dim: rgba(248, 113, 113, 0.14);
   --orange-dim: rgba(251, 146, 60, 0.14);
   --purple-dim: rgba(167, 139, 250, 0.14);
 
   /* Component-specific semantic tokens */
   --scrollbar-thumb: #c1c5d0;
-  --timer-fill:      #dde5ff;
-  --backdrop:        rgba(0, 0, 0, 0.3);
-  --overlay-bg:      rgba(255, 255, 255, 0.92);
-  --card-shadow:     none;
-  --card-hover-title:  var(--text-primary);
+  --timer-fill: #dde5ff;
+  --backdrop: rgba(0, 0, 0, 0.3);
+  --overlay-bg: rgba(255, 255, 255, 0.92);
+  --card-shadow: none;
+  --card-hover-title: var(--text-primary);
   --card-hover-domain: var(--text-secondary);
-  --card-hover-url:    var(--text-muted);
-  --favicon-bg:        var(--bg-elevated);
+  --card-hover-url: var(--text-muted);
+  --favicon-bg: var(--bg-elevated);
 
   /* Pills */
   --pill-font-weight: 500;
@@ -142,30 +142,30 @@
 /* Applied only when JS hasn't set data-theme yet */
 @media (prefers-color-scheme: light) {
   :root:not([data-theme]) {
-    --bg:           #f0f2f7;
-    --bg-surface:   #ffffff;
-    --bg-elevated:  #e8ebf2;
-    --border:       #d1d5e0;
-    --card-border:  #d1d5e0;
+    --bg: #f0f2f7;
+    --bg-surface: #ffffff;
+    --bg-elevated: #e8ebf2;
+    --border: #d1d5e0;
+    --card-border: #d1d5e0;
     /* --card-border:  #b2b7c7; */
-    --text-primary:   #111827;
+    --text-primary: #111827;
     --text-secondary: #4b5563;
-    --text-muted:     #9ca3af;
+    --text-muted: #9ca3af;
     --accent-vibrant: #dde5ff;
-    --accent-dim:     rgba(108, 140, 255, 0.12);
-    --green-dim:  rgba(74, 222, 128, 0.14);
-    --red-dim:    rgba(248, 113, 113, 0.14);
+    --accent-dim: rgba(108, 140, 255, 0.12);
+    --green-dim: rgba(74, 222, 128, 0.14);
+    --red-dim: rgba(248, 113, 113, 0.14);
     --orange-dim: rgba(251, 146, 60, 0.14);
     --purple-dim: rgba(167, 139, 250, 0.14);
     --scrollbar-thumb: #c1c5d0;
-    --timer-fill:      #dde5ff;
-    --backdrop:        rgba(0, 0, 0, 0.3);
-    --overlay-bg:      rgba(255, 255, 255, 0.92);
-    --card-shadow:     none;
-    --card-hover-title:  var(--text-primary);
+    --timer-fill: #dde5ff;
+    --backdrop: rgba(0, 0, 0, 0.3);
+    --overlay-bg: rgba(255, 255, 255, 0.92);
+    --card-shadow: none;
+    --card-hover-title: var(--text-primary);
     --card-hover-domain: var(--text-secondary);
-    --card-hover-url:    var(--text-muted);
-    --favicon-bg:        var(--bg-elevated);
+    --card-hover-url: var(--text-muted);
+    --favicon-bg: var(--bg-elevated);
     --pill-font-weight: 500;
     --pill-text-shadow: none;
     --pill-bg-mix: 45%;
@@ -188,7 +188,6 @@
   }
 }
 
-
 /* --- Reset & Base --- */
 *,
 *::before,
@@ -203,12 +202,16 @@ body {
   background: var(--bg);
   color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
-  transition: background-color 250ms ease, color 250ms ease;
+  transition:
+    background-color 250ms ease,
+    color 250ms ease;
+  overflow: hidden;
 }
 
 .app-root {
-  min-height: 100vh;
+  height: 100vh;
   width: 100%;
+  min-width: 620px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -234,7 +237,6 @@ body {
 }
 
 @keyframes bounce {
-
   0%,
   100% {
     transform: translateY(0);
@@ -347,11 +349,19 @@ body {
 }
 
 @keyframes card-fade-out {
-  from { opacity: 1; }
-  to { opacity: 0; }
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
 }
 
 @keyframes card-fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }

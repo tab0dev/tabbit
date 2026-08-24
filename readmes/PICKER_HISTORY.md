@@ -92,10 +92,12 @@ Bookmark and group history are **completely independent stores**, so they can ev
 
 ### `recordUsage(type, item, tabUrl)` — The Write Trigger
 
-This is the **only** function that writes to storage. It is called exactly once per confirmed picker selection, inside `PickerPanel.confirm()`. It does two things atomically:
+This is the **only** function that writes to storage. It is called exactly once per confirmed picker selection, inside `PickerPanel.confirm()`, and also when a **new folder** is created inline via `createFolder()`. It does two things atomically:
 
 1. Prepends the chosen item to the recent list (deduped, capped at 5).
-2. Upserts the item's ID into the domain map for the tab's base domain.
+2. Upserts the item's ID into the domain map for the tab's base domain (if `tabUrl` is provided).
+
+> Note: For batch selections (which involve multiple domains), `tabUrl` is gracefully omitted. The item is still successfully prepended to the "Recently Used" list, skipping only the domain-specific recommendation step.
 
 Nothing else in the app writes to storage. No background jobs, no timers.
 

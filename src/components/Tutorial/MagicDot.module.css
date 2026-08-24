@@ -13,14 +13,21 @@
 }
 
 @keyframes magicDotFadeIn {
-  0% { opacity: 0; }
-  100% { opacity: 1; }
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
 }
 
 .pulse::after {
   content: '';
   position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   border-radius: 50%;
   background-color: rgba(255, 255, 255, 0.7);
   animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
@@ -58,63 +65,63 @@
   border: 1px solid var(--border);
 }
 
-.tooltip[data-position="bottom"] {
+.tooltip[data-position='bottom'] {
   top: 100%;
   left: 50%;
   transform: translate(calc(-50% + var(--shift-x, 0px)), var(--shift-y, 0px));
   margin-top: 16px;
 }
 
-.tooltip[data-position="top"] {
+.tooltip[data-position='top'] {
   bottom: 100%;
   left: 50%;
   transform: translate(calc(-50% + var(--shift-x, 0px)), var(--shift-y, 0px));
   margin-bottom: 16px;
 }
 
-.tooltip[data-position="left"] {
+.tooltip[data-position='left'] {
   right: 100%;
   top: 50%;
   transform: translate(var(--shift-x, 0px), calc(-50% + var(--shift-y, 0px)));
   margin-right: 16px;
 }
 
-.tooltip[data-position="right"] {
+.tooltip[data-position='right'] {
   left: 100%;
   top: 50%;
   transform: translate(var(--shift-x, 0px), calc(-50% + var(--shift-y, 0px)));
   margin-left: 16px;
 }
 
-.tooltip[data-position="top-left"] {
+.tooltip[data-position='top-left'] {
   bottom: 100%;
   right: 100%;
   margin-bottom: 16px;
   margin-right: 16px;
 }
 
-.tooltip[data-position="top-right"] {
+.tooltip[data-position='top-right'] {
   bottom: 100%;
   left: 100%;
   margin-bottom: 16px;
   margin-left: 16px;
 }
 
-.tooltip[data-position="bottom-left"] {
+.tooltip[data-position='bottom-left'] {
   top: 100%;
   right: 100%;
   margin-top: 16px;
   margin-right: 16px;
 }
 
-.tooltip[data-position="bottom-right"] {
+.tooltip[data-position='bottom-right'] {
   top: 100%;
   left: 100%;
   margin-top: 16px;
   margin-left: 16px;
 }
 
-.tooltip[data-position="center"] {
+.tooltip[data-position='center'] {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
@@ -127,13 +134,19 @@
   background-color: var(--overlay-bg);
   border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.55);
-  transition: background-color 200ms ease, border-color 200ms ease;
+  transition:
+    background-color 200ms ease,
+    border-color 200ms ease;
   animation: tooltipDimIn var(--tooltip-anim, 200ms) ease-out;
 }
 
 @keyframes tooltipDimIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .magicDotFixed {
@@ -176,5 +189,5 @@
   font-size: 0;
   color: transparent;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-  border-width: 0px; 
+  border-width: 0px;
 }

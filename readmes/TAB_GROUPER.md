@@ -47,3 +47,7 @@ The UI is built as a complex React state machine (`ManualTabGroupWizard` at `src
 - Real-time previews of split/merge operations.
 - State exclusion (users can uncheck specific tabs to exclude them from the grouping operation).
 - Upon confirmation, it batches `chrome.tabs.group` and `chrome.tabGroups.update` calls. If a group contains tabs from multiple windows, it intelligently moves them into a single target window (the one holding the majority of the group's tabs) to prevent fragmenting the group across windows.
+
+> **Undo behavior:** The Wizard's confirm flow does not go through `useTriageActions` and does not push to `globalChromeUndoStack`, so its grouping operations are **not undoable** via the triage undo button. This is intentional — the Wizard is a deliberate bulk-restructure action, not a per-tab triage decision. The `chrome.tabs.move` used for cross-window consolidation would also not be reversible without tracking each tab's original window and index.
+
+> **Cross-window grouping is standardized.** The same window-consolidation strategy used by the Wizard is also implemented as `groupBatch` in `useTriageActions`. Any feature that groups an arbitrary set of tabs into an *existing* Chrome tab group should use `groupBatch` rather than calling `chrome.tabs.group` per-tab in a loop. The Wizard's confirmation flow operates on groups it *creates itself*, so it manages this directly; `groupBatch` serves all other callers (e.g., the `TabGroupPickerPanel` batch path and the `AutoTabGrouperPanel` apply-to-existing-group path).

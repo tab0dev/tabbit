@@ -171,14 +171,14 @@ While Shift is held, hovering over a card shows a visual preview of the range th
 
 ## Bulk Actions
 
-Bulk actions appear in the footer when `selectedIds.size > 0`. All actions operate on the current `selectedIds` set and delegate to `useTriageActions`.
+Bulk actions appear in the footer when `selectedIds.size > 0`. All actions operate on the current `selectedIds` set and delegate to atomic batch methods inside `useTriageActions` (e.g. `keepBatch`, `closeBatch`, `bookmarkBatch`, `groupBatch`). This ensures that bulk operations only spam the `useMonitor` with a single summary message (e.g. "BOOKMARKED 10 TABS INTO 'FOLDER'") and push a single atomic entry to the `globalChromeUndoStack` for one-click reverting.
 
 | Action | Behaviour |
 |---|---|
-| **Keep** | Marks selected tabs as `processed: true` — they disappear from the list and remain open in the browser |
-| **Bookmark** | Saves each tab to the browser's bookmarks, then marks as processed |
-| **Group** | Opens the Tab Group Picker panel (`usePicker`) with `batchTarget` set to the selected IDs — the user then picks or creates a Chrome tab group |
-| **Close** | Closes the selected tabs in the browser and marks them as `gone` |
+| **Keep** | Marks selected tabs as `processed: true` via `keepBatch` — they disappear from the list and remain open in the browser |
+| **Bookmark** | Opens the Bookmark Picker panel to save the selected tabs. It enters a batch flow that defaults to forcing a surrounding subfolder creation (configurable via a toggle). The action concludes with `bookmarkBatch`. |
+| **Group** | Opens the Tab Group Picker panel (`usePicker`) with `batchTarget` set to the selected IDs — the user then picks or creates a Chrome tab group. Concludes with `groupBatch`. |
+| **Close** | Closes the selected tabs in the browser and marks them as `gone` via `closeBatch`. |
 | **Clear** | Deselects all (calls `selectNone`) without acting on the tabs |
 
 After Keep / Bookmark / Close, the acted-on tabs no longer pass the `eligibleTabs` filter (`!t.processed && !t.gone`) and disappear from the list automatically. The selection is also cleared.

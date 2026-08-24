@@ -1,0 +1,75 @@
+import React, { createContext, useContext, useState, useCallback, useRef, ReactNode } from 'react';
+import { PickerContextValue, PickerType, PickerHandlers, TriageTab } from '../types';
+
+// centralizes picker panel state and keyboard↔panel communication.
+// replaces the old pickerRegistry singleton + custom DOM events pattern
+// with standard react context, keeping the data flow visible in devtools.
+
+const PickerContext = createContext<PickerContextValue | null>(null);
+
+export function PickerProvider({ children }: { children: ReactNode }) {
+  const [activePicker, setActivePicker] = useState<PickerType | null>(null); // null | 'bookmark' | 'group'
+  const [batchTarget, setBatchTarget] = useState<{ tabs: TriageTab[] } | null>(null); // null | { tabs: Tab[] }
+
+  // event listeners registered by each picker panel.
+  // keyed by pickerType → { onNavigate, onConfirm, onDeactivate }
+  const listenersRef = useRef<Record<string, PickerHandlers>>({});
+
+  // register a picker panel's event handlers.
+  // called by each picker panel on mount, returns unregister fn.
+  const registerPicker = useCallback((type: PickerType, handlers: PickerHandlers) => {
+    listenersRef.current[type] = handlers;
+    return () => {
+      delete listenersRef.current[type];
+    };
+  }, []);
+
+  // dispatch a navigation event to the active picker
+  const navigatePicker = useCallback(
+    (direction: 'up' | 'down') => {
+      const type = activePicker;
+      if (!type) return;
+      listenersRef.current[type]?.onNavigate?.(direction);
+    },
+    [activePicker],
+  );
+
+  // dispatch a confirm event to the active picker
+  const confirmPicker = useCallback(() => {
+    const type = activePicker;
+    if (!type) return;
+    listenersRef.current[type]?.onConfirm?.();
+  }, [activePicker]);
+
+  // deactivate the current picker, notifying it first
+  const deactivatePicker = useCallback(() => {
+    const type = activePicker;
+    if (!type) return;
+    listenersRef.current[type]?.onDeactivate?.();
+    setActivePicker(null);
+    setBatchTarget(null);
+  }, [activePicker, setActivePicker]);
+
+  return (
+    <PickerContext.Provider
+      value={{
+        activePicker,
+        setActivePicker,
+        registerPicker,
+        navigatePicker,
+        confirmPicker,
+        deactivatePicker,
+        batchTarget,
+        setBatchTarget,
+      }}
+    >
+      {children}
+    </PickerContext.Provider>
+  );
+}
+
+export function usePicker(): PickerContextValue {
+  const ctx = useContext(PickerContext);
+  if (!ctx) throw new Error('usePicker must be used within PickerProvider');
+  return ctx;
+}

@@ -47,10 +47,18 @@
 }
 
 @keyframes bunnyFloat {
-  0%   { transform: translateY(0px); }
-  45%  { transform: translateY(-3px); }
-  55%  { transform: translateY(-3px); }
-  100% { transform: translateY(0px); }
+  0% {
+    transform: translateY(0px);
+  }
+  45% {
+    transform: translateY(-3px);
+  }
+  55% {
+    transform: translateY(-3px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
 }
 
 /* Jump — snappy upward launch + squash landing */
@@ -59,12 +67,24 @@
 }
 
 @keyframes bunnyJump {
-  0%   { transform: translateY(0)   scaleY(1);    }
-  20%  { transform: translateY(-9px) scaleY(1.05); }
-  50%  { transform: translateY(-10px) scaleY(1.1); }
-  70%  { transform: translateY(0)    scaleY(0.88); }
-  85%  { transform: translateY(-2px) scaleY(1);    }
-  100% { transform: translateY(0)   scaleY(1);    }
+  0% {
+    transform: translateY(0) scaleY(1);
+  }
+  20% {
+    transform: translateY(-9px) scaleY(1.05);
+  }
+  50% {
+    transform: translateY(-10px) scaleY(1.1);
+  }
+  70% {
+    transform: translateY(0) scaleY(0.88);
+  }
+  85% {
+    transform: translateY(-2px) scaleY(1);
+  }
+  100% {
+    transform: translateY(0) scaleY(1);
+  }
 }
 
 /* Shake — rapid anxious wiggle */
@@ -73,14 +93,30 @@
 }
 
 @keyframes bunnyShake {
-  0%   { transform: rotate(0deg);   }
-  15%  { transform: rotate(-5deg);  }
-  30%  { transform: rotate(4deg);   }
-  45%  { transform: rotate(-4deg);  }
-  60%  { transform: rotate(3deg);   }
-  75%  { transform: rotate(-2deg);  }
-  90%  { transform: rotate(1deg);   }
-  100% { transform: rotate(0deg);   }
+  0% {
+    transform: rotate(0deg);
+  }
+  15% {
+    transform: rotate(-5deg);
+  }
+  30% {
+    transform: rotate(4deg);
+  }
+  45% {
+    transform: rotate(-4deg);
+  }
+  60% {
+    transform: rotate(3deg);
+  }
+  75% {
+    transform: rotate(-2deg);
+  }
+  90% {
+    transform: rotate(1deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
 }
 
 /* Pulse — heartbeat scale, used for excited group actions */
@@ -89,11 +125,21 @@
 }
 
 @keyframes bunnyPulse {
-  0%   { transform: scale(1);    }
-  25%  { transform: scale(1.1);  }
-  50%  { transform: scale(0.95); }
-  75%  { transform: scale(1.08); }
-  100% { transform: scale(1);    }
+  0% {
+    transform: scale(1);
+  }
+  25% {
+    transform: scale(1.1);
+  }
+  50% {
+    transform: scale(0.95);
+  }
+  75% {
+    transform: scale(1.08);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 /* None — explicitly static, no animation */

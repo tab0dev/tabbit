@@ -37,7 +37,6 @@
   gap: 16px;
 }
 
-
 .section {
   display: flex;
   flex-direction: column;
@@ -57,7 +56,10 @@
   flex-direction: column;
   border: 1px solid var(--border);
   border-radius: 8px;
-  transition: border-color var(--transition), background-color var(--transition), color var(--transition);
+  transition:
+    border-color var(--transition),
+    background-color var(--transition),
+    color var(--transition);
 }
 
 /* .sectionBody:hover {
@@ -108,7 +110,6 @@
   flex-shrink: 0;
 }
 
-
 .toggle {
   appearance: none;
   width: 36px;
@@ -132,7 +133,9 @@
   height: 16px;
   background: var(--text-secondary);
   border-radius: 50%;
-  transition: transform 150ms ease, background 150ms ease;
+  transition:
+    transform 150ms ease,
+    background 150ms ease;
 }
 
 .toggle:hover {
@@ -203,7 +206,9 @@
   font-size: 12px;
   font-family: monospace;
   outline: none;
-  transition: border-color 150ms ease, box-shadow 150ms ease;
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease;
 }
 
 .textInput:focus {

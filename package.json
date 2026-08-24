@@ -1,14 +1,17 @@
 {
   "name": "Tabbit: Tab Closer & Organizer",
   "private": true,
-  "version": "0.3",
+  "version": "0.3.1",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
-    "build:zip": "vite build && node scripts/zip-dist.js",
+    "build": "pnpm run format && pnpm run typecheck && pnpm run lint && vite build",
+    "build:zip": "pnpm run format && pnpm run typecheck && pnpm run lint && vite build && node scripts/zip-dist.js",
     "preview": "vite preview",
-    "gen-audio": "node scripts/gen-audio.cjs"
+    "typecheck": "tsc --noEmit",
+    "gen-audio": "node scripts/gen-audio.cjs",
+    "format": "prettier --write \"src/**/*.{ts,tsx,css}\"",
+    "lint": "eslint \"src/**/*.{ts,tsx}\""
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
@@ -24,9 +27,15 @@
     "tone": "^15.1.22"
   },
   "devDependencies": {
-    "@types/react": "^18.2.43",
-    "@types/react-dom": "^18.2.17",
+    "@eslint/js": "^9.39.5",
+    "@types/chrome": "^0.2.6",
+    "@types/react": "^18.3.28",
+    "@types/react-dom": "^18.3.7",
     "@vitejs/plugin-react": "^4.2.1",
+    "eslint": "^9.39.5",
+    "prettier": "^3.9.6",
+    "typescript": "^5.4.5",
+    "typescript-eslint": "^8.67.0",
     "vite": "^5.0.8"
   }
 }

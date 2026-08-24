@@ -109,7 +109,6 @@
   gap: 16px;
 }
 
-
 /* ─── Settings card-in-card ──────────────────────────────────────────────── */
 .sectionBody {
   display: flex;
@@ -206,7 +205,9 @@
   height: 16px;
   background: var(--text-secondary);
   border-radius: 50%;
-  transition: transform 150ms ease, background 150ms ease;
+  transition:
+    transform 150ms ease,
+    background 150ms ease;
 }
 
 .toggle:hover {
@@ -311,7 +312,6 @@
   flex: 1;
   overflow-y: auto;
 }
-
 
 /* ─── Preview tab rows ───────────────────────────────────────────────────── */
 .previewList {

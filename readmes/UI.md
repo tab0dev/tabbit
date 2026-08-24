@@ -52,23 +52,25 @@ src/
 
 ## The Grid System
 
-The core layout (`TriageDashboard.jsx`) uses a strict **5×7 CSS Grid** covering the full viewport. Grid areas are defined in `Dashboard.module.css`:
+The core layout (`TriageDashboard.jsx`) uses a strict **10×7 CSS Grid** covering the full viewport. Grid areas are defined in `Dashboard.module.css`:
 
 ```css
 .dashboard {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(10, minmax(0, 1fr));
   grid-template-rows: repeat(7, minmax(0, 1fr));
   gap: clamp(10px, 1.5vw, 16px);
   padding: clamp(10px, 1.5vw, 16px); /* matches gap for uniform tile look */
   height: 100vh;
 }
 
-.main      { grid-area: 1 / 1 / 7 / 4; }  /* Big left card */
-.hotkeys   { grid-area: 7 / 1 / 8 / 4; }  /* Bottom left hotkey bar */
-.bookmarks { grid-area: 1 / 4 / 5 / 6; }  /* Top right */
-.tabGroups { grid-area: 5 / 4 / 8 / 6; }  /* Bottom right */
+.main      { grid-column: 1 / var(--main-col-end, 8); }  /* 7 of 10 cols = 70% */
+.hotkeys   { grid-column: 1 / var(--main-col-end, 8); grid-row: 7 / 8; }
+.bookmarks { grid-area: 1 / 8 / 5 / 11; }   /* Top-right, 3 of 10 cols = 30% */
+.tabGroups { grid-area: 5 / 8 / 8 / 11; }   /* Bottom-right */
 ```
+
+The 10-column baseline was chosen to allow clean integer ratios: the main content area spans 6 columns (60%) in `normal` mode and 7 columns (70%) in `contentWithSidebar` mode, with the side panels taking the remainder.
 
 The `padding` and `gap` are set to the same `clamp()` value intentionally — this gives the outer border the same visual weight as the inner gutter between tiles.
 
@@ -133,14 +135,29 @@ This pattern is implemented in both `useKeyboard.js` (keyboard triggers) and `Ac
 
 ---
 
-## Picker Modal
+## Picker Panels
 
-The picker (`PickerModal.jsx`) is a **fixed overlay** (z-index 100) that appears over the dashboard when `state.mode === Mode.PICKER`.
+The picker UI is not a modal overlay — it is implemented as always-mounted side panels (`BookmarkPickerPanel`, `TabGroupPickerPanel`) that live in the dashboard grid. Their visibility is controlled by `layoutMode` and CSS transforms, not by mounting/unmounting.
 
-- Lightweight **inline fuzzy search** — no external library. Characters in the query must appear in order in the item name.
-- Keyboard: ↑↓ to navigate, ↵ to confirm, Esc to cancel, click-outside to dismiss.
-- The modal reads `state.pickerType` (`'bookmark'` or `'group'`) to know which list to show.
-- The scrollable `<ul>` requires `min-height: 0` on the flex container to allow `overflow-y: auto` to work correctly inside a flex column.
+**State — `PickerProvider`**
+
+`PickerProvider` (`src/store/PickerProvider.jsx`) is the single source of truth for picker state, accessed via `usePicker()`:
+
+- `activePicker` — `null | 'bookmark' | 'group'`. Setting this to a non-null value activates that panel.
+- `batchTarget` — `null | { tabs: Tab[] }`. Set by List View before opening a picker to indicate which tabs the picker should operate on. Cleared by the panel after confirming.
+- `registerPicker(type, handlers)` — each panel calls this on mount to register `{ onNavigate, onConfirm, onDeactivate }` callbacks. Used by `useKeyboard` to route arrow keys, Enter, and Escape into the active panel without the panel needing to attach its own global listeners.
+- `navigatePicker`, `confirmPicker`, `deactivatePicker` — called by `useKeyboard` to dispatch events to whichever panel is currently active.
+
+**Single-tab triage flow**
+
+The triage hotkeys (↑ bookmark, ↓ group) call `setActivePicker('bookmark' | 'group')`. The corresponding panel becomes active, the user navigates its list with arrow keys, and pressing Enter triggers `onConfirm` → calls `bookmarkAction` or `groupAction` from `useTriageActions` on the current triage card tab.
+- **Bookmark Picker:** Functions as a direct-save picker. Clicking a folder (or pressing Enter) immediately saves the single tab into that folder. No subfolder creation logic is offered.
+
+**Batch flow (List View)**
+
+List View sets `setBatchTarget({ tabs: selectedTabs })` then calls `setActivePicker`. When the panel confirms, it reads `batchTarget.tabs` and delegates to the atomic batch actions inside `useTriageActions` (`groupBatch` or `bookmarkBatch`). These atomic actions ensure the UI monitor is updated only once (e.g. "BOOKMARKED 10 TABS INTO 'FOLDER'") and that only a single undo block is added to the `globalChromeUndoStack`. `batchTarget` is cleared after use.
+- **Bookmark Picker:** Entering batch mode (`batchTarget.tabs.length > 1`) hides the generic "Save" button to prevent ambiguity. By default, it forces a **subfolder creation** (opening an inline prompt when a parent folder is selected) to avoid cluttering the parent folder with multiple tabs. This behavior can be disabled via a "Subfolder" toggle in the header. If the user creates a folder manually (via the `+` button), all batch tabs are automatically saved into the new folder via `bookmarkBatch` and the panel closes.
+
 
 ---
 
@@ -153,125 +170,129 @@ The picker (`PickerModal.jsx`) is a **fixed overlay** (z-index 100) that appears
 
 ---
 
-## CenterView — Expanded Card Mode
+## Layout Modes — `normal`, `centered`, `contentWithSidebar`
 
-Certain panel views (Settings, List View, Bookmark Manager, and the worker/wizard panels) benefit from more space. When one of these views is active, the main card area **expands to fill the entire grid**: full width and full height. The **BottomStatusBar slides off-screen** (bottom edge) and the **right-side panels slide off-screen** (right edge) while fading out. All three stay mounted to preserve their state. This feature is called **CenterView**.
+Certain panel views (Settings, List View, Bookmark Manager, and the worker/wizard panels) benefit from more horizontal or vertical space. The dashboard grid is controlled by a single `layoutMode` string that drives all positioning, visibility, and animation simultaneously. All three modes are **pure derived state** — no `useState`, no persistence. They are computed on every render in `TriageDashboard.jsx`.
 
-### Grid Layout Contract
+### The Three Modes
 
-The dashboard grid is defined in `Dashboard.module.css`:
+| Mode | `.main` columns | Row span | Side panels | Bottom bar |
+|---|---|---|---|---|
+| `normal` | 1–7 (60%) | 1–7 | Visible | Visible |
+| `centered` | 1–11 (full) | 1–8 | Slid off-screen right | Slid off-screen down |
+| `contentWithSidebar` | 1–8 (70%) | 1–8 | Visible | Slid off-screen down |
 
-```css
-.dashboard {
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  grid-template-rows: repeat(6, minmax(0, 1fr)) 62px;  /* last row is fixed 62px for the bar */
-  gap: clamp(10px, 1.5vw, 16px);
-  overflow: hidden;  /* clips the bar/panel exit animations */
-}
+`contentWithSidebar` is specifically designed for the **List View** when a picker panel (Bookmarks or Tab Groups) is active. It gives the panel full vertical height (no bottom status bar row consuming space) while keeping the side panels visible and accessible.
 
-/* .main's span is controlled by the --main-col-end / --main-row-end custom properties */
-.main {
-  grid-column: 1 / var(--main-col-end, 4);  /* 4 = normal, 6 = CenterView (full width) */
-  grid-row: 1 / var(--main-row-end, 7);      /* 7 = normal, 8 = CenterView (full height) */
-}
-
-/* .hotkeys always occupies the last row, regardless of .main's span */
-.hotkeys {
-  grid-column: 1 / var(--main-col-end, 4);
-  grid-row: 7 / 8;
-  z-index: 20;
-}
-```
-
-In **normal mode**: `--main-col-end: 4` / `--main-row-end: 7` → `.main` spans columns 1–4 and rows 1–7, the panels occupy columns 4–6, and `.hotkeys` sits below in row 7–8.  
-In **CenterView**: `--main-col-end: 6` / `--main-row-end: 8` → `.main` expands to the full grid. The panels are kept in their grid cells but hidden with `opacity: 0` and `pointer-events: none` (still in the DOM), and `.hotkeys` slides off-screen via animation (its grid position is unchanged; it is removed visually, not from the DOM).
-
-### State: `isCenterView` in `TriageDashboard.jsx`
-
-`isCenterView` is **pure derived state** — no `useState`, no persistence. It is computed from `activeView` on every render:
+### Layout Mode Derivation
 
 ```js
-// ── CenterView ───────────────────────────────────────────────────────────
-// When one of these views is active, .main expands to fill the entire grid
-// (all 5 columns and full height) and the BottomStatusBar slides off-screen.
-// The right-side panels and status bar stay mounted to preserve their state,
-// but the panels are hidden via opacity: 0 and pointer-events: none.
-//
-// To add a new CenterView card: add its view key string to this Set.
-// No CSS changes required.
-// ──────────────────────────────────────────────────────────────────────────
-const CENTER_VIEW_KEYS = new Set([
-  'settings',             // App settings
-  'listview',             // Full tab list
-  'bookmarks',            // Bookmark manager
-  'autotabgrouperworker', // Auto Tab Grouper settings
-  'autocloserworker',     // Auto Tab Closer settings
-  'autotabgroup',         // Tab Group Wizard
-  'autosmush',            // Auto Smusher
-  'tabsorter',            // Auto Sorter
-  'watchlater',           // YouTube Watch Later
-  'autoclose',            // Close Old Tabs
-]);
-const isCenterView = CENTER_VIEW_KEYS.has(activeView);
+let layoutMode = 'normal';
+if (CENTER_VIEW_KEYS.has(activeView) || showAutoGroupWizard) {
+  if (activeView === 'listview' && activePicker !== null) {
+    layoutMode = 'contentWithSidebar';
+  } else {
+    layoutMode = 'centered';
+  }
+}
 ```
 
-`activeView` is already managed at the `TriageDashboard` level (not inside `Card`) so it persists across card remounts caused by filter changes.
+`CENTER_VIEW_KEYS` is a `Set` of `activeView` string keys. Adding a new full-screen tool requires only adding its key string to this Set — no CSS changes, no new props.
+
+`activeView` is managed at the `TriageDashboard` level (not inside `Card`) so it persists across card remounts caused by filter changes.
 
 ### How the Grid Change Is Applied
 
-The CSS variables are set via an inline `style` prop on the `.dashboard` div, and a `data-center-view` attribute is toggled. 
+The CSS properties for each mode are explicitly defined in `Dashboard.module.css` using the `data-layout-mode` attribute on the `.dashboard` div:
 
 ```jsx
 <div
   className={styles.dashboard}
-  data-center-view={isCenterView}
-  style={{
-    '--main-row-end': isCenterView ? 8 : 7,
-    '--main-col-end': isCenterView ? 6 : 4,
-  }}
+  data-layout-mode={layoutMode}
 >
 ```
 
-When `isCenterView` flips, the entire navigation action is wrapped in the native **View Transitions API** via `document.startViewTransition()` in `handleNavigate`. This triggers the browser's compositor to take a snapshot of the normal state and the new centered state, and morph them together in a seamless GPU-accelerated animation.
+The attribute selector is used to cleanly toggle grid layout changes:
 
+```css
+/* Normal (60/40) */
+.main { grid-column: 1 / 7; grid-row: 1 / 7; }
+.bookmarks, .tabGroups { grid-column: 7 / 11; }
 
-### How the Panels and Bar Are Animated
+/* contentWithSidebar (70/30) */
+[data-layout-mode="contentWithSidebar"] .main { grid-column: 1 / 8; grid-row: 1 / 8; }
+[data-layout-mode="contentWithSidebar"] .bookmarks,
+[data-layout-mode="contentWithSidebar"] .tabGroups { grid-column: 8 / 11; }
 
-Previously, the side panels and bottom bar were animated using complex Framer Motion logic. They are now elegantly integrated directly into the View Transition API.
+/* centered (100%) */
+[data-layout-mode="centered"] .main { grid-column: 1 / 11; grid-row: 1 / 8; }
+```
+
+### Animations
+
+There are four valid layout transitions. `normal ↔ contentWithSidebar` does not exist — `contentWithSidebar` is only reachable from `centered` (i.e. when List View is already open).
+
+| Transition | Trigger | System |
+|---|---|---|
+| `normal` → `centered` | User opens a full-screen tool (e.g. List View) | View Transitions API |
+| `centered` → `normal` | User closes the tool, returns to triage deck | View Transitions API |
+| `centered` → `contentWithSidebar` | User opens a picker (Bookmarks/Group) from List View | CSS transition |
+| `contentWithSidebar` → `centered` | User closes the picker | CSS transition |
+
+**View Transitions API — `normal` ↔ `centered`**
+
+`handleNavigate` in `TriageDashboard.jsx` wraps the state update in `document.startViewTransition()`. The browser snapshots the before and after states and morphs the following named elements (defined via `view-transition-name` in `Dashboard.module.css`):
+
+- `main-card` — primary content area
+- `bookmarks-panel`, `tabgroups-panel` — side panels
+- `hotkeys-bar` — bottom bar
+
+`global.css` overrides the default crossfade for all named groups. The side panels and hotkeys bar animate at `0.8s cubic-bezier(0.4, 0, 0.2, 1)` in sync with the card expansion.
+
+The `main-card` uses a bespoke two-phase sequence to avoid the browser's default "squished stretch" resize artifact. By default, the View Transitions API scales the snapshot to fit the new bounds — `object-fit: none` disables that. The actual animation is split across `old` and `new`:
+
+```css
+::view-transition-old(main-card) {
+  animation: card-fade-out 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  object-fit: none;
+  object-position: center;
+}
+
+::view-transition-new(main-card) {
+  animation: card-fade-in 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.4s both;
+  object-fit: none;
+  object-position: center;
+}
+```
+
+`card-fade-out` runs for 0.3s, fading the old content to opacity 0 while the card bounds simultaneously expand to fill the grid. `card-fade-in` starts at 0.4s (after the expansion has largely settled) and fades the new content in over 0.4s. This creates a "breathing" effect: the card grows empty, then reveals the new view — eliminating any visual collision between the outgoing and incoming content.
+
+The root crossfade (`::view-transition-group(root)`) is disabled entirely via `animation: none`.
+
+`is-routing` is added to `document.documentElement` for the duration of the transition. This triggers `transition: none !important` on `.panel` and `.hotkeys` in `Dashboard.module.css`, preventing the CSS transition system from firing simultaneously.
+
+The following design decisions make this work correctly. Previously, the side panels and bottom bar were animated using complex Framer Motion logic — they are now integrated directly into the View Transition API:
 
 1. **Persistent State:** The side panels and the hotkeys bar remain in the DOM at all times. They do not unmount, which preserves their scroll positions and internal state perfectly.
-2. **Pure CSS Triggers:** When `[data-center-view="true"]` is applied to `.dashboard`, pure CSS transforms slide the panels off the right edge (`transform: translateX(...)`) and slide the bottom bar down below the viewport.
-3. **Synchronization (The Z-Index Fix):** 
-   By assigning unique `view-transition-name` properties in `Dashboard.module.css` (e.g., `bookmarks-panel`, `tabgroups-panel`, `hotkeys-bar`), these elements are hoisted into the same pseudo-element animation layer as the main card. 
-   
+2. **Pure CSS Triggers:** When `[data-layout-mode="centered"]` is applied to `.dashboard`, pure CSS transforms slide the panels off the right edge (`transform: translateX(...)`) and slide the bottom bar down below the viewport.
+3. **Synchronization (The Z-Index Fix):** By assigning unique `view-transition-name` properties in `Dashboard.module.css` (`bookmarks-panel`, `tabgroups-panel`, `hotkeys-bar`), these elements are hoisted into the same pseudo-element animation layer as the main card.
+
    *This guarantees they animate in perfect lockstep with the card expanding, completely eliminating clipping, trailing, or weird overlap issues that plagued the old Framer Motion implementation.*
 
-4. **Cinematic Crossfade Timing:** 
-   In `global.css`, we heavily override the default browser View Transition behavior for the `main-card`. By default, the API creates an ugly "squished" stretch effect during resize. 
-   
-   To fix this, we assign `object-fit: none` and use a bespoke keyframe sequence:
-   
-   ```css
-   ::view-transition-old(main-card) {
-     animation: customFadeOut 0.8s cubic-bezier(0.25, 0.1, 0.25, 1);
-   }
-   ::view-transition-new(main-card) {
-     animation: customFadeIn 0.8s cubic-bezier(0.25, 0.1, 0.25, 1);
-   }
-   ```
-   
-   This creates a beautiful "breathing" effect: the old content fades out instantly, the card's physical bounds smoothly expand while empty, and the new content fades in seamlessly at the very end of the 0.8s timeline.
+**CSS transitions — `centered` ↔ `contentWithSidebar`**
 
-### Adding a New CenterView Card
+`setActivePicker` in `PickerProvider` is a plain synchronous `useState` setter — no View Transition. React re-renders, `layoutMode` flips between `centered` and `contentWithSidebar`, and the data-attribute CSS rules in `Dashboard.module.css` apply or remove `translateX`/`translateY` transforms. The `.panel` class carries `transition: transform 200ms ease-out, opacity 200ms ease-out`; `.hotkeys` carries `transition: transform 200ms ease-out`. The browser handles the slide with no JavaScript coordination.
+
+
+### Adding a New CenterView-Style Tool
 
 1. Open `TriageDashboard.jsx`.
 2. Add the card's `activeView` key string to `CENTER_VIEW_KEYS`. That's it.
 3. No CSS changes, no new state, no new props.
+4. If the tool needs `contentWithSidebar` behavior (panels visible, bar hidden), extend the `layoutMode` derivation condition accordingly.
 
-### Adjusting the Row Span
+### Adjusting Column or Row Spans
 
-To change how many rows CenterView occupies:
-1. Open `Dashboard.module.css`. Find the `.main` rule.
-2. Change the fallback in `var(--main-row-end, 7)` for the normal-mode value.
-3. In `TriageDashboard.jsx`, update the `isCenterView ? 8 : 7` literal to match.
-4. Ensure `grid-template-rows` has enough rows defined in `.dashboard`.
+- **Row span:** Change the `grid-row` values for `.main` and `.hotkeys` in `Dashboard.module.css` for each layout mode block.
+- **Side panel width:** The 60/40 normal split is encoded as column 7 of a 10-column grid, while the 70/30 `contentWithSidebar` split uses column 8. To adjust these ratios, simply edit the `grid-column` values in the corresponding `[data-layout-mode]` overrides in `Dashboard.module.css`.
+- **Ensure** `grid-template-rows` in `.dashboard` has enough rows defined for any new span values.

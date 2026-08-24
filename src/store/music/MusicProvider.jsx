@@ -3,7 +3,7 @@ import * as Tone from 'tone';
 import { MUSIC_CONFIG } from './musicConfig';
 import { song1 } from './songs/song1';
 
-const MusicContext = createContext(null);
+const MusicContext = createContext(/** @type {any} */ (null));
 
 // ─── Beat-window constants ────────────────────────────────────────────────────
 

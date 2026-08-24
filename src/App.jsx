@@ -44,8 +44,12 @@ function GlobalConfetti() {
 }
 
 function AppWrapper({ children }) {
-  const { excludeSuspendedTabs } = useTabProcessing();
-  const tabFilterFn = excludeSuspendedTabs ? (tab) => !tab.isSuspended : null;
+  const { excludeSuspendedTabs, excludeGroupedTabs } = useTabProcessing();
+  const tabFilterFn = (tab) => {
+    if (excludeSuspendedTabs && tab.isSuspended) return false;
+    if (excludeGroupedTabs && tab.groupId !== -1) return false;
+    return true;
+  };
   const { progressPercent } = useProgress(tabFilterFn);
 
   return (

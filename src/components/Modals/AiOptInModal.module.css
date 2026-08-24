@@ -28,12 +28,14 @@
   justify-content: space-between;
   align-items: center;
   padding: 16px 20px;
-  
-  background-color: #9747FF;
+
+  background-color: #9747ff;
   border-radius: 12px;
-  border: 1px solid color-mix(in srgb, #9747FF 80%, #000 20%);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  
+  border: 1px solid color-mix(in srgb, #9747ff 80%, #000 20%);
+  box-shadow:
+    0 6px 16px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+
   background-image:
     linear-gradient(rgba(0, 0, 0, 0.1) 1px, transparent 1px),
     linear-gradient(90deg, rgba(0, 0, 0, 0.1) 1px, transparent 1px);
@@ -83,7 +85,8 @@
   gap: 12px;
 }
 
-.cancelButton, .confirmButton {
+.cancelButton,
+.confirmButton {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -114,14 +117,14 @@
 }
 
 .confirmButton {
-  background-color: #9747FF;
-  border: 1px solid color-mix(in srgb, #9747FF 80%, #000 20%);
+  background-color: #9747ff;
+  border: 1px solid color-mix(in srgb, #9747ff 80%, #000 20%);
   color: white;
   box-shadow: 0 4px 12px rgba(151, 71, 255, 0.3);
 }
 
 .confirmButton:hover:not(:disabled) {
-  background-color: color-mix(in srgb, #9747FF 90%, #fff 10%);
+  background-color: color-mix(in srgb, #9747ff 90%, #fff 10%);
   transform: translateY(-1px);
   box-shadow: 0 6px 16px rgba(151, 71, 255, 0.4);
 }
@@ -160,12 +163,12 @@
   color: var(--text-primary);
 }
 
-.checkboxLabel input[type="checkbox"] {
+.checkboxLabel input[type='checkbox'] {
   margin-top: 2px;
   width: 16px;
   height: 16px;
   cursor: pointer;
-  accent-color: #9747FF;
+  accent-color: #9747ff;
 }
 
 .checkboxLabel span {

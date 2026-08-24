@@ -1,87 +1,16 @@
 import { useState, useEffect } from 'react';
-import { isAiAvailable, suggestGroups, downloadModel } from '../../../services/aiGroupingService';
+import { suggestGroups } from '../../../services/aiGroupingService';
 import '../../../services/aiEvaluationSuite';
+import { useAiAvailability } from '../../../hooks/useAiAvailability';
 
 // hook to manage AI model availability, download progress, and AI-driven
 // group generation.
 export function useWizardAi({ activeTabs, buildGroups, domainPrefs, setGroups, setActiveGroupId, setExcludedTabIds }) {
-    // aiStatus: 'checking' | 'available' | 'unavailable' | 'generating' | 'error' | 'downloading' | 'downloadable'
-    const [aiStatus, setAiStatus] = useState('checking');
+    const aiAvailability = useAiAvailability();
+    const { aiStatus, setAiStatus } = aiAvailability;
     const [groupMode, setGroupMode] = useState('brand'); // 'brand' | 'ai'
     const [aiGenCounter, setAiGenCounter] = useState(0);
-    const [downloadProgress, setDownloadProgress] = useState(0);
-    const [showAiModal, setShowAiModal] = useState(false);
-    const [isModelPhysicallyAvailable, setIsModelPhysicallyAvailable] = useState(false);
-    const [isModelDownloaded, setIsModelDownloaded] = useState(false);
     const [aiPhase, setAiPhase] = useState('idle'); // 'idle' | 'initializing' | 'inferencing' | 'parsing'
-
-    // check ai availability on mount
-    useEffect(() => {
-        let cancelled = false;
-        console.log('[useWizardAi] Checking AI availability on mount...');
-        isAiAvailable().then(result => {
-            if (cancelled) return;
-            const isOptedIn = localStorage.getItem('ai_opt_in') === 'true';
-            const isDownloadRequested = localStorage.getItem('ai_download_requested') === 'true';
-            console.log('[useWizardAi] isAiAvailable result:', result, 'isOptedIn:', isOptedIn, 'isDownloadRequested:', isDownloadRequested);
-
-            const isHardwareSupported = result.available || result.downloading || result.downloadable;
-            setIsModelPhysicallyAvailable(isHardwareSupported);
-            setIsModelDownloaded(result.available);
-
-            if (!isHardwareSupported) {
-                console.log('[useWizardAi] Setting status to unavailable');
-                setAiStatus('unavailable');
-            } else if (isOptedIn && result.available) {
-                console.log('[useWizardAi] Setting status to available');
-                setAiStatus('available');
-            } else if (isOptedIn && isDownloadRequested && (result.downloading || result.downloadable)) {
-                // If opted in and requested download, but not available, it should be downloading
-                console.log('[useWizardAi] Setting status to downloading');
-                setAiStatus('downloading');
-            } else {
-                // Supported, but either not opted in or download not requested. Click should show modal.
-                console.log('[useWizardAi] Setting status to downloadable (requires opt in / download request)');
-                setAiStatus('downloadable');
-            }
-        });
-        return () => { cancelled = true; };
-    }, []);
-
-    // download progress tracking
-    useEffect(() => {
-        console.log('[useWizardAi] download progress tracking effect running. aiStatus:', aiStatus);
-        if (aiStatus !== 'downloading') return;
-        const controller = new AbortController();
-
-        console.log('[useWizardAi] initiating downloadModel...');
-        downloadModel(
-            (progress) => {
-                console.log('[useWizardAi] download progress updated:', progress);
-                setDownloadProgress(progress);
-            },
-            { signal: controller.signal }
-        )
-            .then(() => {
-                console.log('[useWizardAi] downloadModel resolved. Setting available and AI mode.');
-                setAiStatus('available');
-                setDownloadProgress(1);
-                setGroupMode('ai');
-            })
-            .catch(err => {
-                if (err.name === 'AbortError') {
-                    console.log('[useWizardAi] download aborted.');
-                    return;
-                }
-                console.warn('[Tabbit] Model download failed:', err);
-                setAiStatus('unavailable');
-            });
-
-        return () => {
-            console.log('[useWizardAi] aborting download controller');
-            controller.abort();
-        };
-    }, [aiStatus]);
 
     // re-generate groups when mode changes or "Redo" is clicked
     useEffect(() => {
@@ -137,13 +66,9 @@ export function useWizardAi({ activeTabs, buildGroups, domainPrefs, setGroups, s
     }, [groupMode, aiGenCounter]);
 
     return {
-        aiStatus, setAiStatus,
+        ...aiAvailability,
         groupMode, setGroupMode,
         aiGenCounter, setAiGenCounter,
-        downloadProgress,
-        showAiModal, setShowAiModal,
-        isModelPhysicallyAvailable,
-        isModelDownloaded,
         aiPhase, setAiPhase,
     };
 }

@@ -1,20 +1,20 @@
 .dashboard {
   margin: 0;
-  width: 100vw;
+  width: 100%;
   display: grid;
   align-items: stretch;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(10, minmax(0, 1fr));
   grid-template-rows: repeat(6, minmax(0, 1fr)) 62px;
   gap: clamp(10px, 1.5vw, 16px);
   padding: clamp(10px, 1.5vw, 16px);
-  height: 100vh;
+  height: 100%;
   animation: fadeIn 600ms ease;
   overflow: hidden;
 }
 
 .main {
-  grid-column: 1 / var(--main-col-end, 4);  /* 4 = normal, 6 = CenterView (full width) */
-  grid-row: 1 / var(--main-row-end, 7);       /* 7 = normal, 8 = CenterView (full height) */
+  grid-column: 1 / 7;
+  grid-row: 1 / 7;
   position: relative;
   overflow: visible;
   z-index: 10;
@@ -27,34 +27,58 @@
   height: 100%;
 }
 
-.wizardOverlay {
-  position: absolute;
-  inset: 0;
-  z-index: 200;
-}
-
 .hotkeys {
-  grid-column: 1 / var(--main-col-end, 4);
-  grid-row: 7 / 8;     /* last row — slides off-screen in CenterView via CSS animation */
+  grid-column: 1 / 7;
+  grid-row: 7 / 8;
   min-width: 0;
   min-height: 62px;
   height: 100%;
   position: relative;
   z-index: 20;
   view-transition-name: hotkeys-bar;
+  transition: transform 200ms ease-out;
   /* No overflow:hidden needed — .dashboard overflow:hidden clips the translateY exit */
 }
 
 /* Slide off-screen via CSS transform in CenterView */
 .bookmarks {
-  grid-area: 1 / 4 / 5 / 6;
+  grid-column: 7 / 11;
+  grid-row: 1 / 5;
   view-transition-name: bookmarks-panel;
 }
 
 .tabGroups {
-  grid-area: 5 / 4 / 8 / 6;
+  grid-column: 7 / 11;
+  grid-row: 5 / 8;
   view-transition-name: tabgroups-panel;
 }
+
+/* Layout Mode Overrides */
+
+[data-layout-mode='contentWithSidebar'] .main {
+  grid-column: 1 / 8;
+  grid-row: 1 / 8;
+}
+
+[data-layout-mode='contentWithSidebar'] .hotkeys {
+  grid-column: 1 / 8;
+}
+
+[data-layout-mode='contentWithSidebar'] .bookmarks,
+[data-layout-mode='contentWithSidebar'] .tabGroups {
+  grid-column: 8 / 11;
+}
+
+[data-layout-mode='centered'] .main {
+  grid-column: 1 / 11;
+  grid-row: 1 / 8;
+}
+
+[data-layout-mode='centered'] .hotkeys {
+  grid-column: 1 / 11;
+}
+
+/* In centered mode, panels stay in their normal/contentWithSidebar columns so their translateX animation functions correctly */
 
 /* .monitor {
   grid-area: 7 / 4 / 8 / 6;
@@ -64,8 +88,7 @@
   background: var(--bg-surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 0 0 0 0;
-  /* padding: 0 0 clamp(10px, 1.5vw, 16px) 0; */
+  padding: 0;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -74,19 +97,29 @@
   height: 100%;
   /* Ensure default state is set so transitions calculate from here */
   transform: translate(0, 0);
+  transition:
+    transform 200ms ease-out,
+    opacity 200ms ease-out;
 }
 
-[data-center-view="true"] .bookmarks,
-[data-center-view="true"] .tabGroups {
+[data-layout-mode='centered'] .bookmarks,
+[data-layout-mode='centered'] .tabGroups {
   transform: translateX(calc(100% + 16px));
   opacity: 0;
   pointer-events: none;
 }
 
-[data-center-view="true"] .hotkeys {
+[data-layout-mode='centered'] .hotkeys,
+[data-layout-mode='contentWithSidebar'] .hotkeys {
   transform: translateY(calc(100% + 16px));
 }
 
-[data-reduce-motion="true"] .panel {
-  transition: none;
+:global(.is-routing) .panel,
+:global(.is-routing) .hotkeys {
+  transition: none !important;
+}
+
+[data-reduce-motion='true'] .panel,
+[data-reduce-motion='true'] .hotkeys {
+  transition: none !important;
 }

@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Tabbit: Tab Closer & Organizer",
-  "version": "0.3",
+  "version": "0.3.1",
   "description": "Close old tabs, manage bookmarks, and organize groups, quick as a rabbit.",
   "permissions": [
     "tabs",

@@ -55,7 +55,6 @@
   gap: 16px;
 }
 
-
 /* Grid */
 .previewContainer {
   flex: 1;
@@ -122,15 +121,21 @@
   gap: 8px;
   cursor: pointer;
   position: relative;
-  transition: border-color 100ms ease, background 100ms ease;
+  transition:
+    border-color 100ms ease,
+    background 100ms ease;
   user-select: none;
 }
 .previewCard:hover {
   border-color: color-mix(in srgb, var(--text-secondary) 50%, transparent);
   background: var(--bg-elevated);
 }
-.previewCardExcluded { opacity: 0.45; }
-.previewCardLocked   { cursor: default; }
+.previewCardExcluded {
+  opacity: 0.45;
+}
+.previewCardLocked {
+  cursor: default;
+}
 
 /* Status badge (overlays top-right corner during run) */
 .statusBadge {
@@ -146,13 +151,25 @@
   font-size: 11px;
   font-weight: bold;
   border: 2px solid var(--bg-surface);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.25);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
   z-index: 10;
 }
-.statusPending { background: var(--text-muted); color: var(--bg-surface); }
-.statusSaved   { background: var(--green, #34c759); color: #fff; }
-.statusSkipped { background: var(--text-muted); color: var(--bg-surface); }
-.statusFailed  { background: var(--red, #ff3b30); color: #fff; }
+.statusPending {
+  background: var(--text-muted);
+  color: var(--bg-surface);
+}
+.statusSaved {
+  background: var(--green, #34c759);
+  color: #fff;
+}
+.statusSkipped {
+  background: var(--text-muted);
+  color: var(--bg-surface);
+}
+.statusFailed {
+  background: var(--red, #ff3b30);
+  color: #fff;
+}
 
 /* Duplicate badge */
 .duplicateBadge {
@@ -170,7 +187,7 @@
   align-items: center;
   justify-content: center;
   padding: 0 4px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.25);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
   z-index: 10;
   border: 2px solid var(--bg-surface);
 }
@@ -198,11 +215,15 @@
 }
 
 .checkbox {
-  width: 16px; height: 16px;
+  width: 16px;
+  height: 16px;
   border-radius: 4px;
   border: 1.5px solid var(--border);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 10px; color: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  color: transparent;
   transition: all 100ms ease;
   flex-shrink: 0;
 }
@@ -212,14 +233,28 @@
   color: #fff;
 }
 
-.previewInfo { display: flex; flex-direction: column; gap: 2px; }
+.previewInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
 .previewTitleText {
-  font-size: 12px; font-weight: 500; color: var(--text-primary);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.3;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3;
 }
 .previewUrlText {
-  font-size: 10px; color: var(--text-muted); font-family: var(--font-mono);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.3;
+  font-size: 10px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3;
 }
 
 .emptyState {
@@ -231,34 +266,75 @@
 
 /* Footer */
 .footer {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 12px 16px; border-top: 1px solid var(--border); gap: 8px; flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+  gap: 8px;
+  flex-shrink: 0;
   background: var(--bg-surface);
 }
-.footerLeft  { display: flex; align-items: center; gap: 6px; }
-.footerMeta  { font-size: 11px; color: var(--text-muted); font-family: var(--font-mono); }
-.footerRight { display: flex; align-items: center; gap: 8px; }
+.footerLeft {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.footerMeta {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
+.footerRight {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
 
 .btnCancel {
-  font-size: 12px; font-weight: 500; color: var(--text-muted); background: transparent;
-  border: 1px solid var(--border); border-radius: 6px; padding: 6px 14px; cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 14px;
+  cursor: pointer;
   transition: all 100ms ease;
 }
-.btnCancel:hover { color: var(--text-primary); background: var(--bg-elevated); }
+.btnCancel:hover {
+  color: var(--text-primary);
+  background: var(--bg-elevated);
+}
 
 .btnConfirm {
-  font-size: 12px; font-weight: 600; color: #fff; background: var(--accent);
-  border: 1px solid transparent; border-radius: 6px; padding: 6px 16px; cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--accent);
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 6px 16px;
+  cursor: pointer;
   transition: all 100ms ease;
 }
-.btnConfirm:hover:not(:disabled) { filter: brightness(1.1); transform: translateY(-1px); }
-.btnConfirm:disabled { opacity: 0.35; cursor: not-allowed; }
+.btnConfirm:hover:not(:disabled) {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+.btnConfirm:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
 
 /* Stop button variant — red-tinted */
 .btnStop {
   background: color-mix(in srgb, var(--red, #ff3b30) 85%, transparent);
 }
-.btnStop:hover { filter: brightness(1.1); transform: translateY(-1px); }
+.btnStop:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
 
 /* ── Debug log panel ─────────────────────────────────────────────────────── */
 .debugLog {
@@ -285,4 +361,3 @@
 .debugLine:last-child {
   color: var(--text-primary);
 }
-

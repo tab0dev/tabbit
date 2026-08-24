@@ -181,12 +181,12 @@
   margin-right: 0.1em;
 }
 
-.actionDot[data-color="green"] {
+.actionDot[data-color='green'] {
   background-color: var(--monitor-dot-green, #4a9a4a);
   box-shadow: 0 0 4px var(--monitor-dot-green, #4a9a4a);
 }
 
-.actionDot[data-color="red"] {
+.actionDot[data-color='red'] {
   background-color: var(--monitor-dot-red, #c04848);
   box-shadow: 0 0 4px var(--monitor-dot-red, #c04848);
 }
@@ -247,8 +247,8 @@
   transform: scale(1);
   /* Snap on (0ms), ease off (80ms) — the [data-beat='true'] rule overrides duration */
   transition:
-    opacity    80ms ease-out,
-    transform  80ms ease-out,
+    opacity 80ms ease-out,
+    transform 80ms ease-out,
     box-shadow 80ms ease-out,
     background-color 80ms ease-out;
   margin-top: 5px;
@@ -324,5 +324,7 @@
 /* ─── Animations ────────────────────────────────────────────────────────── */
 
 @keyframes blink {
-  50% { opacity: 0; }
+  50% {
+    opacity: 0;
+  }
 }

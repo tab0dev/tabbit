@@ -37,7 +37,7 @@
 .modeTabActive {
   color: var(--text-primary);
   background: var(--bg-surface);
-  box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
 }
 
 /* ── Checkbox: indeterminate dash state ─────────────────── */
@@ -302,7 +302,6 @@
   position: relative;
 }
 
-
 /* ── Hidden file input ──────────────────────────────────── */
 .hiddenInput {
   display: none;
@@ -378,7 +377,7 @@
   font-size: 12px;
   font-weight: 500;
   color: var(--text-primary);
-  box-shadow: 0 4px 20px rgba(0,0,0,0.26);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.26);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -476,7 +475,7 @@
   font-weight: 600;
   padding: 6px 12px;
   border-radius: 20px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
   z-index: 100;
   display: inline-flex;
   align-items: center;
@@ -494,6 +493,12 @@
 }
 
 @keyframes floatIn {
-  from { opacity: 0; transform: translate(-50%, 8px); }
-  to { opacity: 1; transform: translate(-50%, 0); }
+  from {
+    opacity: 0;
+    transform: translate(-50%, 8px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
 }

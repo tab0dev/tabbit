@@ -1,8 +1,14 @@
 /* AutoTabGroupWizard.module.css — Two-pane with DnD */
 
 @keyframes wizardIn {
-  from { opacity: 0; transform: scale(0.97) translateY(6px); }
-  to   { opacity: 1; transform: scale(1)   translateY(0); }
+  from {
+    opacity: 0;
+    transform: scale(0.97) translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
 /* ── Root ── */
@@ -39,8 +45,8 @@
   gap: 8px;
 }
 
-.headerIcon { 
-  flex-shrink: 0; 
+.headerIcon {
+  flex-shrink: 0;
 }
 
 .headerSubtitle {
@@ -92,7 +98,6 @@
   overflow-y: auto;
 }
 
-
 /* ── Domain / group row in left pane ── */
 .domainRow {
   display: flex;
@@ -107,7 +112,9 @@
   user-select: none;
 }
 
-.domainRow:hover { background: var(--bg-elevated); }
+.domainRow:hover {
+  background: var(--bg-elevated);
+}
 
 .domainRowActive {
   background: var(--accent-dim);
@@ -116,13 +123,17 @@
 .domainRowActive::before {
   content: '';
   position: absolute;
-  left: 0; top: 0; bottom: 0;
+  left: 0;
+  top: 0;
+  bottom: 0;
   width: 2px;
   background: var(--accent);
   border-radius: 0 2px 2px 0;
 }
 
-.domainRowDisabled { opacity: 0.4; }
+.domainRowDisabled {
+  opacity: 0.4;
+}
 
 /* ── Sibling Grouping ── */
 /* When a domain is split, all rows sharing the same rootDomain get these classes */
@@ -152,10 +163,14 @@
 .domainRowSibling::before {
   content: '';
   position: absolute;
-  left: 0; top: 0; bottom: 0;
+  left: 0;
+  top: 0;
+  bottom: 0;
   width: 2px;
   background: color-mix(in srgb, var(--accent) 15%, transparent);
-  transition: background 150ms ease, width 150ms ease;
+  transition:
+    background 150ms ease,
+    width 150ms ease;
 }
 
 .domainRowHighlightedSibling {
@@ -218,7 +233,9 @@
   line-height: 1.3;
 }
 
-.domainRowActive .domainName { color: var(--accent); }
+.domainRowActive .domainName {
+  color: var(--accent);
+}
 
 .domainCount {
   font-size: 10px;
@@ -253,17 +270,23 @@
   border: 1px solid var(--border);
   cursor: pointer;
   position: relative;
-  transition: background 150ms ease, border-color 150ms ease;
+  transition:
+    background 150ms ease,
+    border-color 150ms ease;
 }
 
 .toggle::after {
   content: '';
   position: absolute;
-  top: 2px; left: 2px;
-  width: 8px; height: 8px;
+  top: 2px;
+  left: 2px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background: var(--text-muted);
-  transition: transform 150ms ease, background 150ms ease;
+  transition:
+    transform 150ms ease,
+    background 150ms ease;
 }
 
 .toggleOn {
@@ -319,7 +342,9 @@
   cursor: pointer;
   width: 100%;
   text-align: left;
-  transition: color 100ms ease, background 100ms ease;
+  transition:
+    color 100ms ease,
+    background 100ms ease;
   margin-top: auto;
   flex-shrink: 0;
 }
@@ -376,7 +401,10 @@
   padding: 3px 8px;
   cursor: pointer;
   white-space: nowrap;
-  transition: color 100ms ease, background 100ms ease, border-color 100ms ease;
+  transition:
+    color 100ms ease,
+    background 100ms ease,
+    border-color 100ms ease;
 }
 
 .rightPaneToggle:hover {
@@ -391,7 +419,6 @@
   padding: 4px 0;
 }
 
-
 /* ── Tab row (draggable) ── */
 .tabRow {
   display: flex;
@@ -399,14 +426,20 @@
   gap: 9px;
   padding: 7px 14px 7px 12px;
   cursor: grab;
-  transition: background 100ms ease, opacity 100ms ease;
+  transition:
+    background 100ms ease,
+    opacity 100ms ease;
   min-width: 0;
   user-select: none;
 }
 
-.tabRow:hover { background: var(--bg-elevated); }
+.tabRow:hover {
+  background: var(--bg-elevated);
+}
 
-.tabRowExcluded { opacity: 0.35; }
+.tabRowExcluded {
+  opacity: 0.35;
+}
 
 /* Dimmed while this tab is being actively dragged */
 .tabRowDragging {
@@ -428,7 +461,9 @@
   cursor: grab;
 }
 
-.tabRow:hover .tabDragHandle { opacity: 1; }
+.tabRow:hover .tabDragHandle {
+  opacity: 1;
+}
 
 .tabFavicon {
   width: 14px;
@@ -484,7 +519,10 @@
   justify-content: center;
   font-size: 9px;
   color: transparent;
-  transition: background 100ms ease, border-color 100ms ease, color 100ms ease;
+  transition:
+    background 100ms ease,
+    border-color 100ms ease,
+    color 100ms ease;
   cursor: pointer;
 }
 
@@ -503,7 +541,9 @@
   background: var(--bg-surface);
   border: 1px solid var(--accent);
   border-radius: 8px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 0 1px color-mix(in srgb, var(--accent) 30%, transparent);
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.4),
+    0 0 0 1px color-mix(in srgb, var(--accent) 30%, transparent);
   font-size: 12px;
   font-weight: 500;
   color: var(--text-primary);
@@ -561,7 +601,11 @@
   gap: 8px;
 }
 
-.footerLeft { display: flex; align-items: center; gap: 6px; }
+.footerLeft {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
 
 .footerMeta {
   font-size: 11px;
@@ -569,7 +613,11 @@
   font-family: var(--font-mono);
 }
 
-.footerRight { display: flex; align-items: center; gap: 6px; }
+.footerRight {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
 
 .btnCancel {
   font-size: 12px;
@@ -581,10 +629,15 @@
   border-radius: 6px;
   padding: 6px 14px;
   cursor: pointer;
-  transition: color 100ms ease, background 100ms ease;
+  transition:
+    color 100ms ease,
+    background 100ms ease;
 }
 
-.btnCancel:hover { color: var(--text-primary); background: var(--bg-elevated); }
+.btnCancel:hover {
+  color: var(--text-primary);
+  background: var(--bg-elevated);
+}
 
 .btnConfirm {
   font-size: 12px;
@@ -596,7 +649,10 @@
   border-radius: 6px;
   padding: 6px 16px;
   cursor: pointer;
-  transition: opacity 100ms ease, filter 100ms ease, transform 80ms ease;
+  transition:
+    opacity 100ms ease,
+    filter 100ms ease,
+    transform 80ms ease;
 }
 
 .btnConfirm:hover:not(:disabled) {
@@ -604,8 +660,14 @@
   transform: translateY(-1px);
 }
 
-.btnConfirm:disabled { opacity: 0.35; cursor: not-allowed; }
-.btnConfirmWorking { opacity: 0.7; cursor: wait; }
+.btnConfirm:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.btnConfirmWorking {
+  opacity: 0.7;
+  cursor: wait;
+}
 
 /* ── Split button (moved to left pane) ── */
 /* ... removed from here ... */
@@ -642,7 +704,9 @@
   padding: 3px 10px;
   cursor: pointer;
   white-space: nowrap;
-  transition: color 120ms ease, background 120ms ease;
+  transition:
+    color 120ms ease,
+    background 120ms ease;
   line-height: 1.3;
 }
 
@@ -713,8 +777,12 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .aiOverlayText {
@@ -733,7 +801,10 @@
   border-radius: 6px;
   padding: 5px 16px;
   cursor: pointer;
-  transition: color 120ms ease, background 120ms ease, border-color 120ms ease;
+  transition:
+    color 120ms ease,
+    background 120ms ease,
+    border-color 120ms ease;
   margin-top: 2px;
 }
 
@@ -744,8 +815,12 @@
 }
 
 @keyframes shimmer {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(200%); }
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(200%);
+  }
 }
 
 .aiIndeterminateContainer {
