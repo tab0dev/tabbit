@@ -3,6 +3,7 @@ import uFuzzy from '@leeoniya/ufuzzy';
 import { Tabs, FloppyDisk, Plus, MagnifyingGlassIcon, Magnet } from '@phosphor-icons/react';
 import Tooltip from '../Shared/Tooltip';
 import InlineAddRow from '../Shared/InlineAddRow';
+import PickerHoverItem from '../Shared/PickerHoverItem';
 import { useTriage, Mode } from '../../store/TriageProvider';
 import { useTriageActions } from '../../hooks/useTriageActions';
 import { usePickerPanel } from '../../hooks/usePickerPanel';
@@ -325,16 +326,17 @@ export default function TabGroupPickerPanel({
                   const label = item.title || 'Untitled group';
                   const color = GROUP_COLORS[item.color] ?? GROUP_COLORS.grey;
                   return (
-                    <li
+                    <PickerHoverItem
                       key={`${section.key}-${item.id}`}
-                      data-selected={globalIdx === selectedIndex ? 'true' : 'false'}
-                      className={`${styles.pickerItem} ${globalIdx === selectedIndex ? styles.pickerItemSelected : ''}`}
+                      isSelected={globalIdx === selectedIndex}
+                      icon={
+                        <span className={styles.pickerItemColor} style={{ background: color }} />
+                      }
+                      label={label}
+                      prefix="Move to"
                       onClick={() => confirm(item)}
                       onMouseEnter={() => setSelectedIndex(globalIdx)}
-                    >
-                      <span className={styles.pickerItemColor} style={{ background: color }} />
-                      <span className={styles.pickerItemLabel}>{label}</span>
-                    </li>
+                    />
                   );
                 })}
               </React.Fragment>

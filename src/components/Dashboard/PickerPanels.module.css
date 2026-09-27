@@ -140,10 +140,6 @@
   color: var(--text-secondary);
 }
 
-.pickerItem:hover {
-  background: var(--bg-elevated);
-}
-
 .pickerItemSelected {
   background: var(--accent-dim);
   color: var(--accent);
@@ -402,10 +398,6 @@
   user-select: none;
 }
 
-.treeNode:hover {
-  background: var(--bg-elevated);
-}
-
 .treeNodeSelected {
   background: var(--accent-dim);
   color: var(--accent);
@@ -458,6 +450,33 @@
   text-overflow: ellipsis;
 }
 
+/* Action-hint prefix shown on hover (e.g. "Save to", "Move to") — muted so it reads as instructional */
+.pickerHoverPrefix {
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+/* Action-hint suffix shown on hover (e.g. "and close") — same muted style as prefix */
+.pickerHoverSuffix {
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+/* Muted → indicator rendered inline after the label text when hovering any picker row */
+.pickerHoverArrow {
+  display: inline;
+  font-size: 11px;
+  color: var(--text-muted);
+  opacity: 0.7;
+  margin-left: 3px;
+  transition: opacity 120ms ease;
+}
+
+.treeNodeSelected .pickerHoverArrow,
+.pickerItemSelected .pickerHoverArrow {
+  opacity: 1;
+}
+
 /* Per-row + button — hidden until row is hovered or selected */
 .treeNodeAddBtn {
   display: flex;
@@ -479,7 +498,6 @@
     color 120ms ease;
 }
 
-.treeNode:hover .treeNodeAddBtn,
 .treeNodeSelected .treeNodeAddBtn {
   opacity: 1;
 }

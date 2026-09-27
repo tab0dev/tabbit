@@ -136,6 +136,31 @@ export default function TriageDashboard() {
     }
   }, [state.currentIndex, activeView]);
 
+  // Correction effect: keep currentIndex pointing at a filter-visible tab.
+  // Fires whenever the filter flags change (toggle) OR after the reducer
+  // advances currentIndex (tab action). The early-return makes it idempotent —
+  // when the index is already valid it exits without dispatching, so no loop.
+  useEffect(() => {
+    if (state.mode !== Mode.TRIAGING) return;
+    const current = state.tabs[state.currentIndex];
+    if (!current || tabFilterFn(current)) return; // already on a valid tab
+
+    const all = state.tabs;
+    for (let i = state.currentIndex + 1; i < all.length; i++) {
+      if (!all[i].processed && !all[i].gone && tabFilterFn(all[i])) {
+        dispatch({ type: 'SET_CURRENT_INDEX', payload: i });
+        return;
+      }
+    }
+    for (let i = 0; i < state.currentIndex; i++) {
+      if (!all[i].processed && !all[i].gone && tabFilterFn(all[i])) {
+        dispatch({ type: 'SET_CURRENT_INDEX', payload: i });
+        return;
+      }
+    }
+    dispatch({ type: 'SET_MODE', payload: Mode.COMPLETE });
+  }, [excludeSuspendedTabs, excludeGroupedTabs, state.currentIndex]);
+
   const handleDismissDebuggerWarning = () => {
     setIsDebuggerWarningDismissed(true);
     sessionStorage.setItem('debuggerWarningDismissed', 'true');

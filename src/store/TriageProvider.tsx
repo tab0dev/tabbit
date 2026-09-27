@@ -358,6 +358,8 @@ function triageReducer(state: TriageState, action: TriageReducerAction): TriageS
         isReordering: false,
       };
     }
+    case 'SET_CURRENT_INDEX':
+      return { ...state, currentIndex: action.payload };
     default:
       return state;
   }

@@ -19,7 +19,8 @@ export type TriageReducerAction =
   | { type: 'ADD_BOOKMARK_FOLDER'; payload: { id: string; title: string; parentId: string } }
   | { type: 'ADD_TAB_GROUP'; payload: ChromeTabGroup }
   | { type: 'START_REORDER' }
-  | { type: 'REORDER_TABS'; payload: TabProcessingMode };
+  | { type: 'REORDER_TABS'; payload: TabProcessingMode }
+  | { type: 'SET_CURRENT_INDEX'; payload: number };
 
 /** The global application mode. */
 export type AppMode = 'LOADING' | 'PERMISSION' | 'TRIAGING' | 'PICKER' | 'COMPLETE';

@@ -157,10 +157,23 @@ export function useDuplicateTabs({
   const { state } = useTriage();
 
   const duplicateGroups = useMemo(() => {
-    const tabs = state.tabs?.filter((t) => !t.gone && !t.processed && t.url) ?? [];
+    const primaryTabs = state.tabs?.filter((t) => !t.gone && !t.processed && t.url) ?? [];
+    const allTabs: TriageTab[] = [];
+
+    for (const pt of primaryTabs) {
+      allTabs.push(pt);
+      if (pt.duplicates) {
+        for (const dup of pt.duplicates) {
+          if (!dup.gone && !dup.processed && dup.url) {
+            allTabs.push(dup);
+          }
+        }
+      }
+    }
+
     const map = new Map<string, TriageTab[]>();
 
-    for (const tab of tabs) {
+    for (const tab of allTabs) {
       if (skipPinned && tab.pinned) continue;
       if (tab.url.startsWith('chrome://') || tab.url.startsWith('chrome-extension://')) continue;
       const key = normaliseSmushUrl(tab.url, { ignoreFragments, ignoreQueryStrings });

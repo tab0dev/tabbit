@@ -113,6 +113,10 @@ const STRATEGIES: Record<string, (tabs: TriageTab[]) => TriageTab[]> = {
 
 export function applyTabProcessing(tabs: TriageTab[], mode: string): TriageTab[] {
   const strategy = STRATEGIES[mode] || STRATEGIES[TAB_PROCESSING_MODES.AUTO];
-  // Always work on a shallow copy to avoid mutating callers' arrays.
-  return strategy([...tabs]);
+  // Only sort tabs that still need triaging. Processed/gone tabs are appended
+  // to the back so they never sit between currentIndex and remaining work,
+  // which would break the forward-only walk in useUpcomingTabs.
+  const pending = tabs.filter((t) => !t.processed && !t.gone);
+  const done = tabs.filter((t) => t.processed || t.gone);
+  return [...strategy([...pending]), ...done];
 }

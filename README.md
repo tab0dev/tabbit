@@ -10,7 +10,7 @@
 <br />
 Tabbit is the tab toolbox you've been missing.  Use Tabbit to triage your open tabs, one tab at a time. Keep, close, bookmark, or group tabs and get back to a clean browser. 100% offline, privacy respecting, open source, free to use.   <br /><br /> Tabbit includes powerful browser-cleaning utilities to help manage huge sessions. Use Tabbit to:  **sort tabs** (manually, or automatically), **group tabs** (manually, or automatically, or manually with AI), **remove tabs based on age** (manually, or automatically), **smush duplicate tabs** (manually, or automatically), **consolidate tabs into a single window**, and  **clean up old bookmarks**.
 
-[![Chrome Web Store](https://img.shields.io/badge/Chrome%20Web%20Store-v0.3.1-f8b50a?logo=googlechrome&logoColor=white&style=flat-square)](https://chromewebstore.google.com/detail/tabbit-tab-closer-organiz/calbmnbhppoplenhgpfejepklainehko)
+[![Chrome Web Store](https://img.shields.io/badge/Chrome%20Web%20Store-v0.3.2-f8b50a?logo=googlechrome&logoColor=white&style=flat-square)](https://chromewebstore.google.com/detail/tabbit-tab-closer-organiz/calbmnbhppoplenhgpfejepklainehko)
 
 Install it on the Google Chrome Web store: 
 https://chromewebstore.google.com/detail/tabbit-tab-closer-organiz/calbmnbhppoplenhgpfejepklainehko

@@ -13,6 +13,7 @@ import {
 
 import Tooltip from '../Shared/Tooltip';
 import InlineAddRow from '../Shared/InlineAddRow';
+import PickerHoverItem from '../Shared/PickerHoverItem';
 import { useTriage } from '../../store/TriageProvider';
 import { useTriageActions } from '../../hooks/useTriageActions';
 import { usePickerPanel } from '../../hooks/usePickerPanel';
@@ -58,7 +59,7 @@ export default function BookmarkPickerPanel({
   const { batchTarget, setBatchTarget } = usePicker();
   const currentTab = state.tabs[state.currentIndex];
 
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectedKey, setSelectedKey] = useState<string | null>(null);
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
 
   // addingToId: folder id for the new subfolder (null = not adding)
@@ -111,10 +112,11 @@ export default function BookmarkPickerPanel({
     rawItems: flatFolders,
     currentTabUrl: currentTab?.url,
     matchFn,
-    selectedId, // Trigger auto-scroll when selectedId changes
+    selectedId: selectedKey, // Trigger auto-scroll when selection changes
     onConfirmItem: async (item: PickerItem) => {
       if ((batchTarget?.tabs?.length ?? 0) > 1 && forceSubfolder) {
-        openAddFolder(String(item.id));
+        const sectionKey = selectedKey ? selectedKey.split('-')[0] : 'all';
+        openAddFolder(String(item.id), sectionKey);
         return false; // Prevent panel from closing
       } else if (batchTarget?.tabs?.length) {
         bookmarkBatch(batchTarget.tabs, String(item.id), item.title, true);
@@ -129,22 +131,26 @@ export default function BookmarkPickerPanel({
         if (direction === 'up') setIdx((i) => Math.max(i - 1, 0));
       } else {
         const visible = displaySections.flatMap((sec) =>
-          flattenVisible(sec.items as import('../../types').BookmarkNode[], expandedIds),
+          flattenVisible(sec.items as import('../../types').BookmarkNode[], expandedIds).map(
+            (v) => ({ ...v, key: `${sec.key}-${v.node.id}` }),
+          ),
         );
-        const currentVisibleIdx = visible.findIndex(({ node }) => node.id === selectedId);
+        const currentVisibleIdx = visible.findIndex((v) => v.key === selectedKey);
         if (direction === 'down') {
           const next = visible[currentVisibleIdx + 1];
-          if (next) setSelectedId(next.node.id);
+          if (next) setSelectedKey(next.key);
         }
         if (direction === 'up') {
           const prev = visible[currentVisibleIdx - 1];
-          if (prev) setSelectedId(prev.node.id);
+          if (prev) setSelectedKey(prev.key);
         }
       }
     },
     customGetSelectedItem: () => {
       if (query.length > 0) return null; // Fallback to flatItems[selectedIndex]
-      return (flatFolders.find((f) => f.id === selectedId) as PickerItem) || null;
+      if (!selectedKey) return null;
+      const id = selectedKey.split('-').slice(1).join('-');
+      return (flatFolders.find((f) => f.id === id) as PickerItem) || null;
     },
   });
 
@@ -163,7 +169,10 @@ export default function BookmarkPickerPanel({
   const visibleNodes = useMemo(() => {
     if (isSearchMode) return [];
     return displaySections.flatMap((sec) =>
-      flattenVisible(sec.items as import('../../types').BookmarkNode[], expandedIds),
+      flattenVisible(sec.items as import('../../types').BookmarkNode[], expandedIds).map((v) => ({
+        ...v,
+        key: `${sec.key}-${v.node.id}`,
+      })),
     );
   }, [displaySections, expandedIds, isSearchMode]);
 
@@ -175,9 +184,9 @@ export default function BookmarkPickerPanel({
         state.bookmarkTree.forEach((n: import('../../types').BookmarkFolder) => next.add(n.id));
         return next;
       });
-      if (isActive && !selectedId) {
+      if (isActive && !selectedKey) {
         // Pre-select the first visible node
-        if (visibleNodes.length > 0) setSelectedId(visibleNodes[0].node.id);
+        if (visibleNodes.length > 0) setSelectedKey(visibleNodes[0].key);
       }
     }
   }, [state.bookmarkTree, isActive]);
@@ -204,7 +213,8 @@ export default function BookmarkPickerPanel({
             payload: { id: newNode.id, title: newNode.title, parentId },
           });
           setExpandedIds((prev) => new Set([...prev, parentId]));
-          setSelectedId(newNode.id);
+          // Just select the newly created folder in the 'all' section
+          setSelectedKey(`all-${newNode.id}`);
 
           if (batchTarget?.tabs?.length) {
             bookmarkBatch(batchTarget.tabs, newNode.id, newNode.title, true);
@@ -235,11 +245,11 @@ export default function BookmarkPickerPanel({
     ],
   );
 
-  const openAddFolder = useCallback((nodeId: string) => {
+  const openAddFolder = useCallback((nodeId: string, sectionKey: string) => {
     setAddingToId(nodeId);
     setNewFolderName('');
     setExpandedIds((prev) => new Set([...prev, nodeId]));
-    setSelectedId(nodeId);
+    setSelectedKey(`${sectionKey}-${nodeId}`);
   }, []);
 
   const cancelAddFolder = useCallback(() => {
@@ -263,13 +273,14 @@ export default function BookmarkPickerPanel({
       if (e.code !== 'Space') return;
       const tag = (document.activeElement as HTMLElement)?.tagName;
       if (tag === 'INPUT' || tag === 'TEXTAREA') return;
-      if (!selectedId || isSearchMode) return;
+      if (!selectedKey || isSearchMode) return;
       e.preventDefault();
-      toggleExpanded(selectedId);
+      const id = selectedKey.split('-').slice(1).join('-');
+      toggleExpanded(id);
     }
     document.addEventListener('keydown', onKeyDown);
     return () => document.removeEventListener('keydown', onKeyDown);
-  }, [isActive, isSearchMode, selectedId, toggleExpanded]);
+  }, [isActive, isSearchMode, selectedKey, toggleExpanded]);
 
   const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Escape') {
@@ -364,7 +375,9 @@ export default function BookmarkPickerPanel({
             className={styles.pickerSearchInput}
             placeholder="Search folders…"
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => {
+              setQuery(e.target.value);
+            }}
             onKeyDown={handleSearchKeyDown}
           />
         </div>
@@ -384,14 +397,15 @@ export default function BookmarkPickerPanel({
                 )}
                 {sec.items.map((rootNode) => (
                   <BookmarkTreeNode
-                    key={rootNode.id}
+                    key={`${sec.key}-${rootNode.id}`}
+                    sectionKey={sec.key}
                     node={rootNode as import('../../types').BookmarkNode}
                     depth={0}
-                    selectedId={selectedId}
+                    selectedKey={selectedKey}
                     expandedIds={expandedIds}
                     addingToId={addingToId}
                     newFolderName={newFolderName}
-                    onSelect={(node) => setSelectedId(node.id)}
+                    onSelect={(key) => setSelectedKey(key)}
                     onToggle={toggleExpanded}
                     onConfirm={confirm}
                     onOpenAdd={openAddFolder}
@@ -423,17 +437,17 @@ export default function BookmarkPickerPanel({
                   {sectionItems.map((item) => {
                     const globalIdx = runningIndex++;
                     return (
-                      <li
+                      <PickerHoverItem
                         key={`${sec.key}-${item.id}`}
-                        data-selected={globalIdx === searchSelectedIndex ? 'true' : 'false'}
-                        className={`${styles.pickerItem} ${globalIdx === searchSelectedIndex ? styles.pickerItemSelected : ''}`}
+                        isSelected={globalIdx === searchSelectedIndex}
+                        icon={<span className={styles.pickerItemIcon}>📁</span>}
+                        label={item.title}
+                        prefix="Save to"
+                        suffix="and close"
+                        path={item.path}
                         onClick={() => confirm(item)}
                         onMouseEnter={() => setSearchSelectedIndex(globalIdx)}
-                      >
-                        <span className={styles.pickerItemIcon}>📁</span>
-                        <span className={styles.pickerItemLabel}>{item.title}</span>
-                        <span className={styles.pickerItemPath}>{item.path}</span>
-                      </li>
+                      />
                     );
                   })}
                 </React.Fragment>
@@ -470,25 +484,27 @@ export default function BookmarkPickerPanel({
 
 // Recursive tree node component
 export interface BookmarkTreeNodeProps {
+  sectionKey: string;
   node: BookmarkNode;
   depth: number;
-  selectedId: string | null;
+  selectedKey: string | null;
   expandedIds: Set<string>;
   addingToId: string | null;
   newFolderName: string;
-  onSelect: (node: BookmarkNode) => void;
+  onSelect: (key: string) => void;
   onToggle: (id: string) => void;
   onConfirm: (node: BookmarkNode) => void;
-  onOpenAdd: (id: string) => void;
+  onOpenAdd: (id: string, sectionKey: string) => void;
   onCancelAdd: () => void;
   onNewFolderNameChange: (name: string) => void;
   onCreateFolder: (id: string) => void;
 }
 
 function BookmarkTreeNode({
+  sectionKey,
   node,
   depth,
-  selectedId,
+  selectedKey,
   expandedIds,
   addingToId,
   newFolderName,
@@ -501,7 +517,8 @@ function BookmarkTreeNode({
   onCreateFolder,
 }: BookmarkTreeNodeProps) {
   const hasChildren = node.children?.length > 0;
-  const isSelected = node.id === selectedId;
+  const currentKey = `${sectionKey}-${node.id}`;
+  const isSelected = currentKey === selectedKey;
   const isExpanded = expandedIds.has(node.id);
   const isAddingHere = addingToId === node.id;
 
@@ -516,7 +533,8 @@ function BookmarkTreeNode({
         className={`${styles.treeNode} ${isSelected ? styles.treeNodeSelected : ''}`}
         style={{ paddingLeft: `${10 + depth * 16}px` }}
         onClick={() => onConfirm(node)}
-        onMouseEnter={() => onSelect(node)}
+        onMouseEnter={() => onSelect(currentKey)}
+        onMouseMove={() => onSelect(currentKey)}
       >
         <button
           className={styles.treeChevron}
@@ -537,14 +555,25 @@ function BookmarkTreeNode({
           )}
         </button>
         <span className={styles.treeNodeIcon}>📁</span>
-        <span className={styles.treeNodeLabel}>{node.title || 'Untitled'}</span>
+        <span className={styles.treeNodeLabel}>
+          {isSelected ? (
+            <>
+              <span className={styles.pickerHoverPrefix}>Save to </span>
+              {node.title || 'Untitled'}
+              <span className={styles.pickerHoverSuffix}> and close</span>
+              <span className={styles.pickerHoverArrow}>→</span>
+            </>
+          ) : (
+            node.title || 'Untitled'
+          )}
+        </span>
         {/* Inline + button — hidden until row is hovered/selected */}
         <button
           ref={addBtnRef}
           className={styles.treeNodeAddBtn}
           onClick={(e) => {
             e.stopPropagation();
-            onOpenAdd(node.id);
+            onOpenAdd(node.id, sectionKey);
           }}
           onMouseEnter={() => setAddBtnHovered(true)}
           onMouseLeave={() => setAddBtnHovered(false)}
@@ -575,10 +604,11 @@ function BookmarkTreeNode({
         hasChildren &&
         node.children.map((child: BookmarkNode) => (
           <BookmarkTreeNode
-            key={child.id}
+            key={`${sectionKey}-${child.id}`}
+            sectionKey={sectionKey}
             node={child}
             depth={depth + 1}
-            selectedId={selectedId}
+            selectedKey={selectedKey}
             expandedIds={expandedIds}
             addingToId={addingToId}
             newFolderName={newFolderName}

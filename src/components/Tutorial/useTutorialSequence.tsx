@@ -139,6 +139,7 @@ export const TUTORIAL_DATA = {
         color: 'var(--magic-dot)',
         pulse: true,
         size: 14,
+        dimBackground: true,
         tooltip:
           "Welcome to the Auto Close wizard! Let's set up some rules to sweep away old, stale tabs.",
       },
@@ -150,6 +151,7 @@ export const TUTORIAL_DATA = {
         color: 'var(--magic-dot)',
         pulse: true,
         size: 14,
+        dimBackground: true,
         tooltip:
           'Flip this switch to turn on the magic and automatically close old tabs in the background.',
       },
@@ -161,6 +163,7 @@ export const TUTORIAL_DATA = {
         color: 'var(--magic-dot)',
         pulse: true,
         size: 14,
+        dimBackground: true,
         tooltip: 'Just tell us how old a tab needs to be before it gets the boot.',
       },
       {
@@ -195,6 +198,7 @@ export const TUTORIAL_DATA = {
         color: 'var(--magic-dot)',
         pulse: true,
         size: 14,
+        dimBackground: true,
         tooltip: "Hit save and it'll sweep them away quietly in the background for you!",
       },
     ],
@@ -210,6 +214,7 @@ export const TUTORIAL_DATA = {
         color: 'var(--magic-dot)',
         pulse: true,
         size: 14,
+        dimBackground: true,
         tooltip: "Welcome to Close Old Tabs! Let's sweep away those stale tabs in one go.",
       },
       {
@@ -220,6 +225,7 @@ export const TUTORIAL_DATA = {
         color: 'var(--magic-dot)',
         pulse: true,
         size: 14,
+        dimBackground: true,
         tooltip: 'Just tell us how old a tab needs to be before it gets the boot.',
       },
       {
@@ -242,6 +248,7 @@ export const TUTORIAL_DATA = {
         color: 'var(--magic-dot)',
         pulse: true,
         size: 14,
+        dimBackground: true,
         tooltip: 'Too many to click? Toggle them all in one go right here.',
       },
       {
@@ -268,6 +275,7 @@ export const TUTORIAL_DATA = {
         color: 'var(--magic-dot)',
         pulse: true,
         size: 14,
+        dimBackground: true,
         tooltip:
           "Welcome to the Auto Sorter wizard! Let's set up some rules to keep your tabs perfectly organized.",
       },
@@ -279,6 +287,7 @@ export const TUTORIAL_DATA = {
         color: 'var(--magic-dot)',
         pulse: true,
         size: 14,
+        dimBackground: true,
         tooltip: 'Flip this switch to turn on the magic and automatically sort any new tabs.',
       },
       {
@@ -289,6 +298,7 @@ export const TUTORIAL_DATA = {
         color: 'var(--magic-dot)',
         pulse: true,
         size: 14,
+        dimBackground: true,
         tooltip: 'You can choose to sort everything neatly by URL, or by page title.',
       },
       {
@@ -310,6 +320,7 @@ export const TUTORIAL_DATA = {
         color: 'var(--magic-dot)',
         pulse: true,
         size: 14,
+        dimBackground: true,
         tooltip: 'Just want a quick cleanup? You can run a one-time sort right here.',
       },
       {
@@ -320,6 +331,7 @@ export const TUTORIAL_DATA = {
         color: 'var(--magic-dot)',
         pulse: true,
         size: 14,
+        dimBackground: true,
         tooltip: 'Hit save to let it run quietly in the background for you!',
       },
     ],
@@ -335,6 +347,7 @@ export const TUTORIAL_DATA = {
         color: 'var(--magic-dot)',
         pulse: true,
         size: 14,
+        dimBackground: true,
         tooltip:
           "Welcome to the Auto Smusher wizard! Let's set up some rules to crush pesky duplicate tabs.",
       },
@@ -346,6 +359,7 @@ export const TUTORIAL_DATA = {
         color: 'var(--magic-dot)',
         pulse: true,
         size: 14,
+        dimBackground: true,
         tooltip: 'Just flip this on, kick back, and forget duplicates ever existed.',
       },
       {
@@ -379,6 +393,7 @@ export const TUTORIAL_DATA = {
         color: 'var(--magic-dot)',
         pulse: true,
         size: 14,
+        dimBackground: true,
         tooltip: 'Smush that save button and let it do all the heavy lifting!',
       },
     ],
@@ -394,6 +409,7 @@ export const TUTORIAL_DATA = {
         color: 'var(--magic-dot)',
         pulse: true,
         size: 14,
+        dimBackground: true,
         tooltip:
           "Welcome to the Tab Grouper wizard! Let's set up some automated rules to keep your tabs grouped properly.",
       },
@@ -416,6 +432,7 @@ export const TUTORIAL_DATA = {
         color: 'var(--magic-dot)',
         pulse: true,
         size: 14,
+        dimBackground: true,
         tooltip: 'Build your own rule — domain, URL pattern, regex, or rough match. ...',
       },
       {
@@ -426,6 +443,7 @@ export const TUTORIAL_DATA = {
         color: 'var(--magic-dot)',
         pulse: true,
         size: 14,
+        dimBackground: true,
         tooltip: 'Templates are super useful! One click, pre-filled with popular sites.',
       },
       {
@@ -447,6 +465,7 @@ export const TUTORIAL_DATA = {
         color: 'var(--magic-dot)',
         pulse: true,
         size: 14,
+        dimBackground: true,
         tooltip: 'Save your rules and let it run quietly in the background!',
       },
     ],
@@ -611,6 +630,7 @@ export const TUTORIAL_DATA = {
         color: 'var(--magic-dot)',
         pulse: true,
         size: 14,
+        dimBackground: true,
         tooltip:
           "Welcome to the Tab Grouper wizard! We'll help you organize your open tabs into groups in a flash.",
       },
@@ -696,6 +716,7 @@ export const TUTORIAL_DATA = {
         color: 'var(--magic-dot)',
         pulse: true,
         size: 14,
+        dimBackground: true,
         tooltip:
           "Welcome to the Watch Later wizard! Let's save those YouTube videos to your playlist.",
       },
@@ -707,6 +728,7 @@ export const TUTORIAL_DATA = {
         color: 'var(--magic-dot)',
         pulse: true,
         size: 14,
+        dimBackground: true,
         tooltip: 'All your open YouTube tabs are lined up right here. Click any you want to skip!',
       },
       {
@@ -717,6 +739,7 @@ export const TUTORIAL_DATA = {
         color: 'var(--magic-dot)',
         pulse: true,
         size: 14,
+        dimBackground: true,
         tooltip: 'Ready? Hit this button to add them all to your Watch Later playlist!',
       },
     ],
