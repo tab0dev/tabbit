@@ -64,10 +64,11 @@ Tabbit can also automatically clean and manage your tabs while you browse:
 ## ✨ Features & Product, enumerated
 
 1. **Tab Triage Stack**: Keep, close, bookmark, group, smush, or reopen tabs
-    - Rich previews: See a visual snapshot of the page before you decide its fate
-    - Configurable stack ordering
-    - Can filter out suspended tabs (Tiny Suspender, not Google Tab Suspender _yet?_)
-    - Every action is undo-able
+    - Rich previews of each webpage before you decide its fate
+    - Configurable stack ordering (newest, oldest, alphabetical, random)
+    - Filter out suspended tabs (Tiny Suspender, not Chrome-native Tab Suspender _yet?_)
+    - Filter out tabs already in a Tab Group
+    - Undo any action
 2. **Tab List View**: See all your tabs as a list instead of a deck of cards. Filter, sort, and group tabs across windows into a single list. 
     - Select tabs with click, Shift+click ranges, or rubber-band drag
 3. **Tab Closer**: Remove all tabs (minus selections) above an age threshold.
